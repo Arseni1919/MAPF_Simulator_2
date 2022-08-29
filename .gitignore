@@ -12,3 +12,4 @@ example.ckpt
 .neptune
 logs_for_graphs
 heuristics
+heuristic_tables

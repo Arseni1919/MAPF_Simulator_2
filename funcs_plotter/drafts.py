@@ -1,7 +1,4 @@
-import random
-
-import matplotlib.pyplot as plt
-import numpy as np
+from GLOBALS import *
 
 
 for i in range(10):
