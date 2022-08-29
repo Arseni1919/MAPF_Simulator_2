@@ -1,0 +1,16 @@
+map_dimensions_dict = {
+    'lak108d.png': (26, 27),
+    'lak109d.png': (42, 33),
+    'lak110d.png': (21, 30),
+    'hrt201d.png': (272, 297),
+    'den520d.png': (257, 256),
+    'den101d.png': (41, 73),
+    'lak505d.png': (195, 194),
+    'Berlin_1_256.png': (256, 256),
+    '19_20_warehouse.png': (19, 20),
+    '10_10_random.png': (10, 10),
+    '9_10_no_obstacles.png': (9, 10),
+    '3_10_random.png': (3, 10),
+    '2_10_random.png': (2, 10),
+    'rmtst.png': (50, 182),
+}
