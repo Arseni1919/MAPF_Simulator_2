@@ -31,8 +31,15 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list):
 # for closed_node in close_list:
 #     if closed_node.xy_name == node.xy_name:
 #         return closed_node
+def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
+    h_dict = {}
+    for node in target_nodes:
+        h_table = build_heuristic_for_one_target(node, nodes, map_dim, to_save, plotter, middle_plot)
+        h_dict[node.xy_name] = h_table
+    return h_dict
 
-def build_heuristic_to_one_target(target_node, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
+
+def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
     print('Started to build heuristic...')
     copy_nodes = copy.deepcopy(nodes)
     target_node = [node for node in copy_nodes if node.xy_name == target_node.xy_name][0]
@@ -78,9 +85,9 @@ def build_heuristic_to_one_target(target_node, nodes, map_dim, to_save=True, plo
     h_table = np.zeros(map_dim)
     for node in copy_nodes:
         h_table[node.x, node.y] = node.g
-    h_dict = {target_node.xy_name: h_table}
+    # h_dict = {target_node.xy_name: h_table}
     print('\nFinished to build heuristic.')
-    return h_dict
+    return h_table
 
 
 def main():
@@ -90,7 +97,7 @@ def main():
     x_goal, y_goal = 38, 89
     node_goal = [node for node in nodes if node.x == x_goal and node.y == y_goal][0]
     plotter = Plotter(map_dim=map_dim)
-    h_table = build_heuristic_to_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=True)
+    h_table = build_heuristic_for_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=True)
     # h_table = build_heuristic_to_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=False)
     print(h_table)
     plt.show()

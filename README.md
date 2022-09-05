@@ -12,4 +12,5 @@
 - [geeksforgeeks | Ordered Dict](https://www.geeksforgeeks.org/ordereddict-in-python/)
 - [matplotlib | Creating multiple subplots using plt.subplots](https://matplotlib.org/3.5.0/gallery/subplots_axes_and_figures/subplots_demo.html)
 - [matplotlib | matplotlib.animation](https://matplotlib.org/stable/api/animation_api.html#id2)
+- [matplotlib | matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html)
 - [geeksforgeeks | json.load](https://www.geeksforgeeks.org/json-load-in-python/?ref=lbp)
