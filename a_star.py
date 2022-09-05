@@ -1,105 +1,171 @@
+import math
+import random
+
 import matplotlib.pyplot as plt
 import numpy as np
 from simulator_objects import Node
+from funcs_plotter.plotter import Plotter
+from funcs_graph.nodes_from_pic import make_neighbours, build_graph_from_png
+from funcs_graph.map_dimensions import map_dimensions_dict
+from funcs_graph.heuristic_funcs import build_heuristic_to_one_target
 
 
 def heuristic(from_node, to_node):
-    return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
+    return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
+    # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
 
 
-def get_lowest_f_node_from(open_list):
-    lowest_node = open_list[0]
-    for node in open_list:
-        if node.f() < lowest_node.f():
-            lowest_node = node
-    return lowest_node
+def h_func_creator(h_dict):
+    def h_func(from_node, to_node):
+        if to_node.xy_name in h_dict:
+            h_value = h_dict[to_node.xy_name][from_node.x, from_node.y]
+            if h_value > 0:
+                return h_value
+        return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
+        # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
+    return h_func
 
 
-def get_node(successor_ID, nodes):
+def get_node_from_open(open_list):
+    v_list = open_list
+    t_val = min([node.f() for node in v_list])
+    out_nodes = [node for node in v_list if node.f() == t_val]
+    v_list = out_nodes
+    some_v = min([node.h for node in v_list])
+    out_nodes = [node for node in v_list if node.h == some_v]
+    # print([node.ID for node in t_nodes])
+    next_node = random.choice(out_nodes)
+    return next_node
+
+
+def get_node(successor_xy_name, node_current, nodes, open_list, close_list):
     for node in nodes:
-        if node.ID == successor_ID:
-            return node
+        if node.xy_name == successor_xy_name:
+            new_ID = f'{node.x}_{node.y}_{node_current.t + 1}'
+            for open_node in open_list:
+                if open_node.ID == new_ID:
+                    return open_node
+            for closed_node in close_list:
+                if closed_node.ID == new_ID:
+                    return closed_node
+            return Node(x=node.x, y=node.y, t=node_current.t + 1, neighbours=node.neighbours)
     return None
 
 
-# def way(node_current, node_successor):
-#     return heuristic(node_current, node_successor)
-
-
-def a_star(start, goal, nodes, h_func):
+def a_star(start, goal, nodes, h_func, plotter=None, middle_plot=False):
+    print('Started A*...')
     open_list = []
     close_list = []
     node_current = start
-    node_current.h = h_func(start, goal)
-    open_list.append(start)
+    node_current.h = h_func(node_current, goal)
+    open_list.append(node_current)
+    iteration = 0
     while len(open_list) > 0:
-        node_current = get_lowest_f_node_from(open_list)
-        if node_current.ID == goal.ID:
+        iteration += 1
+        node_current = get_node_from_open(open_list)
+        if node_current.xy_name == goal.xy_name:
             break
-        for successor_ID in node_current.neighbours:
-            node_successor = get_node(successor_ID, nodes)
-            successor_current_cost = node_current.g + h_func(node_current, node_successor)
+        for successor_xy_name in node_current.neighbours:
+            node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list)
+            successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor in open_list:
-                if node_successor.g <= successor_current_cost:
+                if node_successor.t <= successor_current_time:
                     continue
             elif node_successor in close_list:
-                if node_successor.g <= successor_current_cost:
+                if node_successor.t <= successor_current_time:
                     continue
                 close_list.remove(node_successor)
                 open_list.append(node_successor)
             else:
                 open_list.append(node_successor)
                 node_successor.h = h_func(node_successor, goal)
-            node_successor.g = successor_current_cost
+            node_successor.t = successor_current_time
+            node_successor.g = node_successor.t
             node_successor.parent = node_current
 
         open_list.remove(node_current)
         close_list.append(node_current)
 
-    if node_current.ID != goal.ID:
-        return None
-    else:
+        if plotter and middle_plot and iteration % 10 == 0:
+            plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, nodes=nodes)
+        print(f'\riter: {iteration}', end='')
+
+    path = None
+    if node_current.xy_name == goal.xy_name:
         path = []
         while node_current is not None:
             path.append(node_current)
             node_current = node_current.parent
-        return path
+        path.reverse()
+
+    if plotter:
+        plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
+    print('Finished A*.')
+    return path
 
 
 def main():
     nodes = [
-        Node(ID=1, x=1, y=5, neighbours=[3]),
-        Node(ID=2, x=3, y=5, neighbours=[3]),
-        Node(ID=3, x=3, y=4, neighbours=[1, 2, 4, 6]),
-        Node(ID=4, x=1, y=3, neighbours=[3, 5]),
-        Node(ID=5, x=3, y=2, neighbours=[4, 6, 7]),
-        Node(ID=6, x=4, y=3, neighbours=[3, 5]),
-        Node(ID=7, x=2, y=1, neighbours=[5]),
+        Node(x=1, y=1, neighbours=[]),
+        Node(x=1, y=2, neighbours=[]),
+        Node(x=1, y=3, neighbours=[]),
+        Node(x=1, y=4, neighbours=[]),
+        Node(x=2, y=1, neighbours=[]),
+        Node(x=2, y=2, neighbours=[]),
+        Node(x=2, y=3, neighbours=[]),
+        Node(x=2, y=4, neighbours=[]),
+        Node(x=3, y=1, neighbours=[]),
+        Node(x=3, y=2, neighbours=[]),
+        Node(x=3, y=3, neighbours=[]),
+        Node(x=3, y=4, neighbours=[]),
+        Node(x=4, y=1, neighbours=[]),
+        Node(x=4, y=2, neighbours=[]),
+        Node(x=4, y=3, neighbours=[]),
+        Node(x=4, y=4, neighbours=[]),
     ]
+    make_neighbours(nodes)
     node_start = nodes[0]
     node_goal = nodes[-1]
-
-    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=heuristic)
-
-    # PLOT RESULTS:
-
-    # plot field
-    x_list = [node.x for node in nodes]
-    y_list = [node.y for node in nodes]
-    plt.scatter(x_list, y_list)
-
-    # plot found path
-    if result is not None:
-        parent = result[0]
-        successor = parent
-        for node in result:
-            parent = node
-            plt.text(node.x, node.y, f'{node.ID}', bbox={'facecolor': 'yellow', 'alpha': 1, 'pad': 10})
-            plt.plot([successor.x, parent.x], [successor.y, parent.y])
-            successor = node
+    plotter = Plotter(map_dim=(5, 5))
+    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=heuristic, plotter=plotter, middle_plot=True)
 
     plt.show()
+    print(result)
+    plt.close()
+
+
+def try_a_map_from_pic():
+    # img_png = 'lak109d.png'
+    # img_png = '19_20_warehouse.png'
+    # img_png = 'den101d.png'
+    img_png = 'rmtst.png'
+    # img_png = 'lak505d.png'
+    # img_png = 'den520d.png'
+    map_dim = map_dimensions_dict[img_png]
+    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='maps', show_map=False)
+    # ------------------------- #
+    # x_start, y_start = 97, 99
+    # x_goal, y_goal = 38, 89
+    # node_start = [node for node in nodes if node.x == x_start and node.y == y_start][0]
+    # node_goal = [node for node in nodes if node.x == x_goal and node.y == y_goal][0]
+    # ------------------------- #
+    # node_start = nodes[100]
+    # node_goal = nodes[-1]
+    # ------------------------- #
+    node_start = random.choice(nodes)
+    node_goal = random.choice(nodes)
+    print(f'start: {node_start.x}, {node_start.y} -> goal: {node_goal.x}, {node_goal.y}')
+    # ------------------------- #
+    plotter = Plotter(map_dim=map_dim)
+    h_dict = build_heuristic_to_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=False)
+    h_func = h_func_creator(h_dict)
+    # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
+    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=True)
+    # ------------------------- #
+    plt.show()
+    plt.close()
 
 
 if __name__ == '__main__':
-    main()
+    # main()
+    try_a_map_from_pic()
