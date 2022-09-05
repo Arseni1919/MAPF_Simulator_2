@@ -92,7 +92,7 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
         open_list.remove(node_current)
         close_list.append(node_current)
 
-        if plotter and middle_plot and iteration % 1 == 0:
+        if plotter and middle_plot and iteration % 10 == 0:
             plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, nodes=nodes)
         print(f'\riter: {iteration}', end='')
 
@@ -143,9 +143,10 @@ def main():
 def try_a_map_from_pic():
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
-    img_png = 'den101d.png'
+    # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
+    img_png = 'brc202d.png'
     # img_png = 'den520d.png'
     map_dim = map_dimensions_dict[img_png]
     nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='maps', show_map=False)

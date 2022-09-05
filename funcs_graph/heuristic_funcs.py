@@ -3,6 +3,8 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
+import asyncio
+
 from simulator_objects import Node
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.nodes_from_pic import build_graph_from_png
@@ -31,11 +33,14 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list):
 # for closed_node in close_list:
 #     if closed_node.xy_name == node.xy_name:
 #         return closed_node
+
+
 def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
     h_dict = {}
     for node in target_nodes:
         h_table = build_heuristic_for_one_target(node, nodes, map_dim, to_save, plotter, middle_plot)
         h_dict[node.xy_name] = h_table
+
     return h_dict
 
 

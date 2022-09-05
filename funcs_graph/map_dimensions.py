@@ -13,4 +13,5 @@ map_dimensions_dict = {
     'den520d.png': (257, 256),
     'Berlin_1_256.png': (256, 256),
     'hrt201d.png': (272, 297),
+    'brc202d.png': (209, 528),
 }
