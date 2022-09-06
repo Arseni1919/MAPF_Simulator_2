@@ -50,7 +50,10 @@ def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=T
     for node in target_nodes:
         h_table = build_heuristic_for_one_target(node, nodes, map_dim, to_save, plotter, middle_plot)
         h_dict[node.xy_name] = h_table
+
         print(f'\nFinished to build heuristic for node {iteration}.')
+        iteration += 1
+
     return h_dict
 
 

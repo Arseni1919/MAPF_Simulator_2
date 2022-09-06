@@ -129,7 +129,7 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
             if node.t > 0:
                 constraint_dict[node.xy_name].append(node.t - 1)
 
-        for t in range(last_time, longest_path):
+        for t in range(last_time, longest_path * 10):
             constraint_dict[i_path[-1].xy_name].append(t)
 
     new_path = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
@@ -177,7 +177,7 @@ def create_simple_ordering(n_agents):
 
 
 def main():
-    n_agents = 50
+    n_agents = 5
 
     initial_ordering = create_simple_ordering(n_agents)
     result = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=initial_ordering, n_agents=n_agents)
