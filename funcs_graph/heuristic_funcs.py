@@ -11,6 +11,22 @@ from funcs_graph.nodes_from_pic import build_graph_from_png
 from funcs_plotter.plotter import Plotter
 
 
+def dist_heuristic(from_node, to_node):
+    return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
+    # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
+
+
+def h_func_creator(h_dict):
+    def h_func(from_node, to_node):
+        if to_node.xy_name in h_dict:
+            h_value = h_dict[to_node.xy_name][from_node.x, from_node.y]
+            if h_value > 0:
+                return h_value
+        return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
+        # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
+    return h_func
+
+
 def get_node_from_open(open_list):
     v_list = open_list
     some_v = min([node.g for node in v_list])
@@ -27,25 +43,19 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list):
     return None
 
 
-# for open_node in open_list:
-#     if open_node.xy_name == node.xy_name:
-#         return open_node
-# for closed_node in close_list:
-#     if closed_node.xy_name == node.xy_name:
-#         return closed_node
-
-
 def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
+    print('Started to build heuristic...')
     h_dict = {}
+    iteration = 0
     for node in target_nodes:
         h_table = build_heuristic_for_one_target(node, nodes, map_dim, to_save, plotter, middle_plot)
         h_dict[node.xy_name] = h_table
-
+        print(f'\nFinished to build heuristic for node {iteration}.')
     return h_dict
 
 
 def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
-    print('Started to build heuristic...')
+    # print('Started to build heuristic...')
     copy_nodes = copy.deepcopy(nodes)
     target_node = [node for node in copy_nodes if node.xy_name == target_node.xy_name][0]
     open_list = []
@@ -84,14 +94,14 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
         if iteration % 100 == 0:
             print(f'\riter: {iteration}', end='')
 
-    if plotter:
+    if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=target_node, nodes=copy_nodes)
 
     h_table = np.zeros(map_dim)
     for node in copy_nodes:
         h_table[node.x, node.y] = node.g
     # h_dict = {target_node.xy_name: h_table}
-    print('\nFinished to build heuristic.')
+    # print(f'\rFinished to build heuristic at iter {iteration}.')
     return h_table
 
 

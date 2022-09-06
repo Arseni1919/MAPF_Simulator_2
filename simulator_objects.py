@@ -18,3 +18,5 @@ class Node:
     def f(self):
         return self.t + self.h
         # return self.g + self.h
+
+

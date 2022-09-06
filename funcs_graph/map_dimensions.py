@@ -11,6 +11,7 @@ map_dimensions_dict = {
     'rmtst.png': (50, 182),
     'lak505d.png': (195, 194),
     'lak503d.png': (194, 194),
+    'ost003d.png': (194, 194),
     'den520d.png': (257, 256),
     'Berlin_1_256.png': (256, 256),
     'hrt201d.png': (272, 297),

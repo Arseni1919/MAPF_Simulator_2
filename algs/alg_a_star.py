@@ -1,3 +1,4 @@
+import copy
 import math
 import random
 
@@ -7,23 +8,7 @@ from simulator_objects import Node
 from funcs_plotter.plotter import Plotter
 from funcs_graph.nodes_from_pic import make_neighbours, build_graph_from_png
 from funcs_graph.map_dimensions import map_dimensions_dict
-from funcs_graph.heuristic_funcs import build_heuristic_for_one_target, build_heuristic_for_multiple_targets
-
-
-def dist_heuristic(from_node, to_node):
-    return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
-    # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
-
-
-def h_func_creator(h_dict):
-    def h_func(from_node, to_node):
-        if to_node.xy_name in h_dict:
-            h_value = h_dict[to_node.xy_name][from_node.x, from_node.y]
-            if h_value > 0:
-                return h_value
-        return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
-        # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
-    return h_func
+from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
 
 
 def get_node_from_open(open_list):
@@ -56,7 +41,19 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list, cons
     return None
 
 
+def deepcopy_nodes(start, goal, nodes):
+    copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}
+    copy_start = copy_nodes_dict[start.xy_name]
+    copy_goal = copy_nodes_dict[goal.xy_name]
+    copy_nodes = list(copy_nodes_dict.values())
+    return copy_start, copy_goal, copy_nodes
+
+
 def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middle_plot=False):
+    """
+    new_t in constraint_dict[successor_xy_name]
+    """
+    start, goal, nodes = deepcopy_nodes(start, goal, nodes)
     print('Started A*...')
     open_list = []
     close_list = []
@@ -104,9 +101,9 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
             node_current = node_current.parent
         path.reverse()
 
-    if plotter:
+    if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
-    print('Finished A*.')
+    print('\nFinished A*.')
     return path
 
 
@@ -143,10 +140,11 @@ def main():
 def try_a_map_from_pic():
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
-    # img_png = 'den101d.png'
+    img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
-    img_png = 'lak503d.png'
+    # img_png = 'lak503d.png'
+    # img_png = 'ost003d.png'
     # img_png = 'brc202d.png'
     # img_png = 'den520d.png'
     map_dim = map_dimensions_dict[img_png]
@@ -174,7 +172,8 @@ def try_a_map_from_pic():
     # h_func = dist_heuristic
     # ------------------------- #
     # ------------------------- #
-    constraint_dict = {'30_12': [69], '29_12': [68, 69]}
+    constraint_dict = None
+    # constraint_dict = {'30_12': [69], '29_12': [68, 69]}
     # ------------------------- #
     # ------------------------- #
     # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
