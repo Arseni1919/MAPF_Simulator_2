@@ -81,7 +81,7 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
 
         if plotter and middle_plot and iteration % 100 == 0:
             plotter.plot_lists(open_list=open_list, closed_list=close_list, start=target_node, nodes=copy_nodes)
-        if iteration % 500 == 0:
+        if iteration % 100 == 0:
             print(f'\riter: {iteration}', end='')
 
     if plotter:

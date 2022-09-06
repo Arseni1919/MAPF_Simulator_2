@@ -10,7 +10,7 @@ from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.heuristic_funcs import build_heuristic_for_one_target, build_heuristic_for_multiple_targets
 
 
-def heuristic(from_node, to_node):
+def dist_heuristic(from_node, to_node):
     return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
     # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
 
@@ -133,7 +133,7 @@ def main():
     node_start = nodes[0]
     node_goal = nodes[-1]
     plotter = Plotter(map_dim=(5, 5))
-    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=heuristic, plotter=plotter, middle_plot=True)
+    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=dist_heuristic, plotter=plotter, middle_plot=True)
 
     plt.show()
     print(result)
@@ -146,7 +146,8 @@ def try_a_map_from_pic():
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
-    img_png = 'brc202d.png'
+    img_png = 'lak503d.png'
+    # img_png = 'brc202d.png'
     # img_png = 'den520d.png'
     map_dim = map_dimensions_dict[img_png]
     nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='maps', show_map=False)
@@ -163,14 +164,24 @@ def try_a_map_from_pic():
     # node_goal = random.choice(nodes)
     print(f'start: {node_start.x}, {node_start.y} -> goal: {node_goal.x}, {node_goal.y}')
     # ------------------------- #
+    # ------------------------- #
     plotter = Plotter(map_dim=map_dim)
+    # ------------------------- #
+    # ------------------------- #
     h_dict = build_heuristic_for_multiple_targets([node_goal], nodes, map_dim, plotter=plotter, middle_plot=False)
     h_func = h_func_creator(h_dict)
-    # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
+    # ------------------------- #
+    # h_func = dist_heuristic
+    # ------------------------- #
+    # ------------------------- #
     constraint_dict = {'30_12': [69], '29_12': [68, 69]}
+    # ------------------------- #
+    # ------------------------- #
+    # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
     result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, constraint_dict=constraint_dict, plotter=plotter, middle_plot=True)
     print('The result is:', *[node.xy_name for node in result], sep='->')
     print('The result is:', *[node.ID for node in result], sep='->')
+    # ------------------------- #
     # ------------------------- #
     plt.show()
     plt.close()
