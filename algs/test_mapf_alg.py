@@ -9,9 +9,9 @@ from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_he
 
 def test_mapf_alg_from_pic(algorithm, **kwargs):
     # img_png = 'lak109d.png'
-    # img_png = '19_20_warehouse.png'
+    img_png = '19_20_warehouse.png'
     # img_png = 'den101d.png'
-    img_png = 'rmtst.png'
+    # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
     # img_png = 'ost003d.png'
@@ -50,8 +50,8 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     print(f'The result is: {result}')
     # ------------------------- #
     # ------------------------- #
-    plt.show()
-    plt.close()
+    # plt.show()
+    # plt.close()
     return result
 
 
