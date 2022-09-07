@@ -1,3 +1,5 @@
+import copy
+
 import matplotlib.pyplot as plt
 
 from alg_a_star import a_star
@@ -13,7 +15,6 @@ class PBSAgent:
         self.start_xy = self.start_node.xy_name
         self.goal_node = goal_node
         self.goal_xy = self.goal_node.xy_name
-        self.order = 0
 
 
 class PBSNode:
@@ -57,7 +58,7 @@ def get_order_lists(pbs_node, agent):
 
 def topological_sorting(pbs_node, agent):
     update_list = [agent]
-    _, lower_order_list = get_order_lists(pbs_node, agent)
+    h_l, lower_order_list = get_order_lists(pbs_node, agent)
 
     while len(lower_order_list) != 0:
         agent_1 = lower_order_list.pop(0)
@@ -150,7 +151,7 @@ def add_new_constraint(pbs_node, index, conf, conf_type):
 def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, i, conf):
     print('FUNC: add_new_ordering')
     agent_1, agent_2 = conf[0], conf[1]
-    NEW_pbs_node.ordering = NEXT_pbs_node.ordering
+    NEW_pbs_node.ordering = copy.deepcopy(NEXT_pbs_node.ordering)
     if i == 0:
         NEW_pbs_node.ordering.append((agent_2, agent_1))
     elif i == 1:
@@ -180,6 +181,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'collisions: {there_is_col}')
+        print(f'ordering of pbs_node {NEXT_pbs_node.index}: {NEXT_pbs_node.ordering}')
         print(f'v_c ({int(len(c_v)/2)}): {c_v}')
         print(f'e_c ({int(len(c_e)/2)}): {c_e}')
         if not there_is_col:
@@ -191,8 +193,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
             agent = NEXT_pbs_node.agent_dict[conf[i]]
             pbs_node_index += 1
             NEW_pbs_node = PBSNode(agents, agents_dict, pbs_node_index)
-            NEW_pbs_node.plan = NEXT_pbs_node.plan
-            NEW_pbs_node.constraints = NEXT_pbs_node.constraints
+            NEW_pbs_node.plan = copy.deepcopy(NEXT_pbs_node.plan)
+            NEW_pbs_node.constraints = copy.deepcopy(NEXT_pbs_node.constraints)
             add_new_constraint(NEW_pbs_node, i, conf, conf_type)
             add_new_ordering(NEW_pbs_node, NEXT_pbs_node, i, conf)
             success = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot)

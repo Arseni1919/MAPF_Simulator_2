@@ -1,3 +1,7 @@
-l = [0, 1, 3, -1]
-l.sort(reverse=True)
-print(l)
+import matplotlib.pyplot as plt
+
+n = 10
+l = plt.cm.get_cmap('hsv', n)
+for i in range(n):
+    item = l(i)
+    print(item)

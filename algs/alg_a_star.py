@@ -65,7 +65,19 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
         iteration += 1
         node_current = get_node_from_open(open_list)
         if node_current.xy_name == goal.xy_name:
-            break
+            # if there is a future constraint of a goal
+            if len(constraint_dict[node_current.xy_name]) > 0:
+                # we will take the maximum time out of all constraints
+                max_t = max(constraint_dict[node_current.xy_name])
+                # and compare to the current time
+                # if it is greater, we will continue to expand the search tree
+                if node_current.t > max_t:
+                    # otherwise break
+                    break
+                # else:
+                #     print('', end='')
+            else:
+                break
         for successor_xy_name in node_current.neighbours:
             node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, constraint_dict)
             successor_current_time = node_current.t + 1  # h(now, next)
