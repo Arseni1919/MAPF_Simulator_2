@@ -23,11 +23,21 @@ def get_node_from_open(open_list):
     return next_node
 
 
-def get_node(successor_xy_name, node_current, nodes, open_list, close_list, constraint_dict):
-    if constraint_dict:
-        new_t = node_current.t + 1
-        if successor_xy_name in constraint_dict and new_t in constraint_dict[successor_xy_name]:
+def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict):
+    new_t = node_current.t + 1
+    if v_constr_dict:
+        if successor_xy_name in v_constr_dict and new_t in v_constr_dict[successor_xy_name]:
             return None
+    if e_constr_dict:
+        if (node_current.x, node_current.y, new_t) in e_constr_dict[successor_xy_name]:
+            return None
+    if perm_constr_dict:
+        if len(perm_constr_dict[successor_xy_name]) > 0:
+            if len(perm_constr_dict[successor_xy_name]) != 1:
+                raise RuntimeError('len(perm_constr_dict[successor_xy_name]) != 1')
+            final_time = perm_constr_dict[successor_xy_name][0]
+            if new_t >= final_time:
+                return None
     new_ID = f'{successor_xy_name}_{node_current.t + 1}'
     for node in nodes:
         if node.xy_name == successor_xy_name:
@@ -49,9 +59,9 @@ def deepcopy_nodes(start, goal, nodes):
     return copy_start, copy_goal, copy_nodes
 
 
-def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middle_plot=False):
+def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, plotter=None, middle_plot=False):
     """
-    new_t in constraint_dict[successor_xy_name]
+    new_t in v_constr_dict[successor_xy_name]
     """
     start, goal, nodes = deepcopy_nodes(start, goal, nodes)
     print('\rStarted A*...', end='')
@@ -63,12 +73,14 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
     iteration = 0
     while len(open_list) > 0:
         iteration += 1
+        if len(open_list) > 10e5:
+            return None
         node_current = get_node_from_open(open_list)
         if node_current.xy_name == goal.xy_name:
             # if there is a future constraint of a goal
-            if len(constraint_dict[node_current.xy_name]) > 0:
+            if len(v_constr_dict[node_current.xy_name]) > 0:
                 # we will take the maximum time out of all constraints
-                max_t = max(constraint_dict[node_current.xy_name])
+                max_t = max(v_constr_dict[node_current.xy_name])
                 # and compare to the current time
                 # if it is greater, we will continue to expand the search tree
                 if node_current.t > max_t:
@@ -79,7 +91,7 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
             else:
                 break
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, constraint_dict)
+            node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict)
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
@@ -103,7 +115,7 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
 
         if plotter and middle_plot and iteration % 10 == 0:
             plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, nodes=nodes)
-        # print(f'\riter: {iteration}', end='')
+        print(f'\riter: {iteration}, open: {len(open_list)}', end='')
 
     path = None
     if node_current.xy_name == goal.xy_name:
@@ -185,11 +197,11 @@ def try_a_map_from_pic():
     # ------------------------- #
     # ------------------------- #
     constraint_dict = None
-    # constraint_dict = {'30_12': [69], '29_12': [68, 69]}
+    # v_constr_dict = {'30_12': [69], '29_12': [68, 69]}
     # ------------------------- #
     # ------------------------- #
     # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
-    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, constraint_dict=constraint_dict, plotter=plotter, middle_plot=True)
+    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, v_constr_dict=constraint_dict, plotter=plotter, middle_plot=True)
     print('The result is:', *[node.xy_name for node in result], sep='->')
     print('The result is:', *[node.ID for node in result], sep='->')
     # ------------------------- #

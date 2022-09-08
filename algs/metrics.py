@@ -1,6 +1,6 @@
 
 
-def c_v_check_for_agent(agent_1: str, path_1: list, results):
+def c_v_check_for_agent(agent_1: str, path_1, results):
     """
     c_v_for_agent_list: (agent name 1, agent name 2, x, y, t)
     """
@@ -43,10 +43,10 @@ def c_e_check_for_agent(agent_1: str, path_1, results):
             if len(path_2) > 1:
                 prev_node_1 = path_1[0]
                 prev_node_2 = path_2[0]
-                for t in range(max(len(path_1), len(path_2))):
-                    node_1 = path_1[min(t, len(path_1) - 1)]
-                    node_2 = path_2[min(t, len(path_2) - 1)]
-                    if (prev_node_1.x, prev_node_1.y, node_1.x, node_1.y) == (prev_node_2.x, prev_node_2.y, node_2.x, node_2.y):
+                for t in range(1, min(len(path_1), len(path_2))):
+                    node_1 = path_1[t]
+                    node_2 = path_2[t]
+                    if (prev_node_1.x, prev_node_1.y, node_1.x, node_1.y) == (node_2.x, node_2.y, prev_node_2.x, prev_node_2.y):
                         c_e_for_agent_list.append((agent_1, agent_2, prev_node_1.x, prev_node_1.y, node_1.x, node_1.y, t))
                     prev_node_1 = node_1
                     prev_node_2 = node_2
@@ -56,8 +56,8 @@ def c_e_check_for_agent(agent_1: str, path_1, results):
 def edge_col_check(results):
     edge_col_list = []
     for agent_1, path_1 in results.items():
-        e_v_for_agent_list = c_e_check_for_agent(agent_1, path_1, results)
-        edge_col_list.extend(e_v_for_agent_list)
+        c_e_for_agent_list = c_e_check_for_agent(agent_1, path_1, results)
+        edge_col_list.extend(c_e_for_agent_list)
     return edge_col_list
 
 
