@@ -1,13 +1,17 @@
 
 
-def c_v_check_for_agent(agent_1, path_1, results):
+def c_v_check_for_agent(agent_1: str, path_1: list, results):
     """
     c_v_for_agent_list: (agent name 1, agent name 2, x, y, t)
     """
+    if type(agent_1) is not str:
+        raise RuntimeError('type(agent_1) is not str')
     c_v_for_agent_list = []
     if len(path_1) < 1:
         return c_v_for_agent_list
     for agent_2, path_2 in results.items():
+        if type(agent_2) is not str:
+            raise RuntimeError('type(agent_2) is not str')
         if agent_2 != agent_1:
             for t in range(max(len(path_1), len(path_2))):
                 node_1 = path_1[min(t, len(path_1) - 1)]
@@ -25,10 +29,12 @@ def vertex_col_check(results):
     return vertex_col_list
 
 
-def c_e_check_for_agent(agent_1, path_1, results):
+def c_e_check_for_agent(agent_1: str, path_1, results):
     """
     c_e_check_for_agent: (agent name 1, agent name 2, x, y, x, y, t)
     """
+    if type(agent_1) is not str:
+        raise RuntimeError('type(agent_1) is not str')
     c_e_for_agent_list = []
     if len(path_1) <= 1:
         return c_e_for_agent_list

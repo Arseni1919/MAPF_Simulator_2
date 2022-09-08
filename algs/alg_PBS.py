@@ -1,4 +1,6 @@
 import copy
+import random
+import numpy as np
 
 import matplotlib.pyplot as plt
 
@@ -8,7 +10,7 @@ from metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_age
 
 
 class PBSAgent:
-    def __init__(self, index, start_node, goal_node):
+    def __init__(self, index: int, start_node, goal_node):
         self.index = index
         self.name = f'agent_{index}'
         self.start_node = start_node
@@ -68,6 +70,8 @@ def topological_sorting(pbs_node, agent):
                 lower_order_list.append(agent_1)
                 break
         update_list.append(agent_1)
+        if len(update_list) > 10e6:
+            raise RuntimeError('topological_sorting wrong')
 
     # update_list.extend(lower_order_list)
 
@@ -77,21 +81,21 @@ def topological_sorting(pbs_node, agent):
 def collide_check(pbs_node, update_agent):
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
     sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
-    c_v_list = c_v_check_for_agent(update_agent, pbs_node.plan[update_agent.name], sub_results)
+    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     if len(c_v_list) > 0:
         return True
-    e_v_list = c_e_check_for_agent(update_agent, pbs_node.plan[update_agent.name], sub_results)
+    e_v_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     if len(e_v_list):
         return True
     return False
 
 
 def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot):
-    # print('FUNC: update_path')
+    print('FUNC: update_path', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
     sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
-    c_v_list = c_v_check_for_agent(update_agent, pbs_node.plan[update_agent.name], sub_results)
-    c_e_list = c_e_check_for_agent(update_agent, pbs_node.plan[update_agent.name], sub_results)
+    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
+    c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     constraint_dict = {node.xy_name: [] for node in nodes}
     for constr in c_v_list:
         agent_1, agent_2, x, y, t = constr
@@ -104,11 +108,15 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
         x, y, t = constr
         constraint_dict[f'{x}_{y}'].append(t)
 
-
-    # print('BEFORE A*')
+    print('\rBEFORE A*', end='')
     new_path = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
                       h_func=h_func, constraint_dict=constraint_dict,
                       plotter=plotter, middle_plot=middle_plot)
+    c_v_list = c_v_check_for_agent(update_agent.name, new_path, sub_results)
+    c_e_list = c_e_check_for_agent(update_agent.name, new_path, sub_results)
+    if len(c_v_list) > 0 or len(c_e_list) > 0:
+        raise RuntimeError('a_star failed')
+
     return new_path
 
 
@@ -233,5 +241,16 @@ def main():
 
 
 if __name__ == '__main__':
+    random_seed = True
+
+    if random_seed:
+        seed = random.choice(range(1000))
+    else:
+        seed = 0
+    print(f'SEED: {seed}')
+
+    random.seed(seed)
+    np.random.seed(seed)
+
     main()
 

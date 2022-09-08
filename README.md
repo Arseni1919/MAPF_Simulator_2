@@ -15,3 +15,4 @@
 - [matplotlib | matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html)
 - [geeksforgeeks | json.load](https://www.geeksforgeeks.org/json-load-in-python/?ref=lbp)
 - [scipy | scipy.sparse.csgraph.floyd_warshall (from all to all dist)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.floyd_warshall.html)
+- [sof | q](https://stackoverflow.com/questions/55109716/c-argument-looks-like-a-single-numeric-rgb-or-rgba-sequence)

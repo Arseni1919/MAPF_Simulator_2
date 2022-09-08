@@ -54,7 +54,7 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
     new_t in constraint_dict[successor_xy_name]
     """
     start, goal, nodes = deepcopy_nodes(start, goal, nodes)
-    # print('Started A*...')
+    print('\rStarted A*...', end='')
     open_list = []
     close_list = []
     node_current = start
@@ -115,7 +115,7 @@ def a_star(start, goal, nodes, h_func, constraint_dict=None, plotter=None, middl
 
     if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
-    # print('\nFinished A*.')
+    print('\rFinished A*.', end='')
     return path
 
 
