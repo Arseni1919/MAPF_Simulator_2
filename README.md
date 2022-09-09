@@ -1,6 +1,7 @@
 # MAPF Simulator (version 2)
 
 ## Algorithms
+- PBS
 - 
 
 ## Credits
