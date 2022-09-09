@@ -11,19 +11,22 @@ class DSAgent:
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
-    pass
+    return None, {}
 
 
 def main():
-    n_agents = 10
-    result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, n_agents=n_agents)
-
+    result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, n_agents=n_agents, random_seed=random_seed, seed=seed)
     print(result)
     # plt.show()
     plt.close()
 
 
 if __name__ == '__main__':
+    random_seed = True
+    # random_seed = False
+    seed = 667
+    n_agents = 7
+
     main()
 
 

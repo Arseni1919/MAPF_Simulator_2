@@ -1,5 +1,6 @@
 import random
 import matplotlib.pyplot as plt
+import numpy as np
 
 from funcs_plotter.plotter import Plotter
 from funcs_graph.map_dimensions import map_dimensions_dict
@@ -8,6 +9,15 @@ from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_he
 
 
 def test_mapf_alg_from_pic(algorithm, **kwargs):
+    random_seed = kwargs['random_seed']
+    seed = kwargs['seed']
+    if random_seed:
+        seed = random.choice(range(1000))
+    print(f'SEED: {seed}')
+
+    random.seed(seed)
+    np.random.seed(seed)
+
     # img_png = 'lak109d.png'
     img_png = '19_20_warehouse.png'
     # img_png = 'den101d.png'

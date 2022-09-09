@@ -258,7 +258,8 @@ def main():
     # result = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=initial_ordering, n_agents=n_agents)
     for i in range(20):
         print(f'\n[run {i}]')
-        result, info = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=[], n_agents=n_agents)
+        result, info = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=[], n_agents=n_agents,
+                                              random_seed=random_seed, seed=seed)
 
         # plt.show()
         plt.close()
@@ -269,13 +270,5 @@ if __name__ == '__main__':
     # random_seed = False
     seed = 667
     n_agents = 7
-
-    if random_seed:
-        seed = random.choice(range(1000))
-
-    print(f'SEED: {seed}')
-
-    random.seed(seed)
-    np.random.seed(seed)
 
     main()
