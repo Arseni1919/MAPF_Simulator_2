@@ -86,12 +86,12 @@ class Plotter:
                 field[path[0].x, path[0].y] = 4
                 field[path[-1].x, path[-1].y] = 5
 
-            self.ax.imshow(field, origin='lower')
-            self.ax.set_title('MAPF Paths')
+            if t % 1 == 0:
+                self.ax.imshow(field, origin='lower')
+                self.ax.set_title('MAPF Paths')
 
-            # plt.pause(1)
-            plt.pause(0.01)
-            # plt.show()
+                # plt.pause(1)
+                plt.pause(0.01)
 
 
 

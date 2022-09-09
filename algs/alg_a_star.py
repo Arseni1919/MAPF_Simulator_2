@@ -73,7 +73,7 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
     iteration = 0
     while len(open_list) > 0:
         iteration += 1
-        if len(open_list) > 10e5:
+        if iteration > 1e4:
             return None
         node_current = get_node_from_open(open_list)
         if node_current.xy_name == goal.xy_name:
@@ -115,7 +115,7 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
 
         if plotter and middle_plot and iteration % 10 == 0:
             plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, nodes=nodes)
-        print(f'\riter: {iteration}, open: {len(open_list)}', end='')
+        print(f'\r(a_star) iter: {iteration}, open: {len(open_list)}', end='')
 
     path = None
     if node_current.xy_name == goal.xy_name:
@@ -127,7 +127,7 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
 
     if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
-    print('\rFinished A*.', end='')
+    # print('\rFinished A*.', end='')
     return path
 
 
