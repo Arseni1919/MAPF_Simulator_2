@@ -106,7 +106,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 197
-    n_agents = 20
+    n_agents = 10
 
     # good example: img_png = '19_20_warehouse.png'
     # random_seed = True
