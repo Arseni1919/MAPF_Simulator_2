@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 from alg_a_star import a_star
 from test_mapf_alg import test_mapf_alg_from_pic
-from metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
+from metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
 
 
 def preprint_func_name(func):
@@ -107,23 +107,26 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
 
-    v_constr_dict = {node.xy_name: [] for node in nodes}
-    e_constr_dict = {node.xy_name: [] for node in nodes}
-    perm_constr_dict = {node.xy_name: [] for node in nodes}
 
-    for agent_name, path in sub_results.items():
-        if len(path) > 0:
-            final_node = path[-1]
-            perm_constr_dict[final_node.xy_name].append(final_node.t)
+    # v_constr_dict = {node.xy_name: [] for node in nodes}
+    # e_constr_dict = {node.xy_name: [] for node in nodes}
+    # perm_constr_dict = {node.xy_name: [] for node in nodes}
+    #
+    # for agent_name, path in sub_results.items():
+    #     if len(path) > 0:
+    #         final_node = path[-1]
+    #         perm_constr_dict[final_node.xy_name].append(final_node.t)
+    #
+    #         prev_node = path[0]
+    #         for node in path:
+    #             # vertex
+    #             v_constr_dict[f'{node.x}_{node.y}'].append(node.t)
+    #             # edge
+    #             if prev_node.xy_name != node.xy_name:
+    #                 e_constr_dict[f'{prev_node.x}_{prev_node.y}'].append((node.x, node.y, node.t))
+    #             prev_node = node
 
-            prev_node = path[0]
-            for node in path:
-                # vertex
-                v_constr_dict[f'{node.x}_{node.y}'].append(node.t)
-                # edge
-                if prev_node.xy_name != node.xy_name:
-                    e_constr_dict[f'{prev_node.x}_{prev_node.y}'].append((node.x, node.y, node.t))
-                prev_node = node
+    v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
     print('\rBEFORE A*', end='')
     new_path = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
@@ -266,9 +269,9 @@ def main():
 
 
 if __name__ == '__main__':
-    random_seed = True
-    # random_seed = False
-    seed = 250
-    n_agents = 11
+    # random_seed = True
+    random_seed = False
+    seed = 23
+    n_agents = 30
 
     main()

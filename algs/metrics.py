@@ -1,5 +1,26 @@
 
 
+def build_constraints(nodes, other_paths):
+    v_constr_dict = {node.xy_name: [] for node in nodes}
+    e_constr_dict = {node.xy_name: [] for node in nodes}
+    perm_constr_dict = {node.xy_name: [] for node in nodes}
+
+    for agent_name, path in other_paths.items():
+        if len(path) > 0:
+            final_node = path[-1]
+            perm_constr_dict[final_node.xy_name].append(final_node.t)
+
+            prev_node = path[0]
+            for node in path:
+                # vertex
+                v_constr_dict[f'{node.x}_{node.y}'].append(node.t)
+                # edge
+                if prev_node.xy_name != node.xy_name:
+                    e_constr_dict[f'{prev_node.x}_{prev_node.y}'].append((node.x, node.y, node.t))
+                prev_node = node
+    return v_constr_dict, e_constr_dict, perm_constr_dict
+
+
 def c_v_check_for_agent(agent_1: str, path_1, results):
     """
     c_v_for_agent_list: (agent name 1, agent name 2, x, y, t)

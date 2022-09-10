@@ -73,7 +73,8 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
     iteration = 0
     while len(open_list) > 0:
         iteration += 1
-        if iteration > 1e4:
+        if iteration > 1e3:
+            print('[ERROR]: out of iterations')
             return None
         node_current = get_node_from_open(open_list)
         if node_current.xy_name == goal.xy_name:
