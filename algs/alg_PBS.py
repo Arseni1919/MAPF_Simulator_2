@@ -268,7 +268,7 @@ def main():
 if __name__ == '__main__':
     random_seed = True
     # random_seed = False
-    seed = 667
-    n_agents = 7
+    seed = 250
+    n_agents = 11
 
     main()
