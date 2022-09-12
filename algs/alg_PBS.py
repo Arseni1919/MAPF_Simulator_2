@@ -260,6 +260,6 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 197
-    n_agents = 20
+    n_agents = 15
 
     main()

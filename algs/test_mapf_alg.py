@@ -19,9 +19,9 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     np.random.seed(seed)
 
     # img_png = 'lak109d.png'
-    img_png = '19_20_warehouse.png'
+    # img_png = '19_20_warehouse.png'
     # img_png = 'den101d.png'
-    # img_png = 'rmtst.png'
+    img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
     # img_png = 'ost003d.png'
