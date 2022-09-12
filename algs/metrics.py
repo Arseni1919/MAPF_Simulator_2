@@ -23,7 +23,7 @@ def build_constraints(nodes, other_paths):
 
 def c_v_check_for_agent(agent_1: str, path_1, results):
     """
-    c_v_for_agent_list: (agent name 1, agent name 2, x, y, t)
+    c_v_for_agent_list: (agents name 1, agents name 2, x, y, t)
     """
     if type(agent_1) is not str:
         raise RuntimeError('type(agent_1) is not str')
@@ -52,7 +52,7 @@ def vertex_col_check(results):
 
 def c_e_check_for_agent(agent_1: str, path_1, results):
     """
-    c_e_check_for_agent: (agent name 1, agent name 2, x, y, x, y, t)
+    c_e_check_for_agent: (agents name 1, agents name 2, x, y, x, y, t)
     """
     if type(agent_1) is not str:
         raise RuntimeError('type(agent_1) is not str')
@@ -84,7 +84,7 @@ def edge_col_check(results):
 
 def check_for_collisions(results):
     """
-    results: {'agent str': [Nodes list]}
+    results: {'agents str': [Nodes list]}
     """
     if results:
         vertex_col_list = vertex_col_check(results)

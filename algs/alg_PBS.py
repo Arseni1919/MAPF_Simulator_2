@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from alg_a_star import a_star
 from test_mapf_alg import test_mapf_alg_from_pic
 from metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
+from topological_sorting import topological_sorting
 
 
 def preprint_func_name(func):
@@ -28,7 +29,7 @@ class PBSAgent:
 
 class PBSNode:
     def __init__(self, agents, agents_dict, index):
-        self.agent = agents
+        self.agents = agents
         self.agent_dict = agents_dict
         self.index = index
         self.name = f'PBSNode {index}'
@@ -41,6 +42,9 @@ class PBSNode:
 
     def calc_cost(self):
         self.cost = sum([len(path) for path in self.plan.values()])
+
+    def agent_names(self):
+        return [agent.name for agent in self.agents]
 
     def update_ordering_rules(self):
         if len(self.partial_order) > 0:
@@ -62,6 +66,14 @@ def create_agents(start_nodes, goal_nodes):
 
 
 def get_order_lists(pbs_node, agent):
+    agents_names = []
+    for a_1, a_2 in pbs_node.ordering_rules:
+        agents_names.append(a_1)
+        agents_names.append(a_2)
+    agents_names = list(set(agents_names))
+    # if len(agents_names) > 0:
+    #     print(f'\rpbs_node [{pbs_node.index}]: agents_names -> {agents_names}\n')
+    pbs_node.partial_order = topological_sorting(nodes=agents_names, sorting_rules=pbs_node.ordering_rules)
     if agent.name in pbs_node.partial_order:
         agent_index = pbs_node.partial_order.index(agent.name)
         higher_order_names = [pbs_node.partial_order[i] for i in range(0, agent_index)]
@@ -70,20 +82,6 @@ def get_order_lists(pbs_node, agent):
         lower_order_list = [pbs_node.agent_dict[name] for name in lower_order_names]
         return higher_order_list, lower_order_list
     return [], []
-
-
-# @preprint_func_name
-def topological_sorting(pbs_node, agent):
-    print('\rFUNC: topological_sorting', end='')
-    update_list = [agent]
-    h_l, lower_order_list = get_order_lists(pbs_node, agent)
-    if len(lower_order_list) > 0:
-        lower_order_names = [a.name for a in lower_order_list]
-        lower_order_dict = {a.name: a for a in lower_order_list}
-        for partial_order_agent in pbs_node.partial_order:
-            if partial_order_agent in lower_order_names:
-                update_list.append(lower_order_dict[partial_order_agent])
-    return update_list
 
 
 def collide_check(pbs_node, update_agent):
@@ -107,25 +105,6 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
 
-
-    # v_constr_dict = {node.xy_name: [] for node in nodes}
-    # e_constr_dict = {node.xy_name: [] for node in nodes}
-    # perm_constr_dict = {node.xy_name: [] for node in nodes}
-    #
-    # for agent_name, path in sub_results.items():
-    #     if len(path) > 0:
-    #         final_node = path[-1]
-    #         perm_constr_dict[final_node.xy_name].append(final_node.t)
-    #
-    #         prev_node = path[0]
-    #         for node in path:
-    #             # vertex
-    #             v_constr_dict[f'{node.x}_{node.y}'].append(node.t)
-    #             # edge
-    #             if prev_node.xy_name != node.xy_name:
-    #                 e_constr_dict[f'{prev_node.x}_{prev_node.y}'].append((node.x, node.y, node.t))
-    #             prev_node = node
-
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
     print('\rBEFORE A*', end='')
@@ -145,8 +124,8 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
 # @preprint_func_name
 def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot):
     print('\rFUNC: update_plan', end='')
-    update_list = topological_sorting(pbs_node, agent)
-
+    update_list_names = topological_sorting(nodes=[agent.name], sorting_rules=pbs_node.ordering_rules)
+    update_list = [pbs_node.agent_dict[agent_name] for agent_name in update_list_names]
     for update_agent in update_list:
         if collide_check(pbs_node, update_agent) or update_agent.name == agent.name:
             new_path = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot)
@@ -171,38 +150,40 @@ def choose_conf(c_v, c_e):
 def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
     print('\rFUNC: add_new_ordering', end='')
     h_agent, l_agent = None, None
-    new_name = None
     if agent.name == conf[0]:
-        h_agent = agent.name
-        l_agent = conf[1]
+        h_agent = conf[1]
+        l_agent = conf[0]
     elif agent.name == conf[1]:
         h_agent = conf[0]
-        l_agent = agent.name
+        l_agent = conf[1]
     else:
         raise RuntimeError('no such name in constr')
 
-    NEW_pbs_node.partial_order = copy.deepcopy(NEXT_pbs_node.partial_order)
-    if h_agent in NEW_pbs_node.partial_order and l_agent in NEW_pbs_node.partial_order:
-        raise RuntimeError('a star did something wrong so')
-    if h_agent in NEW_pbs_node.partial_order:
-        h_index = NEW_pbs_node.partial_order.index(h_agent)
-        NEW_pbs_node.partial_order.insert(h_index + 1, l_agent)
-        new_name = l_agent
-    elif l_agent in NEW_pbs_node.partial_order:
-        l_index = NEW_pbs_node.partial_order.index(l_agent)
-        NEW_pbs_node.partial_order.insert(l_index, h_agent)
-        new_name = h_agent
-    else:
-        NEW_pbs_node.partial_order.append(agent.name)
-        new_name = agent.name
+    # new_name = agent.name
+    # NEW_pbs_node.partial_order = copy.deepcopy(NEXT_pbs_node.partial_order)
+    # if h_agent in NEW_pbs_node.partial_order and l_agent in NEW_pbs_node.partial_order:
+    #     raise RuntimeError('a star did something wrong so')
+    # if h_agent in NEW_pbs_node.partial_order:
+    #     h_index = NEW_pbs_node.partial_order.index(h_agent)
+    #     NEW_pbs_node.partial_order.insert(h_index + 1, l_agent)
+    #     new_name = l_agent
+    # elif l_agent in NEW_pbs_node.partial_order:
+    #     l_index = NEW_pbs_node.partial_order.index(l_agent)
+    #     NEW_pbs_node.partial_order.insert(l_index, h_agent)
+    #     new_name = h_agent
+    # else:
+    #     NEW_pbs_node.partial_order.append(agents.name)
+    #     new_name = agents.name
 
-    NEW_pbs_node.update_ordering_rules()
+    # NEW_pbs_node.update_ordering_rules()
+
+    NEW_pbs_node.ordering_rules.append((h_agent, l_agent))
 
     for (i_1, i_2) in NEW_pbs_node.ordering_rules:
         if (i_2, i_1) in NEW_pbs_node.ordering_rules:
             raise RuntimeError('there are upsidedown orders')
 
-    return NEW_pbs_node.agent_dict[new_name]
+    return agent
 
 
 def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
@@ -225,9 +206,15 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
         iteration += 1
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
-        print(f'\r---\n[iter {iteration}] PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\norder: {NEXT_pbs_node.partial_order}\ncost: {NEXT_pbs_node.cost}\n---\n')
+        print(f'\r---\n'
+              f'[iter {iteration}] '
+              f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
+              f'partial order: {NEXT_pbs_node.partial_order}\n'
+              f'cost: {NEXT_pbs_node.cost}\n'
+              f'---\n')
 
         if not there_is_col:
+            print(f'order: {topological_sorting(NEXT_pbs_node.agent_names(), NEXT_pbs_node.ordering_rules)}\n')
             print(f'#########################################################')
             print(f'#########################################################')
             print(f'#########################################################')
@@ -239,6 +226,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
             pbs_node_index += 1
             NEW_pbs_node = PBSNode(agents, agents_dict, pbs_node_index)
             NEW_pbs_node.plan = copy.deepcopy(NEXT_pbs_node.plan)
+            NEW_pbs_node.ordering_rules = copy.deepcopy(NEXT_pbs_node.ordering_rules)
 
             # NEW_pbs_node.constraints = copy.deepcopy(NEXT_pbs_node.constraints)
             # add_new_constraint(NEW_pbs_node, i, conf, conf_type)
@@ -269,9 +257,9 @@ def main():
 
 
 if __name__ == '__main__':
-    # random_seed = True
-    random_seed = False
-    seed = 23
-    n_agents = 30
+    random_seed = True
+    # random_seed = False
+    seed = 197
+    n_agents = 20
 
     main()
