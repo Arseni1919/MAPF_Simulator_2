@@ -20,26 +20,48 @@ class DSAgent:
         self. middle_plot = middle_plot
         self.path = []
         self.other_paths = {}
+        self.conf_paths = {}
 
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
 
-    def plan(self):
         sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
+        conf_agents = []
+        conf_list = []
         c_v_list = c_v_check_for_agent(self.name, self.path, sub_results)
         c_e_list = c_e_check_for_agent(self.name, self.path, sub_results)
+        conf_list.extend(c_v_list)
+        conf_list.extend(c_e_list)
+        for conf in conf_list:
+            if self.name != conf[0]:
+                conf_agents.append(conf[0])
+            if self.name != conf[1]:
+                conf_agents.append(conf[1])
 
+        self.conf_paths = {agent_name: self.other_paths[agent_name] for agent_name in conf_agents}
+        if len(self.conf_paths) > 0:
+            print()
+
+    def plan(self):
+        sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
+        # c_v_list = c_v_check_for_agent(self.name, self.path, self.conf_paths)
+        # c_e_list = c_e_check_for_agent(self.name, self.path, self.conf_paths)
+
+        # v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.conf_paths)
         v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, sub_results)
 
-        new_path = a_star(start=self.start_node, goal=self.goal_node, nodes=self.nodes,
-                          h_func=self.h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict,
+        new_path = a_star(start=self.start_node, goal=self.goal_node, nodes=self.nodes, h_func=self.h_func,
+                          v_constr_dict=v_constr_dict,
+                          e_constr_dict=e_constr_dict,
                           perm_constr_dict=perm_constr_dict,
                           plotter=self.plotter, middle_plot=self.middle_plot)
 
         if new_path is not None:
-            c_v_list_after = c_v_check_for_agent(self.name, new_path, sub_results)
-            c_e_list_after = c_e_check_for_agent(self.name, new_path, sub_results)
-            if len(c_v_list_after) > 0 or len(c_e_list_after) > 0:
+            c_v_list_after_1 = c_v_check_for_agent(self.name, new_path, self.conf_paths)
+            c_e_list_after_1 = c_e_check_for_agent(self.name, new_path, self.conf_paths)
+            c_v_list_after_2 = c_v_check_for_agent(self.name, new_path, sub_results)
+            c_e_list_after_2 = c_e_check_for_agent(self.name, new_path, sub_results)
+            if len(c_v_list_after_1) > 0 or len(c_e_list_after_1) > 0:
                 raise RuntimeError('a_star failed')
 
             if random.random() < 0.8:
@@ -103,9 +125,9 @@ def main():
 
 
 if __name__ == '__main__':
-    random_seed = True
-    # random_seed = False
-    seed = 197
+    # random_seed = True
+    random_seed = False
+    seed = 183
     n_agents = 10
 
     # good example: img_png = '19_20_warehouse.png'

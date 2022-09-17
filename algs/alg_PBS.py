@@ -186,7 +186,6 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
     return agent
 
 
-
 def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
     partial_order = kwargs['initial_ordering']
     pbs_node_index = 0
