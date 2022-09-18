@@ -4,10 +4,10 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-from alg_a_star import a_star
-from test_mapf_alg import test_mapf_alg_from_pic
-from metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
-from topological_sorting import topological_sorting
+from algs.alg_a_star import a_star
+from algs.test_mapf_alg import test_mapf_alg_from_pic
+from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
+from algs.topological_sorting import topological_sorting
 
 
 def preprint_func_name(func):
@@ -214,11 +214,12 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
               f'---\n')
 
         if not there_is_col:
-            print(f'order: {topological_sorting(NEXT_pbs_node.agent_names(), NEXT_pbs_node.ordering_rules)}\n')
-            print(f'#########################################################')
-            print(f'#########################################################')
-            print(f'#########################################################')
-            plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes)
+            if middle_plot:
+                print(f'order: {topological_sorting(NEXT_pbs_node.agent_names(), NEXT_pbs_node.ordering_rules)}\n')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes)
             return NEXT_pbs_node.plan, {'PBSNode': NEXT_pbs_node}
 
         conf, conf_type = choose_conf(c_v, c_e)
@@ -250,7 +251,7 @@ def main():
     for i in range(20):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=[], n_agents=n_agents,
-                                              random_seed=random_seed, seed=seed)
+                                              random_seed=random_seed, seed=seed, max_time=5)
 
         # plt.show()
         plt.close()

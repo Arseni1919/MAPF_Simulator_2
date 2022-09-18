@@ -3,9 +3,10 @@ import numpy as np
 
 
 class Plotter:
-    def __init__(self, map_dim):
-        self.side_x, self.side_y = map_dim
-        self.fig, self.ax = plt.subplots(1, 3)
+    def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=3):
+        if map_dim:
+            self.side_x, self.side_y = map_dim
+        self.fig, self.ax = plt.subplots(subplot_rows, subplot_cols)
 
     def plot_lists(self, open_list, closed_list, start, goal=None, path=None, nodes=None):
 
@@ -86,12 +87,16 @@ class Plotter:
                 field[path[0].x, path[0].y] = 4
                 field[path[-1].x, path[-1].y] = 5
 
-            if t % 1 == 0:
+            if t % 10 == 0:
                 self.ax.imshow(field, origin='lower')
                 self.ax.set_title('MAPF Paths')
 
                 # plt.pause(1)
                 plt.pause(0.01)
+
+    def plot_big_test(self):
+        for ax in self.ax:
+            ax.cla()
 
 
 

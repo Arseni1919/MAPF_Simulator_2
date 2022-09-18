@@ -2,9 +2,9 @@ import random
 
 import matplotlib.pyplot as plt
 
-from alg_a_star import a_star
-from test_mapf_alg import test_mapf_alg_from_pic
-from metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
+from algs.alg_a_star import a_star
+from algs.test_mapf_alg import test_mapf_alg_from_pic
+from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
 
 
 class DSAgent:
@@ -71,7 +71,7 @@ class DSAgent:
         return False
 
 
-def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
+def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, max_time=5, **kwargs):
     # Creating agents
     agents = []
     n_agent = 0
@@ -99,10 +99,11 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
             there_is_col, c_v, c_e = check_for_collisions(plan)
             print(f'\r---\n[iter {iteration}] \ncost: {cost}\n---\n')
             if not there_is_col:
-                print(f'#########################################################')
-                print(f'#########################################################')
-                print(f'#########################################################')
-                plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes)
+                if middle_plot:
+                    print(f'#########################################################')
+                    print(f'#########################################################')
+                    print(f'#########################################################')
+                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes)
                 return plan, {'agents': agents}
 
     # partial order

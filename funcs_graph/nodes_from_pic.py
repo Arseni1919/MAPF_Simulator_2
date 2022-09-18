@@ -1,4 +1,4 @@
-from GLOBALS import *
+from globals import *
 from funcs_graph.map_dimensions import map_dimensions_dict
 from simulator_objects import Node
 

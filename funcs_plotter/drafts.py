@@ -1,4 +1,4 @@
-from GLOBALS import *
+from globals import *
 
 
 for i in range(10):

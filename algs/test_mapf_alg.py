@@ -55,7 +55,7 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     # ------------------------- #
     # ------------------------- #
     result = algorithm(start_nodes=start_nodes, goal_nodes=goal_nodes, nodes=nodes, nodes_dict=nodes_dict, h_func=h_func,
-                       plotter=plotter, middle_plot=False, **kwargs)
+                       plotter=plotter, middle_plot=False, max_time=5, **kwargs)
 
     print(f'The result: {result}')
     # ------------------------- #
