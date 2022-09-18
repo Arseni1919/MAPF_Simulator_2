@@ -71,8 +71,9 @@ def big_test(
                     h_func=h_func,
                     plotter=inner_plotter,
                     middle_plot=False,
+                    final_plot=False,
                     max_time=max_time_per_alg,
-                    initial_ordering=[]  # for PBS
+                    # initial_ordering=[]  # for PBS
                 )
 
                 # plot + print

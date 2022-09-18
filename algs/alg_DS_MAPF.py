@@ -72,6 +72,14 @@ class DSAgent:
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, max_time=5, **kwargs):
+    if 'max_time' in kwargs:
+        max_time = kwargs['max_time']
+    else:
+        max_time = 10
+    if 'final_plot' in kwargs:
+        final_plot = kwargs['final_plot']
+    else:
+        final_plot = True
     # Creating agents
     agents = []
     n_agent = 0
@@ -81,7 +89,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         n_agent += 1
 
     # Distributed Part
-    for iteration in range(100):
+    for iteration in range(1000):
 
         for agent in agents:
             agent.plan()
@@ -99,7 +107,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
             there_is_col, c_v, c_e = check_for_collisions(plan)
             print(f'\r---\n[iter {iteration}] \ncost: {cost}\n---\n')
             if not there_is_col:
-                if middle_plot:
+                if final_plot:
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
@@ -116,7 +124,7 @@ def main():
     for i in range(20):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
-                                              random_seed=random_seed, seed=seed)
+                                              random_seed=random_seed, seed=seed, final_plot=True)
 
         if not random_seed:
             break

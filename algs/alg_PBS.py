@@ -159,24 +159,6 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
     else:
         raise RuntimeError('no such name in constr')
 
-    # new_name = agent.name
-    # NEW_pbs_node.partial_order = copy.deepcopy(NEXT_pbs_node.partial_order)
-    # if h_agent in NEW_pbs_node.partial_order and l_agent in NEW_pbs_node.partial_order:
-    #     raise RuntimeError('a star did something wrong so')
-    # if h_agent in NEW_pbs_node.partial_order:
-    #     h_index = NEW_pbs_node.partial_order.index(h_agent)
-    #     NEW_pbs_node.partial_order.insert(h_index + 1, l_agent)
-    #     new_name = l_agent
-    # elif l_agent in NEW_pbs_node.partial_order:
-    #     l_index = NEW_pbs_node.partial_order.index(l_agent)
-    #     NEW_pbs_node.partial_order.insert(l_index, h_agent)
-    #     new_name = h_agent
-    # else:
-    #     NEW_pbs_node.partial_order.append(agents.name)
-    #     new_name = agents.name
-
-    # NEW_pbs_node.update_ordering_rules()
-
     NEW_pbs_node.ordering_rules.append((h_agent, l_agent))
 
     for (i_1, i_2) in NEW_pbs_node.ordering_rules:
@@ -187,7 +169,18 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
 
 
 def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
-    partial_order = kwargs['initial_ordering']
+    if 'max_time' in kwargs:
+        max_time = kwargs['max_time']
+    else:
+        max_time = 10
+    if 'final_plot' in kwargs:
+        final_plot = kwargs['final_plot']
+    else:
+        final_plot = True
+    if 'initial_ordering' in kwargs:
+        partial_order = kwargs['initial_ordering']
+    else:
+        partial_order = []
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -214,7 +207,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
               f'---\n')
 
         if not there_is_col:
-            if middle_plot:
+            if final_plot:
                 print(f'order: {topological_sorting(NEXT_pbs_node.agent_names(), NEXT_pbs_node.ordering_rules)}\n')
                 print(f'#########################################################')
                 print(f'#########################################################')
@@ -251,7 +244,7 @@ def main():
     for i in range(20):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=[], n_agents=n_agents,
-                                              random_seed=random_seed, seed=seed, max_time=5)
+                                              random_seed=random_seed, seed=seed, max_time=5, final_plot=True)
 
         # plt.show()
         plt.close()
@@ -261,6 +254,6 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 197
-    n_agents = 15
+    n_agents = 5
 
     main()
