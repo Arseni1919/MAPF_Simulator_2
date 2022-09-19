@@ -2,7 +2,24 @@
 
 ## Algorithms
 - PBS
-- 
+- DS-MAPF
+
+## Experiments
+
+### lak108d Map
+
+#### Specs:
+
+- From 10 till 20 agents per run
+- There are 10 runs with different start-goal positions per same _N_ of agents
+- 1 minute max on each algorithm
+- The time for DS-MAPF divided by _N_ of agents
+- _A*_ limited to 3000 nodes
+- The metric of quality is SoC
+- Quality and runtime graphs are only of those cases who succeeded to solve an instance
+
+
+![](pics/results_lak108d.png)
 
 ## Credits
 
