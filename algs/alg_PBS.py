@@ -199,7 +199,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'\r---\n'
-              f'[iter {iteration}][time: {time.time() - start_time:0.2f}s] '
+              f'[iter {iteration}][{len(agents)} agents][time: {time.time() - start_time:0.2f}s] '
               f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
               f'partial order: {NEXT_pbs_node.partial_order}\n'
               f'cost: {NEXT_pbs_node.cost}\n'
@@ -214,7 +214,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes)
             return NEXT_pbs_node.plan, {
                 'PBSNode': NEXT_pbs_node,
-                'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost, 'runtime': 1}
+                'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost, 'runtime': time.time() - start_time}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):

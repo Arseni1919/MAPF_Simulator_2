@@ -59,8 +59,8 @@ class DSAgent:
         if new_path is not None:
             c_v_list_after_1 = c_v_check_for_agent(self.name, new_path, self.conf_paths)
             c_e_list_after_1 = c_e_check_for_agent(self.name, new_path, self.conf_paths)
-            c_v_list_after_2 = c_v_check_for_agent(self.name, new_path, sub_results)
-            c_e_list_after_2 = c_e_check_for_agent(self.name, new_path, sub_results)
+            # c_v_list_after_2 = c_v_check_for_agent(self.name, new_path, sub_results)
+            # c_e_list_after_2 = c_e_check_for_agent(self.name, new_path, sub_results)
             if len(c_v_list_after_1) > 0 or len(c_e_list_after_1) > 0:
                 raise RuntimeError('a_star failed')
 
@@ -71,7 +71,7 @@ class DSAgent:
         return False
 
 
-def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, max_time=5, **kwargs):
+def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
     start_time = time.time()
     if 'max_time' in kwargs:
         max_time = kwargs['max_time']
@@ -90,9 +90,10 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         n_agent += 1
 
     # Distributed Part
-    for iteration in range(1000):
+    for iteration in range(100):
 
         # time constraint
+        # if crossed_time_limit(start_time, max_time * len(agents)):
         if crossed_time_limit(start_time, max_time):
             break
 
@@ -106,7 +107,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         plan_lngths = [len(path) for path in plan.values()]
 
         if 0 in plan_lngths:
-            print(f'\r---\n[DS-MAPF][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n---\n')
+            print(f'\r---\n[DS-MAPF][{len(agents)} agents][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n---\n')
         else:
             cost = sum([len(path) for path in plan.values()])
             there_is_col, c_v, c_e = check_for_collisions(plan)
@@ -117,7 +118,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                     print(f'#########################################################')
                     print(f'#########################################################')
                     plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes)
-                return plan, {'agents': agents, 'success_rate': 1, 'sol_quality': cost, 'runtime': 1}
+                return plan, {'agents': agents,
+                              'success_rate': 1, 'sol_quality': cost, 'runtime': (time.time() - start_time)/len(agents)}
 
     # partial order
     pass

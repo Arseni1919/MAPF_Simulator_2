@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.ticker import MaxNLocator
 
 
 class Plotter:
@@ -136,12 +137,22 @@ class Plotter:
         self.ax[0].set_title('success_rate')
         self.ax[1].set_title('sol_quality')
         self.ax[2].set_title('runtime')
+
         self.ax[0].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        self.ax[0].set_ylim([0, 1.5])
         self.ax[1].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         self.ax[2].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+
         self.ax[0].set_xticks(n_agents_list)
+        # self.ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
+        # self.ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
         self.ax[1].set_xticks(n_agents_list)
         self.ax[2].set_xticks(n_agents_list)
+
+        self.ax[0].set_xlabel('N agents')
+        self.ax[1].set_xlabel('N agents')
+        self.ax[2].set_xlabel('N agents')
+
         self.ax[0].legend()
         self.ax[1].legend()
         self.ax[2].legend()
