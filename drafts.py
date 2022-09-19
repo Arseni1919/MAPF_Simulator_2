@@ -6,6 +6,7 @@
 #     item = l(i)
 #     print(item)
 import random
+import time
 
 l = [0, 1, 2, 3]
 l.insert(3, 100)
@@ -13,6 +14,10 @@ random.shuffle(l)
 print(l)
 print(l.index(100))
 
+s = time.time()
+time.sleep(1)
+elapsed = time.time() - s
+print(f"Executed in {elapsed:0.2f} seconds.")
 
 
 

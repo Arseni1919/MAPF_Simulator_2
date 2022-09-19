@@ -6,6 +6,8 @@ class Plotter:
     def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=3):
         if map_dim:
             self.side_x, self.side_y = map_dim
+        self.subplot_rows = subplot_rows
+        self.subplot_cols = subplot_cols
         self.fig, self.ax = plt.subplots(subplot_rows, subplot_cols)
 
     def plot_lists(self, open_list, closed_list, start, goal=None, path=None, nodes=None):
@@ -94,9 +96,60 @@ class Plotter:
                 # plt.pause(1)
                 plt.pause(0.01)
 
-    def plot_big_test(self):
-        for ax in self.ax:
-            ax.cla()
+    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list):
+        for i_ax in self.ax:
+            i_ax.cla()
+        # self.fig, self.ax = plt.subplots(self.subplot_rows, self.subplot_cols)
+
+        for alg_name, _ in algs_to_test_dict.items():
+
+            # success_rate
+            sr_x = []
+            sr_y = []
+            for n_agents in n_agents_list:
+                sr_list = statistics_dict[alg_name][n_agents]['success_rate']
+                if len(sr_list) > 0:
+                    sr_x.append(n_agents)
+                    sr_y.append(sum(sr_list) / len(sr_list))
+            self.ax[0].plot(sr_x, sr_y, '-o', label=f'{alg_name}')
+
+            # sol_quality
+            sq_x = []
+            sq_y = []
+            for n_agents in n_agents_list:
+                sq_list = statistics_dict[alg_name][n_agents]['sol_quality']
+                if len(sq_list) > 0:
+                    sq_x.append(n_agents)
+                    sq_y.append(np.mean(sq_list))
+            self.ax[1].plot(sq_x, sq_y, '-o', label=f'{alg_name}')
+
+            # runtime
+            rt_x = []
+            rt_y = []
+            for n_agents in n_agents_list:
+                rt_list = statistics_dict[alg_name][n_agents]['runtime']
+                if len(rt_list) > 0:
+                    rt_x.append(n_agents)
+                    rt_y.append(np.mean(rt_list))
+            self.ax[2].plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+
+        self.ax[0].set_title('success_rate')
+        self.ax[1].set_title('sol_quality')
+        self.ax[2].set_title('runtime')
+        self.ax[0].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        self.ax[1].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        self.ax[2].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        self.ax[0].set_xticks(n_agents_list)
+        self.ax[1].set_xticks(n_agents_list)
+        self.ax[2].set_xticks(n_agents_list)
+        self.ax[0].legend()
+        self.ax[1].legend()
+        self.ax[2].legend()
+
+        self.fig.tight_layout()
+        plt.pause(0.01)
+        # plt.show()
+
 
 
 

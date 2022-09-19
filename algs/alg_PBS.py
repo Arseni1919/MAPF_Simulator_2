@@ -1,12 +1,10 @@
 import copy
-import random
-import numpy as np
-
+import time
 import matplotlib.pyplot as plt
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
+from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, crossed_time_limit
 from algs.topological_sorting import topological_sorting
 
 
@@ -169,6 +167,7 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
 
 
 def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
+    start_time = time.time()
     if 'max_time' in kwargs:
         max_time = kwargs['max_time']
     else:
@@ -195,12 +194,12 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     root.calc_cost()
     stack = [root]
     iteration = 0
-    while len(stack) > 0:
+    while len(stack) > 0 and not crossed_time_limit(start_time, max_time):
         iteration += 1
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'\r---\n'
-              f'[iter {iteration}] '
+              f'[iter {iteration}][time: {time.time() - start_time:0.2f}s] '
               f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
               f'partial order: {NEXT_pbs_node.partial_order}\n'
               f'cost: {NEXT_pbs_node.cost}\n'
@@ -213,7 +212,9 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 print(f'#########################################################')
                 print(f'#########################################################')
                 plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes)
-            return NEXT_pbs_node.plan, {'PBSNode': NEXT_pbs_node}
+            return NEXT_pbs_node.plan, {
+                'PBSNode': NEXT_pbs_node,
+                'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost, 'runtime': 1}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
@@ -235,7 +236,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 NEW_pbs_node.parent = NEXT_pbs_node
                 stack.sort(key=lambda x: x.cost, reverse=True)
 
-    return None, {}
+    return None, {'success_rate': 0}
 
 
 def main():

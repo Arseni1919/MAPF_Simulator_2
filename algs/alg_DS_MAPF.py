@@ -1,10 +1,10 @@
 import random
-
+import time
 import matplotlib.pyplot as plt
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints
+from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, crossed_time_limit
 
 
 class DSAgent:
@@ -72,6 +72,7 @@ class DSAgent:
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, max_time=5, **kwargs):
+    start_time = time.time()
     if 'max_time' in kwargs:
         max_time = kwargs['max_time']
     else:
@@ -91,6 +92,10 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     # Distributed Part
     for iteration in range(1000):
 
+        # time constraint
+        if crossed_time_limit(start_time, max_time):
+            break
+
         for agent in agents:
             agent.plan()
 
@@ -101,7 +106,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         plan_lngths = [len(path) for path in plan.values()]
 
         if 0 in plan_lngths:
-            print(f'\r---\n[iter {iteration}]\n---\n')
+            print(f'\r---\n[DS-MAPF][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n---\n')
         else:
             cost = sum([len(path) for path in plan.values()])
             there_is_col, c_v, c_e = check_for_collisions(plan)
@@ -112,12 +117,12 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                     print(f'#########################################################')
                     print(f'#########################################################')
                     plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes)
-                return plan, {'agents': agents}
+                return plan, {'agents': agents, 'success_rate': 1, 'sol_quality': cost, 'runtime': 1}
 
     # partial order
     pass
 
-    return None, {'agents': agents}
+    return None, {'agents': agents, 'success_rate': 0}
 
 
 def main():

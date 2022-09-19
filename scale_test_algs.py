@@ -8,20 +8,23 @@ from algs.alg_PBS import run_pbs
 from globals import *
 
 
-def create_statistics_dict(algs_to_test, n_agents_list):
+def create_statistics_dict(algs_to_test_dict, n_agents_list):
     return {
-        alg: {
+        alg_name: {
             n_agents: {
                 'success_rate': [],
+                'sol_quality': [],
                 'runtime': [],
-                'sol_quality': []
             } for n_agents in n_agents_list
-        } for alg in algs_to_test
+        } for alg_name, _ in algs_to_test_dict.items()
     }
 
 
-def update_statistics_dict(statistics_dict, alg, result, info):
-    pass
+def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info):
+    statistics_dict[alg_name][n_agents]['success_rate'].append(info['success_rate'])
+    if info['success_rate'] == 1:
+        statistics_dict[alg_name][n_agents]['sol_quality'].append(info['sol_quality'])
+        statistics_dict[alg_name][n_agents]['runtime'].append(info['runtime'])
 
 
 def set_seed(random_seed, seed):
@@ -48,7 +51,7 @@ def get_nodes_from_pic():
 
 
 def big_test(
-        algs_to_test: dict,
+        algs_to_test_dict: dict,
         n_agents_list: list,
         runs_per_n_agents: int,
         max_time_per_alg: int,
@@ -62,10 +65,11 @@ def big_test(
 
     # get nodes and dimensions from image
     nodes, nodes_dict, map_dim = get_nodes_from_pic()
-    inner_plotter = Plotter(map_dim=map_dim)
+    # inner_plotter = Plotter(map_dim=map_dim)
+    inner_plotter = None
 
     # for plotter
-    statistics_dict = create_statistics_dict(algs_to_test=algs_to_test, n_agents_list=n_agents_list)
+    statistics_dict = create_statistics_dict(algs_to_test_dict=algs_to_test_dict, n_agents_list=n_agents_list)
 
     # for num of agents
     for n_agents in n_agents_list:
@@ -81,7 +85,7 @@ def big_test(
             # h_func = dist_heuristic
 
             # for at max 5 minutes
-            for alg_name, alg in algs_to_test.items():
+            for alg_name, alg in algs_to_test_dict.items():
                 result, info = alg(
                     start_nodes=start_nodes,
                     goal_nodes=goal_nodes,
@@ -96,20 +100,22 @@ def big_test(
                 )
 
                 # plot + print
-                print(f'#########################################################')
+                print(f'\n#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> result: {result}\n')
-                update_statistics_dict(statistics_dict, alg, result, info)
-                plotter.plot_big_test(statistics_dict)
+                update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
+                plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list)
+
+    plt.show()
 
 
 def main():
-    algs_to_test = {
+    algs_to_test_dict = {
         'PBS': run_pbs,
         'DS-MAPF': run_ds_mapf,
     }
-    n_agents_list = [2, 3, 4]
+    n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     runs_per_n_agents = 5
     max_time_per_alg = 1
     random_seed = True
@@ -117,7 +123,7 @@ def main():
     seed = 197
     plotter = Plotter()
     big_test(
-        algs_to_test=algs_to_test,
+        algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
         runs_per_n_agents=runs_per_n_agents,
         max_time_per_alg=max_time_per_alg,
