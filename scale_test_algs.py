@@ -36,9 +36,10 @@ def set_seed(random_seed, seed):
 
 
 def get_nodes_from_pic():
+    img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
-    img_png = 'den101d.png'
+    # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
