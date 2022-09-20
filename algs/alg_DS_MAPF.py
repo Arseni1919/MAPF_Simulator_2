@@ -25,22 +25,22 @@ class DSAgent:
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
 
-        sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
-        conf_agents = []
-        conf_list = []
-        c_v_list = c_v_check_for_agent(self.name, self.path, sub_results)
-        c_e_list = c_e_check_for_agent(self.name, self.path, sub_results)
-        conf_list.extend(c_v_list)
-        conf_list.extend(c_e_list)
-        for conf in conf_list:
-            if self.name != conf[0]:
-                conf_agents.append(conf[0])
-            if self.name != conf[1]:
-                conf_agents.append(conf[1])
-
-        self.conf_paths = {agent_name: self.other_paths[agent_name] for agent_name in conf_agents}
-        if len(self.conf_paths) > 0:
-            print()
+        # sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
+        # conf_agents = []
+        # conf_list = []
+        # c_v_list = c_v_check_for_agent(self.name, self.path, sub_results)
+        # c_e_list = c_e_check_for_agent(self.name, self.path, sub_results)
+        # conf_list.extend(c_v_list)
+        # conf_list.extend(c_e_list)
+        # for conf in conf_list:
+        #     if self.name != conf[0]:
+        #         conf_agents.append(conf[0])
+        #     if self.name != conf[1]:
+        #         conf_agents.append(conf[1])
+        #
+        # self.conf_paths = {agent_name: self.other_paths[agent_name] for agent_name in conf_agents}
+        # if len(self.conf_paths) > 0:
+        #     print()
 
     def plan(self):
         sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
