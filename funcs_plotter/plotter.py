@@ -3,6 +3,54 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 
+def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents):
+    """
+    {
+        alg_name: {
+            n_agents: {
+                'success_rate': {run: None for run in range(runs_per_n_agents)},
+                'sol_quality': {run: None for run in range(runs_per_n_agents)},
+                'runtime': {run: None for run in range(runs_per_n_agents)},
+            } for n_agents in n_agents_list
+        } for alg_name, _ in algs_to_test_dict.items()
+    }
+    """
+    curr_list = []
+    for i_run in range(runs_per_n_agents):
+        curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
+        if curr_element:
+            curr_list.append(curr_element)
+    return curr_list
+
+
+def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_dict):
+    """
+    {
+        alg_name: {
+            n_agents: {
+                'success_rate': {run: None for run in range(runs_per_n_agents)},
+                'sol_quality': {run: None for run in range(runs_per_n_agents)},
+                'runtime': {run: None for run in range(runs_per_n_agents)},
+            } for n_agents in n_agents_list
+        } for alg_name, _ in algs_to_test_dict.items()
+    }
+    """
+    algs_list = list(algs_to_test_dict.keys())
+    curr_list = []
+    for i_run in range(runs_per_n_agents):
+        curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
+        if curr_element:
+            to_insert = True
+            for another_alg in algs_list:
+                another_element = statistics_dict[another_alg][n_agents][list_type][i_run]
+                if another_element is None:
+                    to_insert = False
+                    break
+            if to_insert:
+                curr_list.append(curr_element)
+    return curr_list
+
+
 class Plotter:
     def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=3):
         if map_dim:
@@ -108,7 +156,7 @@ class Plotter:
             sr_x = []
             sr_y = []
             for n_agents in n_agents_list:
-                sr_list = statistics_dict[alg_name][n_agents]['success_rate']
+                sr_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'success_rate', runs_per_n_agents)
                 if len(sr_list) > 0:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
@@ -118,7 +166,7 @@ class Plotter:
             sq_x = []
             sq_y = []
             for n_agents in n_agents_list:
-                sq_list = statistics_dict[alg_name][n_agents]['sol_quality']
+                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents, algs_to_test_dict)
                 if len(sq_list) > 0:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))
@@ -128,7 +176,9 @@ class Plotter:
             rt_x = []
             rt_y = []
             for n_agents in n_agents_list:
-                rt_list = statistics_dict[alg_name][n_agents]['runtime']
+                # rt_list = statistics_dict[alg_name][n_agents]['runtime']
+                # rt_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'runtime', runs_per_n_agents)
+                rt_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'runtime', runs_per_n_agents, algs_to_test_dict)
                 if len(rt_list) > 0:
                     rt_x.append(n_agents)
                     rt_y.append(np.mean(rt_list))

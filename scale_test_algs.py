@@ -8,23 +8,23 @@ from algs.alg_PBS import run_pbs
 from globals import *
 
 
-def create_statistics_dict(algs_to_test_dict, n_agents_list):
+def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
     return {
         alg_name: {
             n_agents: {
-                'success_rate': [],
-                'sol_quality': [],
-                'runtime': [],
+                'success_rate': {run: None for run in range(runs_per_n_agents)},
+                'sol_quality': {run: None for run in range(runs_per_n_agents)},
+                'runtime': {run: None for run in range(runs_per_n_agents)},
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
 
 
 def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info):
-    statistics_dict[alg_name][n_agents]['success_rate'].append(info['success_rate'])
+    statistics_dict[alg_name][n_agents]['success_rate'][i_run] = info['success_rate']
     if info['success_rate'] == 1:
-        statistics_dict[alg_name][n_agents]['sol_quality'].append(info['sol_quality'])
-        statistics_dict[alg_name][n_agents]['runtime'].append(info['runtime'])
+        statistics_dict[alg_name][n_agents]['sol_quality'][i_run] = info['sol_quality']
+        statistics_dict[alg_name][n_agents]['runtime'][i_run] = info['runtime']
 
 
 def set_seed(random_seed, seed):
@@ -71,7 +71,8 @@ def big_test(
     inner_plotter = None
 
     # for plotter
-    statistics_dict = create_statistics_dict(algs_to_test_dict=algs_to_test_dict, n_agents_list=n_agents_list)
+    statistics_dict = create_statistics_dict(algs_to_test_dict=algs_to_test_dict, n_agents_list=n_agents_list,
+                                             runs_per_n_agents=runs_per_n_agents)
 
     # for num of agents
     for n_agents in n_agents_list:
@@ -120,7 +121,7 @@ def main():
     }
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    runs_per_n_agents = 10
+    runs_per_n_agents = 3
     max_time_per_alg = 1
     random_seed = True
     # random_seed = False

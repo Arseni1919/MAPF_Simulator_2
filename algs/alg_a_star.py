@@ -11,6 +11,12 @@ from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
 
 
+def get_max_final(perm_constr_dict):
+    final_list = [v[0] for k, v in perm_constr_dict.items() if len(v) > 0]
+    max_final = max(final_list) if len(final_list) > 0 else None
+    return max_final
+
+
 def get_node_from_open(open_list):
     v_list = open_list
     t_val = min([node.f() for node in v_list])
@@ -18,7 +24,6 @@ def get_node_from_open(open_list):
     v_list = out_nodes
     some_v = min([node.h for node in v_list])
     out_nodes = [node for node in v_list if node.h == some_v]
-    # print([node.ID for node in t_nodes])
     next_node = random.choice(out_nodes)
     return next_node
 
@@ -26,7 +31,7 @@ def get_node_from_open(open_list):
 def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict):
     new_t = node_current.t + 1
     if v_constr_dict:
-        if successor_xy_name in v_constr_dict and new_t in v_constr_dict[successor_xy_name]:
+        if new_t in v_constr_dict[successor_xy_name]:
             return None
     if e_constr_dict:
         if (node_current.x, node_current.y, new_t) in e_constr_dict[successor_xy_name]:
@@ -78,19 +83,20 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
             return None
         node_current = get_node_from_open(open_list)
         if node_current.xy_name == goal.xy_name:
-            # if there is a future constraint of a goal
-            if len(v_constr_dict[node_current.xy_name]) > 0:
-                # we will take the maximum time out of all constraints
-                max_t = max(v_constr_dict[node_current.xy_name])
-                # and compare to the current time
-                # if it is greater, we will continue to expand the search tree
-                if node_current.t > max_t:
-                    # otherwise break
-                    break
-                # else:
-                #     print('', end='')
-            else:
-                break
+            break
+            # # if there is a future constraint of a goal
+            # if len(v_constr_dict[node_current.xy_name]) > 0:
+            #     # we will take the maximum time out of all constraints
+            #     max_t = max(v_constr_dict[node_current.xy_name])
+            #     # and compare to the current time
+            #     # if it is greater, we will continue to expand the search tree
+            #     if node_current.t > max_t:
+            #         # otherwise break
+            #         break
+            #     # else:
+            #     #     print('', end='')
+            # else:
+            #     break
         for successor_xy_name in node_current.neighbours:
             node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict)
             successor_current_time = node_current.t + 1  # h(now, next)
@@ -173,18 +179,18 @@ def try_a_map_from_pic():
     # img_png = 'brc202d.png'
     # img_png = 'den520d.png'
     map_dim = map_dimensions_dict[img_png]
-    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='maps', show_map=False)
+    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='../maps', show_map=False)
     # ------------------------- #
     # x_start, y_start = 97, 99
     # x_goal, y_goal = 38, 89
     # node_start = [node for node in nodes if node.x == x_start and node.y == y_start][0]
     # node_goal = [node for node in nodes if node.x == x_goal and node.y == y_goal][0]
     # ------------------------- #
-    node_start = nodes[100]
-    node_goal = nodes[-1]
+    # node_start = nodes[100]
+    # node_goal = nodes[-1]
     # ------------------------- #
-    # node_start = random.choice(nodes)
-    # node_goal = random.choice(nodes)
+    node_start = random.choice(nodes)
+    node_goal = random.choice(nodes)
     print(f'start: {node_start.x}, {node_start.y} -> goal: {node_goal.x}, {node_goal.y}')
     # ------------------------- #
     # ------------------------- #
@@ -197,7 +203,8 @@ def try_a_map_from_pic():
     # h_func = dist_heuristic
     # ------------------------- #
     # ------------------------- #
-    constraint_dict = None
+    # constraint_dict = None
+    constraint_dict = {node.xy_name: [] for node in nodes}
     # v_constr_dict = {'30_12': [69], '29_12': [68, 69]}
     # ------------------------- #
     # ------------------------- #

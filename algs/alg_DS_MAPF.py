@@ -119,7 +119,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                     print(f'#########################################################')
                     plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes)
                 return plan, {'agents': agents,
-                              'success_rate': 1, 'sol_quality': cost, 'runtime': (time.time() - start_time)/len(agents)}
+                              'success_rate': 1, 'sol_quality': cost, 'runtime': (time.time() - start_time)}
 
     # partial order
     pass
