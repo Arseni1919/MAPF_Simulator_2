@@ -117,7 +117,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
-                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes)
+                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=1)
                 return plan, {'agents': agents,
                               'success_rate': 1, 'sol_quality': cost, 'runtime': (time.time() - start_time)}
 
@@ -141,10 +141,10 @@ def main():
 
 
 if __name__ == '__main__':
-    # random_seed = True
-    random_seed = False
+    random_seed = True
+    # random_seed = False
     seed = 183
-    n_agents = 10
+    n_agents = 5
 
     # good example: img_png = '19_20_warehouse.png'
     # random_seed = True

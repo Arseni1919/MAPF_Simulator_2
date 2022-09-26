@@ -13,8 +13,8 @@ from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_he
 
 def get_max_final(perm_constr_dict):
     final_list = [v[0] for k, v in perm_constr_dict.items() if len(v) > 0]
-    max_final = max(final_list) if len(final_list) > 0 else None
-    return max_final
+    max_final_time = max(final_list) if len(final_list) > 0 else None
+    return max_final_time
 
 
 def get_node_from_open(open_list):
@@ -28,14 +28,17 @@ def get_node_from_open(open_list):
     return next_node
 
 
-def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict):
+def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time):
     new_t = node_current.t + 1
+
     if v_constr_dict:
         if new_t in v_constr_dict[successor_xy_name]:
             return None
+
     if e_constr_dict:
         if (node_current.x, node_current.y, new_t) in e_constr_dict[successor_xy_name]:
             return None
+
     if perm_constr_dict:
         if len(perm_constr_dict[successor_xy_name]) > 0:
             if len(perm_constr_dict[successor_xy_name]) != 1:
@@ -43,7 +46,14 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_co
             final_time = perm_constr_dict[successor_xy_name][0]
             if new_t >= final_time:
                 return None
-    new_ID = f'{successor_xy_name}_{node_current.t + 1}'
+
+    if max_final_time:
+        if max_final_time > 0:
+            if node_current.t >= max_final_time:
+                new_t = max_final_time + 1
+
+    new_ID = f'{successor_xy_name}_{new_t}'
+
     for node in nodes:
         if node.xy_name == successor_xy_name:
             for open_node in open_list:
@@ -52,7 +62,7 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_co
             for closed_node in close_list:
                 if closed_node.ID == new_ID:
                     return closed_node
-            return Node(x=node.x, y=node.y, t=node_current.t + 1, neighbours=node.neighbours)
+            return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
     return None
 
 
@@ -75,30 +85,31 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
     node_current = start
     node_current.h = h_func(node_current, goal)
     open_list.append(node_current)
+    max_final_time = get_max_final(perm_constr_dict)
     iteration = 0
     while len(open_list) > 0:
         iteration += 1
-        if iteration > 3e3:
+        if iteration > 5e3:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
             return None
         node_current = get_node_from_open(open_list)
         if node_current.xy_name == goal.xy_name:
-            break
-            # # if there is a future constraint of a goal
-            # if len(v_constr_dict[node_current.xy_name]) > 0:
-            #     # we will take the maximum time out of all constraints
-            #     max_t = max(v_constr_dict[node_current.xy_name])
-            #     # and compare to the current time
-            #     # if it is greater, we will continue to expand the search tree
-            #     if node_current.t > max_t:
-            #         # otherwise break
-            #         break
-            #     # else:
-            #     #     print('', end='')
-            # else:
-            #     break
+            # break
+            # if there is a future constraint of a goal
+            if len(v_constr_dict[node_current.xy_name]) > 0:
+                # we will take the maximum time out of all constraints
+                max_t = max(v_constr_dict[node_current.xy_name])
+                # and compare to the current time
+                # if it is greater, we will continue to expand the search tree
+                if node_current.t > max_t:
+                    # otherwise break
+                    break
+                # else:
+                #     print('', end='')
+            else:
+                break
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict)
+            node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
@@ -135,6 +146,8 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
     if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
     # print('\rFinished A*.', end='')
+    if path is None:
+        print()
     return path
 
 

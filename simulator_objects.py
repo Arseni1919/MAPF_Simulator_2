@@ -1,6 +1,9 @@
 class Node:
-    def __init__(self, x, y, t=0, neighbours=None):
-        self.ID = f'{x}_{y}_{t}'
+    def __init__(self, x, y, t=0, neighbours=None, new_ID=None):
+        if new_ID:
+            self.ID = new_ID
+        else:
+            self.ID = f'{x}_{y}_{t}'
         self.xy_name = f'{x}_{y}'
         self.x = x
         self.y = y

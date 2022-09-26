@@ -20,8 +20,12 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
 
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
+    img_png = 'warehouse-10-20-10-2-1.png'
+    # img_png = 'warehouse-10-20-10-2-2.png'
+    # img_png = 'ht_chantry.png'
+    # img_png = 'Berlin_1_256.png'
     # img_png = 'den101d.png'
-    img_png = 'rmtst.png'
+    # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
     # img_png = 'ost003d.png'

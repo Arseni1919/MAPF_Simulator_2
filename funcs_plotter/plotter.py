@@ -108,7 +108,7 @@ class Plotter:
         plt.pause(0.01)
         # plt.show()
 
-    def plot_mapf_paths(self, paths_dict, nodes=None):
+    def plot_mapf_paths(self, paths_dict, nodes=None, plot_per=10):
         plt.close()
         self.fig, self.ax = plt.subplots()
         longest_path = max([len(path) for path in paths_dict.values()])
@@ -138,7 +138,7 @@ class Plotter:
                 field[path[0].x, path[0].y] = 4
                 field[path[-1].x, path[-1].y] = 5
 
-            if t % 10 == 0:
+            if t % plot_per == 0:
                 self.ax.imshow(field, origin='lower')
                 self.ax.set_title('MAPF Paths')
 

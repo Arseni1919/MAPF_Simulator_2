@@ -211,7 +211,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 print(f'#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
-                plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes)
+                plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes, plot_per=1)
             return NEXT_pbs_node.plan, {
                 'PBSNode': NEXT_pbs_node,
                 'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost, 'runtime': time.time() - start_time}
@@ -247,6 +247,9 @@ def main():
         result, info = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=[], n_agents=n_agents,
                                               random_seed=random_seed, seed=seed, max_time=5, final_plot=True)
 
+        if not random_seed:
+            break
+
         # plt.show()
         plt.close()
 
@@ -254,7 +257,7 @@ def main():
 if __name__ == '__main__':
     random_seed = True
     # random_seed = False
-    seed = 197
-    n_agents = 5
+    seed = 710
+    n_agents = 1
 
     main()
