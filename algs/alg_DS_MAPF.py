@@ -122,7 +122,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         else:
             cost = sum([len(path) for path in plan.values()])
             there_is_col, c_v, c_e = check_for_collisions(plan)
-            print(f'\r---\n[iter {iteration}] \ncost: {cost}\n---\n')
+            print(f'\r---\n[DS-MAPF][{len(agents)} agents][time: {time.time() - start_time:0.2f}s][iter {iteration}] \ncost: {cost}\n---\n')
             if not there_is_col:
                 if final_plot:
                     print(f'#########################################################')
