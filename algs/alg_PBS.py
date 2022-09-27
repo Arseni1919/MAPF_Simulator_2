@@ -189,7 +189,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     for agent in agents:
         success = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot)
         if not success:
-            return None, {}
+            return None, {'success_rate': 0}
 
     root.calc_cost()
     stack = [root]

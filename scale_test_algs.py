@@ -36,11 +36,12 @@ def set_seed(random_seed, seed):
 
 
 def get_nodes_from_pic():
-    img_png = 'lak108d.png'
+    # img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
+    img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
     # img_png = 'ost003d.png'
@@ -48,14 +49,14 @@ def get_nodes_from_pic():
     # img_png = 'den520d.png'
     map_dim = map_dimensions_dict[img_png]
     nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='maps', show_map=False)
-    return nodes, nodes_dict, map_dim
+    return nodes, nodes_dict, map_dim, img_png
 
 
 def big_test(
         algs_to_test_dict: dict,
         n_agents_list: list,
         runs_per_n_agents: int,
-        max_time_per_alg: int,
+        max_time_per_alg,
         random_seed: bool,
         seed: int,
         plotter
@@ -66,7 +67,7 @@ def big_test(
     set_seed(random_seed, seed)
 
     # get nodes and dimensions from image
-    nodes, nodes_dict, map_dim = get_nodes_from_pic()
+    nodes, nodes_dict, map_dim, img_png = get_nodes_from_pic()
     # inner_plotter = Plotter(map_dim=map_dim)
     inner_plotter = None
 
@@ -106,9 +107,9 @@ def big_test(
                 print(f'\n#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
-                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> result: {result}\n')
+                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}, result: {result}\n')
                 update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
-                plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list)
+                plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
     plt.show()
@@ -119,9 +120,11 @@ def main():
         'PBS': run_pbs,
         'DS-MAPF': run_ds_mapf,
     }
-    # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    runs_per_n_agents = 3
+    n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+    # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    # n_agents_list = [19, 20, 21, 22, 23, 24, 25]
+    runs_per_n_agents = 10
     max_time_per_alg = 1
     random_seed = True
     # random_seed = False

@@ -18,7 +18,7 @@ def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_ag
     curr_list = []
     for i_run in range(runs_per_n_agents):
         curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
-        if curr_element:
+        if curr_element is not None:
             curr_list.append(curr_element)
     return curr_list
 
@@ -39,7 +39,7 @@ def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_pe
     curr_list = []
     for i_run in range(runs_per_n_agents):
         curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
-        if curr_element:
+        if curr_element is not None:
             to_insert = True
             for another_alg in algs_list:
                 another_element = statistics_dict[another_alg][n_agents][list_type][i_run]
@@ -145,7 +145,7 @@ class Plotter:
                 # plt.pause(1)
                 plt.pause(0.01)
 
-    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list):
+    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png=''):
         for i_ax in self.ax:
             i_ax.cla()
         # self.fig, self.ax = plt.subplots(self.subplot_rows, self.subplot_cols)
@@ -208,6 +208,7 @@ class Plotter:
         self.ax[2].legend()
 
         self.fig.tight_layout()
+        self.fig.suptitle(f'{img_png} Map', fontsize=16)
         plt.pause(0.01)
         # plt.show()
 
