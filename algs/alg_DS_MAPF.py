@@ -8,7 +8,7 @@ from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_fo
 
 
 class DSAgent:
-    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot):
+    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit=1e100):
         self.index = index
         self.name = f'agent_{index}'
         self.start_node = start_node
@@ -18,6 +18,7 @@ class DSAgent:
         self.h_func = h_func
         self.plotter = plotter
         self. middle_plot = middle_plot
+        self.iter_limit = iter_limit
         self.path = []
         self.other_paths = {}
         self.conf_paths = {}
@@ -43,6 +44,7 @@ class DSAgent:
         #     print()
 
     def plan(self):
+        start_time = time.time()
         sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
         # c_v_list = c_v_check_for_agent(self.name, self.path, self.conf_paths)
         # c_e_list = c_e_check_for_agent(self.name, self.path, self.conf_paths)
@@ -54,8 +56,10 @@ class DSAgent:
                           v_constr_dict=v_constr_dict,
                           e_constr_dict=e_constr_dict,
                           perm_constr_dict=perm_constr_dict,
-                          plotter=self.plotter, middle_plot=self.middle_plot)
+                          plotter=self.plotter, middle_plot=self.middle_plot,
+                          iter_limit=self.iter_limit)
 
+        elapsed = time.time() - start_time
         if new_path is not None:
             c_v_list_after_1 = c_v_check_for_agent(self.name, new_path, self.conf_paths)
             c_e_list_after_1 = c_e_check_for_agent(self.name, new_path, self.conf_paths)
@@ -67,12 +71,13 @@ class DSAgent:
             if random.random() < 0.8:
                 self.path = new_path
 
-            return True
-        return False
+            return True, {'elapsed': elapsed}
+        return False, {'elapsed': elapsed}
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
     start_time = time.time()
+    iterations_time = 0
     if 'max_time' in kwargs:
         max_time = kwargs['max_time']
     else:
@@ -81,24 +86,30 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         final_plot = kwargs['final_plot']
     else:
         final_plot = True
+    if 'a_star_iter_limit' in kwargs:
+        iter_limit = kwargs['a_star_iter_limit']
+    else:
+        iter_limit = 1e100
     # Creating agents
     agents = []
     n_agent = 0
     for start_node, goal_node in zip(start_nodes, goal_nodes):
-        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot)
+        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
         agents.append(agent)
         n_agent += 1
 
     # Distributed Part
-    for iteration in range(100):
-
+    for iteration in range(100000):
+        max_time_list = []
         # time constraint
         # if crossed_time_limit(start_time, max_time * len(agents)):
         if crossed_time_limit(start_time, max_time):
             break
 
         for agent in agents:
-            agent.plan()
+            succeeded, info = agent.plan()
+            max_time_list.append(info['elapsed'])
+        iterations_time += max(max_time_list)
 
         for agent in agents:
             agent.exchange(agents=agents)
@@ -119,7 +130,10 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                     print(f'#########################################################')
                     plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=1)
                 return plan, {'agents': agents,
-                              'success_rate': 1, 'sol_quality': cost, 'runtime': (time.time() - start_time)}
+                              'success_rate': 1,
+                              'sol_quality': cost,
+                              'runtime': (time.time() - start_time),
+                              'iterations_time': iterations_time}
 
     # partial order
     pass

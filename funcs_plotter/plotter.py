@@ -176,13 +176,21 @@ class Plotter:
             rt_x = []
             rt_y = []
             for n_agents in n_agents_list:
-                # rt_list = statistics_dict[alg_name][n_agents]['runtime']
-                # rt_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'runtime', runs_per_n_agents)
                 rt_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'runtime', runs_per_n_agents, algs_to_test_dict)
                 if len(rt_list) > 0:
                     rt_x.append(n_agents)
                     rt_y.append(np.mean(rt_list))
             self.ax[2].plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+
+            # iterations_time
+            it_x = []
+            it_y = []
+            for n_agents in n_agents_list:
+                it_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'iterations_time', runs_per_n_agents, algs_to_test_dict)
+                if len(it_list) > 0:
+                    it_x.append(n_agents)
+                    it_y.append(np.mean(it_list))
+            self.ax[2].plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
 
         self.ax[0].set_title('success_rate')
         self.ax[1].set_title('sol_quality')

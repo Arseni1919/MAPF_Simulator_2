@@ -15,6 +15,7 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
                 'success_rate': {run: None for run in range(runs_per_n_agents)},
                 'sol_quality': {run: None for run in range(runs_per_n_agents)},
                 'runtime': {run: None for run in range(runs_per_n_agents)},
+                'iterations_time': {run: None for run in range(runs_per_n_agents)},
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -25,6 +26,11 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
     if info['success_rate'] == 1:
         statistics_dict[alg_name][n_agents]['sol_quality'][i_run] = info['sol_quality']
         statistics_dict[alg_name][n_agents]['runtime'][i_run] = info['runtime']
+
+        if 'iterations_time' in info:
+            statistics_dict[alg_name][n_agents]['iterations_time'][i_run] = info['iterations_time']
+
+
 
 
 def set_seed(random_seed, seed):
@@ -39,9 +45,9 @@ def get_nodes_from_pic():
     # img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
+    img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
-    img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
     # img_png = 'ost003d.png'
@@ -59,7 +65,8 @@ def big_test(
         max_time_per_alg,
         random_seed: bool,
         seed: int,
-        plotter
+        plotter,
+        a_star_iter_limit
 ):
     print(f'\nTest started at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
 
@@ -100,6 +107,7 @@ def big_test(
                     middle_plot=False,
                     final_plot=False,
                     max_time=max_time_per_alg,
+                    a_star_iter_limit=a_star_iter_limit,
                     # initial_ordering=[]  # for PBS
                 )
 
@@ -120,16 +128,17 @@ def main():
         'PBS': run_pbs,
         'DS-MAPF': run_ds_mapf,
     }
-    n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    # n_agents_list = [19, 20, 21, 22, 23, 24, 25]
+    n_agents_list = [25, 30, 35, 40]
     runs_per_n_agents = 10
     max_time_per_alg = 1
     random_seed = True
     # random_seed = False
     seed = 197
     plotter = Plotter()
+    a_star_iter_limit = 3e3
     big_test(
         algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
@@ -137,7 +146,8 @@ def main():
         max_time_per_alg=max_time_per_alg,
         random_seed=random_seed,
         seed=seed,
-        plotter=plotter
+        plotter=plotter,
+        a_star_iter_limit=a_star_iter_limit
     )
 
 

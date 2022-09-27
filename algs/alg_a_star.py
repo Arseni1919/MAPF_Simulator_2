@@ -12,8 +12,10 @@ from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_he
 
 
 def get_max_final(perm_constr_dict):
-    final_list = [v[0] for k, v in perm_constr_dict.items() if len(v) > 0]
-    max_final_time = max(final_list) if len(final_list) > 0 else None
+    max_final_time = None
+    if perm_constr_dict:
+        final_list = [v[0] for k, v in perm_constr_dict.items() if len(v) > 0]
+        max_final_time = max(final_list) if len(final_list) > 0 else None
     return max_final_time
 
 
@@ -74,7 +76,10 @@ def deepcopy_nodes(start, goal, nodes):
     return copy_start, copy_goal, copy_nodes
 
 
-def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, plotter=None, middle_plot=False):
+def a_star(start, goal, nodes, h_func,
+           v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None,
+           plotter=None, middle_plot=False,
+           iter_limit=1e100):
     """
     new_t in v_constr_dict[successor_xy_name]
     """
@@ -89,7 +94,7 @@ def a_star(start, goal, nodes, h_func, v_constr_dict=None, e_constr_dict=None, p
     iteration = 0
     while len(open_list) > 0:
         iteration += 1
-        if iteration > 3e3:
+        if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
             return None
         node_current = get_node_from_open(open_list)
@@ -184,13 +189,14 @@ def main():
 def try_a_map_from_pic():
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
-    img_png = 'den101d.png'
+    # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
     # img_png = 'lak503d.png'
     # img_png = 'ost003d.png'
     # img_png = 'brc202d.png'
     # img_png = 'den520d.png'
+    img_png = 'warehouse-10-20-10-2-1.png'
     map_dim = map_dimensions_dict[img_png]
     nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='../maps', show_map=False)
     # ------------------------- #
@@ -217,20 +223,30 @@ def try_a_map_from_pic():
     # ------------------------- #
     # ------------------------- #
     # constraint_dict = None
-    constraint_dict = {node.xy_name: [] for node in nodes}
+    v_constr_dict = {node.xy_name: [] for node in nodes}
     # v_constr_dict = {'30_12': [69], '29_12': [68, 69]}
+    perm_constr_dict = {node.xy_name: [] for node in nodes}
+    perm_constr_dict['74_9'].append(10)
     # ------------------------- #
     # ------------------------- #
     # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
-    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, v_constr_dict=constraint_dict, plotter=plotter, middle_plot=True)
+    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
+                    v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
+                    plotter=plotter, middle_plot=True)
     print('The result is:', *[node.xy_name for node in result], sep='->')
     print('The result is:', *[node.ID for node in result], sep='->')
     # ------------------------- #
     # ------------------------- #
     plt.show()
-    plt.close()
+    # plt.close()
 
 
 if __name__ == '__main__':
+    # random_seed = True
+    random_seed = False
+    seed = random.choice(range(1000)) if random_seed else 121
+    random.seed(seed)
+    np.random.seed(seed)
+    print(f'SEED: {seed}')
     # main()
     try_a_map_from_pic()

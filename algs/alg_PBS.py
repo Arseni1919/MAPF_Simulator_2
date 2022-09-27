@@ -95,7 +95,7 @@ def collide_check(pbs_node, update_agent):
     return False
 
 
-def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot):
+def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
     print('\rFUNC: update_path', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
     sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
@@ -108,7 +108,7 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     print('\rBEFORE A*', end='')
     new_path = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
                       h_func=h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict, perm_constr_dict=perm_constr_dict,
-                      plotter=plotter, middle_plot=middle_plot)
+                      plotter=plotter, middle_plot=middle_plot, iter_limit=iter_limit)
 
     if new_path is not None:
         c_v_list_after = c_v_check_for_agent(update_agent.name, new_path, sub_results)
@@ -120,13 +120,13 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
 
 
 # @preprint_func_name
-def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot):
+def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
     print('\rFUNC: update_plan', end='')
     update_list_names = topological_sorting(nodes=[agent.name], sorting_rules=pbs_node.ordering_rules)
     update_list = [pbs_node.agent_dict[agent_name] for agent_name in update_list_names]
     for update_agent in update_list:
         if collide_check(pbs_node, update_agent) or update_agent.name == agent.name:
-            new_path = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot)
+            new_path = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
             if new_path is None:
                 return False
             pbs_node.plan[update_agent.name] = new_path
@@ -180,6 +180,10 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
         partial_order = kwargs['initial_ordering']
     else:
         partial_order = []
+    if 'a_star_iter_limit' in kwargs:
+        iter_limit = kwargs['a_star_iter_limit']
+    else:
+        iter_limit = 1e100
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -187,7 +191,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     root.update_ordering_rules()
 
     for agent in agents:
-        success = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot)
+        success = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
         if not success:
             return None, {'success_rate': 0}
 
@@ -212,9 +216,12 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 print(f'#########################################################')
                 print(f'#########################################################')
                 plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes, plot_per=1)
+
+            runtime = time.time() - start_time
             return NEXT_pbs_node.plan, {
                 'PBSNode': NEXT_pbs_node,
-                'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost, 'runtime': time.time() - start_time}
+                'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost,
+                'runtime': runtime, 'iterations_time': runtime}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
@@ -228,7 +235,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
 
             agent = NEXT_pbs_node.agent_dict[conf[i]]
             agent = add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf)
-            success = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot)
+            success = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
 
             if success:
                 NEW_pbs_node.calc_cost()
