@@ -31,8 +31,6 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
             statistics_dict[alg_name][n_agents]['iterations_time'][i_run] = info['iterations_time']
 
 
-
-
 def set_seed(random_seed, seed):
     if random_seed:
         seed = random.choice(range(1000))
