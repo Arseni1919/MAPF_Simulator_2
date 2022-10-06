@@ -42,8 +42,8 @@ def set_seed(random_seed, seed):
 def get_nodes_from_pic():
     # img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
-    # img_png = '19_20_warehouse.png'
-    img_png = 'warehouse-10-20-10-2-1.png'
+    img_png = '19_20_warehouse.png'
+    # img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
@@ -126,10 +126,10 @@ def main():
         'PBS': run_pbs,
         'DS-MAPF': run_ds_mapf,
     }
-    # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [25, 30, 35, 40]
+    # n_agents_list = [25, 30, 35, 40]
     runs_per_n_agents = 10
     max_time_per_alg = 1
     random_seed = True

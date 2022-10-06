@@ -51,6 +51,27 @@ def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_pe
     return curr_list
 
 
+def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_per_n_agents):
+    """
+    {
+        alg_name: {
+            n_agents: {
+                'success_rate': {run: None for run in range(runs_per_n_agents)},
+                'sol_quality': {run: None for run in range(runs_per_n_agents)},
+                'runtime': {run: None for run in range(runs_per_n_agents)},
+            } for n_agents in n_agents_list
+        } for alg_name, _ in algs_to_test_dict.items()
+    }
+    """
+    curr_list = []
+    for n_agents in n_agents_list:
+        for i_run in range(runs_per_n_agents):
+            curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
+            if curr_element is not None:
+                curr_list.append(curr_element)
+    return curr_list
+
+
 class Plotter:
     def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=3):
         if map_dim:
@@ -173,43 +194,40 @@ class Plotter:
             self.ax[1].plot(sq_x, sq_y, '-o', label=f'{alg_name}')
 
             # runtime
-            rt_x = []
-            rt_y = []
-            for n_agents in n_agents_list:
-                rt_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'runtime', runs_per_n_agents, algs_to_test_dict)
-                if len(rt_list) > 0:
-                    rt_x.append(n_agents)
-                    rt_y.append(np.mean(rt_list))
+            rt_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'runtime', runs_per_n_agents)
+            rt_y.sort()
+            rt_x = list(range(len(rt_y)))
             self.ax[2].plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+            if len(rt_x) > 0:
+                self.ax[2].text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
             # iterations_time
-            it_x = []
-            it_y = []
-            for n_agents in n_agents_list:
-                it_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'iterations_time', runs_per_n_agents, algs_to_test_dict)
-                if len(it_list) > 0:
-                    it_x.append(n_agents)
-                    it_y.append(np.mean(it_list))
-            self.ax[2].plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
+            if alg_name == 'DS-MAPF':
+                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents)
+                it_y.sort()
+                it_x = list(range(len(it_y)))
+                self.ax[2].plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
+                if len(it_x) > 0:
+                    self.ax[2].text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
         self.ax[0].set_title('success_rate')
         self.ax[1].set_title('sol_quality')
-        self.ax[2].set_title('runtime')
+        self.ax[2].set_title('runtime (cactus)')
 
         self.ax[0].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         self.ax[0].set_ylim([0, 1.5])
         self.ax[1].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
-        self.ax[2].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        # self.ax[2].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
 
         self.ax[0].set_xticks(n_agents_list)
         # self.ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
         # self.ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
         self.ax[1].set_xticks(n_agents_list)
-        self.ax[2].set_xticks(n_agents_list)
+        # self.ax[2].set_xticks(rt_x)
 
         self.ax[0].set_xlabel('N agents')
         self.ax[1].set_xlabel('N agents')
-        self.ax[2].set_xlabel('N agents')
+        self.ax[2].set_xlabel('Solved Instances')
 
         self.ax[0].legend()
         self.ax[1].legend()
