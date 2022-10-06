@@ -170,7 +170,7 @@ class Plotter:
         for i_ax in self.ax:
             i_ax.cla()
         # self.fig, self.ax = plt.subplots(self.subplot_rows, self.subplot_cols)
-
+        max_instances = 0
         for alg_name, _ in algs_to_test_dict.items():
 
             # success_rate
@@ -197,6 +197,7 @@ class Plotter:
             rt_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'runtime', runs_per_n_agents)
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
+            max_instances = max(max_instances, len(rt_x))
             self.ax[2].plot(rt_x, rt_y, '-o', label=f'{alg_name}')
             if len(rt_x) > 0:
                 self.ax[2].text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
@@ -206,6 +207,7 @@ class Plotter:
                 it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents)
                 it_y.sort()
                 it_x = list(range(len(it_y)))
+                max_instances = max(max_instances, len(it_x))
                 self.ax[2].plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
                 if len(it_x) > 0:
                     self.ax[2].text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
@@ -217,7 +219,7 @@ class Plotter:
         self.ax[0].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         self.ax[0].set_ylim([0, 1.5])
         self.ax[1].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
-        # self.ax[2].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        self.ax[2].set_xlim([0, max_instances + 2])
 
         self.ax[0].set_xticks(n_agents_list)
         # self.ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
@@ -233,7 +235,7 @@ class Plotter:
         self.ax[1].legend()
         self.ax[2].legend()
 
-        self.fig.tight_layout()
+        # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map', fontsize=16)
         plt.pause(0.01)
         # plt.show()

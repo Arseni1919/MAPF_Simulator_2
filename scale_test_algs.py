@@ -64,7 +64,8 @@ def big_test(
         random_seed: bool,
         seed: int,
         plotter,
-        a_star_iter_limit
+        a_star_iter_limit,
+        a_star_calls_limit
 ):
     print(f'\nTest started at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
 
@@ -106,6 +107,7 @@ def big_test(
                     final_plot=False,
                     max_time=max_time_per_alg,
                     a_star_iter_limit=a_star_iter_limit,
+                    a_star_calls_limit=a_star_calls_limit,
                     # initial_ordering=[]  # for PBS
                 )
 
@@ -137,6 +139,7 @@ def main():
     seed = 197
     plotter = Plotter()
     a_star_iter_limit = 3e3
+    a_star_calls_limit = 200
     big_test(
         algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
@@ -145,7 +148,8 @@ def main():
         random_seed=random_seed,
         seed=seed,
         plotter=plotter,
-        a_star_iter_limit=a_star_iter_limit
+        a_star_iter_limit=a_star_iter_limit,
+        a_star_calls_limit=a_star_calls_limit,
     )
 
 

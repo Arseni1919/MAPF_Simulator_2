@@ -90,6 +90,10 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         iter_limit = kwargs['a_star_iter_limit']
     else:
         iter_limit = 1e100
+    if 'a_star_calls_limit' in kwargs:
+        a_star_calls_limit = kwargs['a_star_calls_limit']
+    else:
+        a_star_calls_limit = None
     # Creating agents
     agents = []
     n_agent = 0

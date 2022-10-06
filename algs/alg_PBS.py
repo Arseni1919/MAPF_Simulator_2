@@ -184,6 +184,10 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
         iter_limit = kwargs['a_star_iter_limit']
     else:
         iter_limit = 1e100
+    if 'a_star_calls_limit' in kwargs:
+        a_star_calls_limit = kwargs['a_star_calls_limit']
+    else:
+        a_star_calls_limit = None
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
