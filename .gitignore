@@ -13,3 +13,5 @@ example.ckpt
 logs_for_graphs
 heuristics
 heuristic_tables
+stats
+algs/stasts

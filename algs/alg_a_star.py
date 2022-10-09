@@ -1,6 +1,8 @@
 import copy
 import math
 import random
+import cProfile
+import pstats
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -230,9 +232,11 @@ def try_a_map_from_pic():
     # ------------------------- #
     # ------------------------- #
     # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
+    profiler.enable()
     result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
                     v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
-                    plotter=plotter, middle_plot=True)
+                    plotter=plotter, middle_plot=False)
+    profiler.disable()
     print('The result is:', *[node.xy_name for node in result], sep='->')
     print('The result is:', *[node.ID for node in result], sep='->')
     # ------------------------- #
@@ -249,4 +253,10 @@ if __name__ == '__main__':
     np.random.seed(seed)
     print(f'SEED: {seed}')
     # main()
+    profiler = cProfile.Profile()
+    # profiler.enable()
     try_a_map_from_pic()
+    # profiler.disable()
+    # stats.print_stats()
+    stats = pstats.Stats(profiler).sort_stats('cumtime')
+    stats.dump_stats('../stats/results.pstat')
