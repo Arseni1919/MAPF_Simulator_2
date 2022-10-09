@@ -1,3 +1,5 @@
+import matplotlib.pyplot as plt
+
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
 from funcs_graph.nodes_from_pic import build_graph_from_png
 from funcs_graph.map_dimensions import map_dimensions_dict
@@ -6,6 +8,21 @@ from funcs_plotter.plotter import Plotter
 from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
 from globals import *
+
+
+def save_and_show_results(statistics_dict, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None, n_agents_list=None, img_png=None):
+    # Serializing json
+    json_object = json.dumps(statistics_dict, indent=4)
+    # Writing to sample.json
+    file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%d-%m-%Y-%H-%M")}.json'
+    with open(file_dir, "w") as outfile:
+        outfile.write(json_object)
+    # Results saved.
+    if plotter:
+        with open(f'{file_dir}', 'r') as openfile:
+            # Reading from json file
+            json_object = json.load(openfile)
+        plotter.plot_big_test(json_object, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, is_json=True)
 
 
 def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
@@ -120,6 +137,9 @@ def big_test(
                 plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
+
+    # save_and_show_results(statistics_dict, plotter, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
+    print('Results saved.')
     plt.show()
 
 
@@ -128,11 +148,12 @@ def main():
         'PBS': run_pbs,
         'DS-MAPF': run_ds_mapf,
     }
-    n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    n_agents_list = [2, 3]
+    # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [25, 30, 35, 40]
-    runs_per_n_agents = 10
+    runs_per_n_agents = 3
     max_time_per_alg = 1
     random_seed = True
     # random_seed = False

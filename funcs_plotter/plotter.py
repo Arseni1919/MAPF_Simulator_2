@@ -3,7 +3,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 
-def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents):
+def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, is_json=False):
     """
     {
         alg_name: {
@@ -17,13 +17,16 @@ def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_ag
     """
     curr_list = []
     for i_run in range(runs_per_n_agents):
+        if is_json:
+            n_agents = str(n_agents)
+            i_run = str(i_run)
         curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
         if curr_element is not None:
             curr_list.append(curr_element)
     return curr_list
 
 
-def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_dict):
+def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_dict, is_json=False):
     """
     {
         alg_name: {
@@ -38,6 +41,9 @@ def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_pe
     algs_list = list(algs_to_test_dict.keys())
     curr_list = []
     for i_run in range(runs_per_n_agents):
+        if is_json:
+            n_agents = str(n_agents)
+            i_run = str(i_run)
         curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
         if curr_element is not None:
             to_insert = True
@@ -51,7 +57,7 @@ def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_pe
     return curr_list
 
 
-def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_per_n_agents):
+def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_per_n_agents, is_json=False):
     """
     {
         alg_name: {
@@ -66,6 +72,9 @@ def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_p
     curr_list = []
     for n_agents in n_agents_list:
         for i_run in range(runs_per_n_agents):
+            if is_json:
+                n_agents = str(n_agents)
+                i_run = str(i_run)
             curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
             if curr_element is not None:
                 curr_list.append(curr_element)
@@ -166,7 +175,7 @@ class Plotter:
                 # plt.pause(1)
                 plt.pause(0.01)
 
-    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png=''):
+    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png='', is_json=False):
         for i_ax in self.ax:
             i_ax.cla()
         # self.fig, self.ax = plt.subplots(self.subplot_rows, self.subplot_cols)
@@ -177,7 +186,7 @@ class Plotter:
             sr_x = []
             sr_y = []
             for n_agents in n_agents_list:
-                sr_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'success_rate', runs_per_n_agents)
+                sr_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'success_rate', runs_per_n_agents, is_json)
                 if len(sr_list) > 0:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
@@ -187,14 +196,14 @@ class Plotter:
             sq_x = []
             sq_y = []
             for n_agents in n_agents_list:
-                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents, algs_to_test_dict)
+                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents, algs_to_test_dict, is_json)
                 if len(sq_list) > 0:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))
             self.ax[1].plot(sq_x, sq_y, '-o', label=f'{alg_name}')
 
             # runtime
-            rt_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'runtime', runs_per_n_agents)
+            rt_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'runtime', runs_per_n_agents, is_json)
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
@@ -204,7 +213,7 @@ class Plotter:
 
             # iterations_time
             if alg_name == 'DS-MAPF':
-                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents)
+                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents, is_json)
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
