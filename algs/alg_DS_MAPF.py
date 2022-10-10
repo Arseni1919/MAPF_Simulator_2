@@ -1,3 +1,4 @@
+import logging
 import random
 import time
 import matplotlib.pyplot as plt
@@ -122,9 +123,9 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
 
         plan = {agent.name: agent.path for agent in agents}
         plan_lngths = [len(path) for path in plan.values()]
-
+        # logging.info(f'\rinside ds_mapf')
         if 0 in plan_lngths:
-            print(f'\r---\n[DS-MAPF][{len(agents)} agents][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n---\n')
+            print(f'\r---\n[DS-MAPF][{len(agents)} agents][time: {time.time() - start_time:0.2f}s][iter {iteration}] \n cost: None\n---\n')
         else:
             cost = sum([len(path) for path in plan.values()])
             there_is_col, c_v, c_e = check_for_collisions(plan)

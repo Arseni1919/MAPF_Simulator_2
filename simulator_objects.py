@@ -22,4 +22,11 @@ class Node:
         return self.t + self.h
         # return self.g + self.h
 
+    def reset(self):
+        self.t = 0
+        self.h = 0
+        self.g = self.t
+        self.ID = f'{self.x}_{self.y}_{self.t}'
+        self.parent = None
+
 

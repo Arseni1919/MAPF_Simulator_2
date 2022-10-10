@@ -22,17 +22,48 @@ def get_max_final(perm_constr_dict):
 
 
 def get_node_from_open(open_list):
-    v_list = open_list
-    t_val = min([node.f() for node in v_list])
-    out_nodes = [node for node in v_list if node.f() == t_val]
-    v_list = out_nodes
-    some_v = min([node.h for node in v_list])
-    out_nodes = [node for node in v_list if node.h == some_v]
-    next_node = random.choice(out_nodes)
+    # v_list = open_list
+    f_dict = {}
+    f_vals_list = []
+    for node in open_list:
+        curr_f = node.f()
+        f_vals_list.append(curr_f)
+        if curr_f not in f_dict:
+            f_dict[curr_f] = []
+        f_dict[curr_f].append(node)
+
+    smallest_f_nodes = f_dict[min(f_vals_list)]
+
+    h_dict = {}
+    h_vals_list = []
+    for node in smallest_f_nodes:
+        curr_h = node.h
+        h_vals_list.append(curr_h)
+        if curr_h not in h_dict:
+            h_dict[curr_h] = []
+        h_dict[curr_h].append(node)
+
+    smallest_h_from_smallest_f_nodes = h_dict[min(h_vals_list)]
+    next_node = random.choice(smallest_h_from_smallest_f_nodes)
     return next_node
 
+    # smallest_f = min([node.f() for node in open_list])
+    # smallest_f_nodes = []
+    # h_values = []
+    # for node in open_list:
+    #     if node.f() == smallest_f:
+    #         smallest_f_nodes.append(node)
+    #         h_values.append(node.h)
+    # smallest_h = min(h_values)
+    # # smallest_f_nodes = [node for node in open_list if node.f() == smallest_f]
+    # # v_list = smallest_f_nodes
+    # # smallest_h = min([node.h for node in smallest_f_nodes])
+    # smallest_h_from_smallest_f_nodes = [node for node in smallest_f_nodes if node.h == smallest_h]
+    # next_node = random.choice(smallest_h_from_smallest_f_nodes)
+    # return next_node
 
-def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time):
+
+def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time):
     new_t = node_current.t + 1
 
     if v_constr_dict:
@@ -58,34 +89,45 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_co
 
     new_ID = f'{successor_xy_name}_{new_t}'
 
-    for node in nodes:
-        if node.xy_name == successor_xy_name:
-            for open_node in open_list:
-                if open_node.ID == new_ID:
-                    return open_node
-            for closed_node in close_list:
-                if closed_node.ID == new_ID:
-                    return closed_node
-            return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
+    for open_node in open_list:
+        if open_node.ID == new_ID:
+            return open_node
+    for closed_node in close_list:
+        if closed_node.ID == new_ID:
+            return closed_node
+
+    if nodes_dict:
+        node = nodes_dict[successor_xy_name]
+        return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
+    else:
+        for node in nodes:
+            if node.xy_name == successor_xy_name:
+                return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
     return None
 
 
-def deepcopy_nodes(start, goal, nodes):
-    copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}
-    copy_start = copy_nodes_dict[start.xy_name]
-    copy_goal = copy_nodes_dict[goal.xy_name]
-    copy_nodes = list(copy_nodes_dict.values())
-    return copy_start, copy_goal, copy_nodes
+# def deepcopy_nodes(start, goal, nodes):
+#     copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}
+#     copy_start = copy_nodes_dict[start.xy_name]
+#     copy_goal = copy_nodes_dict[goal.xy_name]
+#     copy_nodes = list(copy_nodes_dict.values())
+#     return copy_start, copy_goal, copy_nodes
+
+
+def reset_nodes(start, goal, nodes):
+    _ = [node.reset() for node in nodes]
+    return start, goal, nodes
 
 
 def a_star(start, goal, nodes, h_func,
            v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None,
            plotter=None, middle_plot=False,
-           iter_limit=1e100):
+           iter_limit=1e100, nodes_dict=None):
     """
     new_t in v_constr_dict[successor_xy_name]
     """
-    start, goal, nodes = deepcopy_nodes(start, goal, nodes)
+    # start, goal, nodes = deepcopy_nodes(start, goal, nodes)  # heavy!
+    start, goal, nodes = reset_nodes(start, goal, nodes)
     print('\rStarted A*...', end='')
     open_list = []
     close_list = []
@@ -99,7 +141,7 @@ def a_star(start, goal, nodes, h_func,
         if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
             return None
-        node_current = get_node_from_open(open_list)
+        node_current = get_node_from_open(open_list)  # heavy!
         if node_current.xy_name == goal.xy_name:
             # break
             # if there is a future constraint of a goal
@@ -116,7 +158,7 @@ def a_star(start, goal, nodes, h_func,
             else:
                 break
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, nodes, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)
+            node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)  # heavy!
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
@@ -216,6 +258,7 @@ def try_a_map_from_pic():
     # ------------------------- #
     # ------------------------- #
     plotter = Plotter(map_dim=map_dim)
+    # plotter = None
     # ------------------------- #
     # ------------------------- #
     h_dict = build_heuristic_for_multiple_targets([node_goal], nodes, map_dim, plotter=plotter, middle_plot=False)
@@ -235,7 +278,7 @@ def try_a_map_from_pic():
     profiler.enable()
     result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
                     v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
-                    plotter=plotter, middle_plot=False)
+                    plotter=plotter, middle_plot=True, nodes_dict=nodes_dict)
     profiler.disable()
     print('The result is:', *[node.xy_name for node in result], sep='->')
     print('The result is:', *[node.ID for node in result], sep='->')
@@ -259,4 +302,4 @@ if __name__ == '__main__':
     # profiler.disable()
     # stats.print_stats()
     stats = pstats.Stats(profiler).sort_stats('cumtime')
-    stats.dump_stats('../stats/results.pstat')
+    stats.dump_stats('../stats/results_a_star.pstat')
