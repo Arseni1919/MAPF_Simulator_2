@@ -82,12 +82,12 @@ def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_p
 
 
 class Plotter:
-    def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=3):
+    def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=4):
         if map_dim:
             self.side_x, self.side_y = map_dim
         self.subplot_rows = subplot_rows
         self.subplot_cols = subplot_cols
-        self.fig, self.ax = plt.subplots(subplot_rows, subplot_cols)
+        self.fig, self.ax = plt.subplots(subplot_rows, subplot_cols, figsize=(14, 7))
 
     def plot_lists(self, open_list, closed_list, start, goal=None, path=None, nodes=None):
 
@@ -175,12 +175,12 @@ class Plotter:
                 # plt.pause(1)
                 plt.pause(0.01)
 
-    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png='', is_json=False):
+    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='', is_json=False):
         for i_ax in self.ax:
             i_ax.cla()
         # self.fig, self.ax = plt.subplots(self.subplot_rows, self.subplot_cols)
         max_instances = 0
-        for alg_name, _ in algs_to_test_dict.items():
+        for alg_name in algs_to_test_list:
 
             # success_rate
             sr_x = []
@@ -212,7 +212,7 @@ class Plotter:
                 self.ax[2].text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
             # iterations_time
-            if alg_name == 'DS-MAPF':
+            if 'DS-MAPF' in alg_name:
                 it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents, is_json)
                 it_y.sort()
                 it_x = list(range(len(it_y)))
@@ -221,14 +221,36 @@ class Plotter:
                 if len(it_x) > 0:
                     self.ax[2].text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
+            # A* calls
+            ac_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_counter', runs_per_n_agents,
+                                    is_json)
+            ac_y.sort()
+            ac_x = list(range(len(ac_y)))
+            max_instances = max(max_instances, len(ac_x))
+            self.ax[3].plot(ac_x, ac_y, '-o', label=f'{alg_name}')
+            if len(ac_x) > 0:
+                self.ax[3].text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
+                                bbox=dict(facecolor='yellow', alpha=0.75))
+
+            if 'DS-MAPF' in alg_name:
+                acd_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_dist_counter', runs_per_n_agents, is_json)
+                acd_y.sort()
+                acd_x = list(range(len(acd_y)))
+                max_instances = max(max_instances, len(acd_x))
+                self.ax[3].plot(acd_x, acd_y, '-o', label=f'{alg_name} (distributed)')
+                if len(acd_x) > 0:
+                    self.ax[3].text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
         self.ax[0].set_title('success_rate')
         self.ax[1].set_title('sol_quality')
         self.ax[2].set_title('runtime (cactus)')
+        self.ax[3].set_title('A* Calls (cactus)')
 
         self.ax[0].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         self.ax[0].set_ylim([0, 1.5])
         self.ax[1].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         self.ax[2].set_xlim([0, max_instances + 2])
+        self.ax[3].set_xlim([0, max_instances + 2])
 
         self.ax[0].set_xticks(n_agents_list)
         # self.ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
@@ -239,14 +261,16 @@ class Plotter:
         self.ax[0].set_xlabel('N agents')
         self.ax[1].set_xlabel('N agents')
         self.ax[2].set_xlabel('Solved Instances')
+        self.ax[3].set_xlabel('Solved Instances')
 
         self.ax[0].legend()
         self.ax[1].legend()
         self.ax[2].legend()
+        self.ax[3].legend()
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map', fontsize=16)
-        plt.pause(0.01)
+        plt.pause(0.001)
         # plt.show()
 
 

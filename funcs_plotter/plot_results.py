@@ -26,7 +26,8 @@ def show_results(file_dir, plotter, algs_to_test_dict):
     runs_per_n_agents = json_object['runs_per_n_agents']
     n_agents_list = json_object['n_agents_list']
     img_png = json_object['img_png']
-    plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, is_json=True)
+    algs_to_test_names = json_object['algs_to_test_names']
+    plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_names, n_agents_list, img_png, is_json=True)
     plt.show()
 
 

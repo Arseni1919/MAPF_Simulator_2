@@ -46,7 +46,7 @@ class DSAgent:
         # if len(self.conf_paths) > 0:
         #     print()
 
-    def plan(self):
+    def plan(self, alpha=0.8):
         start_time = time.time()
         sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
         # c_v_list = c_v_check_for_agent(self.name, self.path, self.conf_paths)
@@ -71,7 +71,7 @@ class DSAgent:
             if len(c_v_list_after_1) > 0 or len(c_e_list_after_1) > 0:
                 raise RuntimeError('a_star failed')
 
-            if random.random() < 0.8:
+            if random.random() < alpha:
                 self.path = new_path
 
             return True, {'elapsed': elapsed}
@@ -84,7 +84,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     if 'max_time' in kwargs:
         max_time = kwargs['max_time']
     else:
-        max_time = 10
+        max_time = 60
     if 'final_plot' in kwargs:
         final_plot = kwargs['final_plot']
     else:
@@ -96,7 +96,13 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     if 'a_star_calls_limit' in kwargs:
         a_star_calls_limit = kwargs['a_star_calls_limit']
     else:
-        a_star_calls_limit = None
+        a_star_calls_limit = 1e100
+    a_star_calls_counter = 0
+    a_star_calls_dist_counter = 0
+    if 'alpha' in kwargs:
+        alpha = kwargs['alpha']
+    else:
+        alpha = 0.8
     # Creating agents
     agents = []
     n_agent = 0
@@ -113,10 +119,17 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         if crossed_time_limit(start_time, max_time):
             break
 
+        # if a_star_calls_counter >= a_star_calls_limit:
+        #     break
+        if a_star_calls_dist_counter >= a_star_calls_limit:
+            break
+
         for agent in agents:
-            succeeded, info = agent.plan()
+            succeeded, info = agent.plan(alpha=alpha)
             max_time_list.append(info['elapsed'])
+            a_star_calls_counter += 1
         iterations_time += max(max_time_list)
+        a_star_calls_dist_counter += 1
 
         for agent in agents:
             agent.exchange(agents=agents)
@@ -124,12 +137,13 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         plan = {agent.name: agent.path for agent in agents}
         plan_lngths = [len(path) for path in plan.values()]
         # logging.info(f'\rinside ds_mapf')
-        if 0 in plan_lngths:
-            print(f'\r---\n[DS-MAPF][{len(agents)} agents][time: {time.time() - start_time:0.2f}s][iter {iteration}] \n cost: None\n---\n')
-        else:
-            cost = sum([len(path) for path in plan.values()])
+        cost = None if 0 in plan_lngths else sum([len(path) for path in plan.values()])
+        print(f'\r---\n'
+              f'[DS-MAPF ({alpha})][{len(agents)} agents][A* calls: {a_star_calls_counter}][A* dist calls: {a_star_calls_dist_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
+              f'cost: {cost}\n'
+              f'---\n')
+        if cost:
             there_is_col, c_v, c_e = check_for_collisions(plan)
-            print(f'\r---\n[DS-MAPF][{len(agents)} agents][time: {time.time() - start_time:0.2f}s][iter {iteration}] \ncost: {cost}\n---\n')
             if not there_is_col:
                 if final_plot:
                     print(f'#########################################################')
@@ -140,7 +154,9 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                               'success_rate': 1,
                               'sol_quality': cost,
                               'runtime': (time.time() - start_time),
-                              'iterations_time': iterations_time}
+                              'iterations_time': iterations_time,
+                              'a_star_calls_counter': a_star_calls_counter,
+                              'a_star_calls_dist_counter': a_star_calls_dist_counter}
 
     # partial order
     pass

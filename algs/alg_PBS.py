@@ -100,8 +100,8 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
     sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
 
-    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
-    c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
+    # c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
+    # c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
 
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
@@ -122,15 +122,17 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
 # @preprint_func_name
 def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
     print('\rFUNC: update_plan', end='')
+    a_star_calls_inner_counter = 0
     update_list_names = topological_sorting(nodes=[agent.name], sorting_rules=pbs_node.ordering_rules)
     update_list = [pbs_node.agent_dict[agent_name] for agent_name in update_list_names]
     for update_agent in update_list:
         if collide_check(pbs_node, update_agent) or update_agent.name == agent.name:
             new_path = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+            a_star_calls_inner_counter += 1
             if new_path is None:
-                return False
+                return False, a_star_calls_inner_counter
             pbs_node.plan[update_agent.name] = new_path
-    return True
+    return True, a_star_calls_inner_counter
 
 
 def choose_conf(c_v, c_e):
@@ -187,7 +189,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     if 'a_star_calls_limit' in kwargs:
         a_star_calls_limit = kwargs['a_star_calls_limit']
     else:
-        a_star_calls_limit = None
+        a_star_calls_limit = 1e100
+    a_star_calls_counter = 0
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -195,19 +198,20 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     root.update_ordering_rules()
 
     for agent in agents:
-        success = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+        success, a_star_calls_inner_counter = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+        a_star_calls_counter += a_star_calls_inner_counter
         if not success:
             return None, {'success_rate': 0}
 
     root.calc_cost()
     stack = [root]
     iteration = 0
-    while len(stack) > 0 and not crossed_time_limit(start_time, max_time):
+    while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and a_star_calls_counter < a_star_calls_limit:
         iteration += 1
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'\r---\n'
-              f'[iter {iteration}][{len(agents)} agents][time: {time.time() - start_time:0.2f}s] '
+              f'[PBS][{len(agents)} agents][A* calls: {a_star_calls_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
               f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
               f'partial order: {NEXT_pbs_node.partial_order}\n'
               f'cost: {NEXT_pbs_node.cost}\n'
@@ -225,7 +229,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
             return NEXT_pbs_node.plan, {
                 'PBSNode': NEXT_pbs_node,
                 'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost,
-                'runtime': runtime, 'iterations_time': runtime}
+                'runtime': runtime, 'iterations_time': runtime,
+                'a_star_calls_counter': a_star_calls_counter, 'a_star_calls_dist_counter': a_star_calls_counter}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
@@ -239,7 +244,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
 
             agent = NEXT_pbs_node.agent_dict[conf[i]]
             agent = add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf)
-            success = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+            success, a_star_calls_inner_counter = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+            a_star_calls_counter += a_star_calls_inner_counter
 
             if success:
                 NEW_pbs_node.calc_cost()

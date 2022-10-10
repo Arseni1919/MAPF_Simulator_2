@@ -1,5 +1,6 @@
 import logging
-
+import cProfile
+import pstats
 import matplotlib.pyplot as plt
 
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
@@ -33,7 +34,7 @@ def save_and_show_results(statistics_dict, plotter=None, runs_per_n_agents=None,
         with open(f'{file_dir}', 'r') as openfile:
             # Reading from json file
             json_object = json.load(openfile)
-        plotter.plot_big_test(json_object['statistics_dict'], runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, is_json=True)
+        plotter.plot_big_test(json_object['statistics_dict'], runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png, is_json=True)
 
 
 def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
@@ -44,6 +45,8 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
                 'sol_quality': {run: None for run in range(runs_per_n_agents)},
                 'runtime': {run: None for run in range(runs_per_n_agents)},
                 'iterations_time': {run: None for run in range(runs_per_n_agents)},
+                'a_star_calls_counter': {run: None for run in range(runs_per_n_agents)},
+                'a_star_calls_dist_counter': {run: None for run in range(runs_per_n_agents)},
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -58,6 +61,12 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
         if 'iterations_time' in info:
             statistics_dict[alg_name][n_agents]['iterations_time'][i_run] = info['iterations_time']
 
+        if 'a_star_calls_counter' in info:
+            statistics_dict[alg_name][n_agents]['a_star_calls_counter'][i_run] = info['a_star_calls_counter']
+
+        if 'a_star_calls_dist_counter' in info:
+            statistics_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = info['a_star_calls_dist_counter']
+
 
 def set_seed(random_seed, seed):
     if random_seed:
@@ -68,10 +77,10 @@ def set_seed(random_seed, seed):
 
 
 def get_nodes_from_pic():
-    # img_png = 'lak108d.png'
+    img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
-    img_png = 'warehouse-10-20-10-2-1.png'
+    # img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
@@ -94,11 +103,11 @@ def big_test(
         plotter,
         a_star_iter_limit,
         a_star_calls_limit,
-        to_save_results
+        to_save_results,
+        profiler=None,
 ):
     print(f'\nTest started at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
-    # logging.info(f'\nTest started at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
-    print(logging.root.level)
+
     # seed
     set_seed(random_seed, seed)
 
@@ -125,7 +134,7 @@ def big_test(
             # h_func = dist_heuristic
 
             # for at max 5 minutes
-            for alg_name, alg in algs_to_test_dict.items():
+            for alg_name, (alg, params) in algs_to_test_dict.items():
                 result, info = alg(
                     start_nodes=start_nodes,
                     goal_nodes=goal_nodes,
@@ -139,6 +148,7 @@ def big_test(
                     a_star_iter_limit=a_star_iter_limit,
                     a_star_calls_limit=a_star_calls_limit,
                     # initial_ordering=[]  # for PBS
+                    **params
                 )
 
                 # plot + print
@@ -147,21 +157,24 @@ def big_test(
                 print(f'#########################################################')
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}, result: {result}\n')
                 update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
-                plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
+                plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
 
     if to_save_results:
         save_and_show_results(statistics_dict, plotter, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
         print('Results saved.')
-    plt.show()
 
 
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
-        'PBS': run_pbs,
-        'DS-MAPF': run_ds_mapf,
+        'PBS': (run_pbs, {}),
+        'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
+        'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
+        'DS-MAPF-0.6': (run_ds_mapf, {'alpha': 0.6}),
+        'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
+        'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
     }
     # n_agents_list = [2, 3]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
@@ -169,7 +182,7 @@ def main():
     n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [25, 30, 35, 40]
     runs_per_n_agents = 10
-    max_time_per_alg = 1
+    max_time_per_alg = 10
     # random_seed = True
     random_seed = False
     seed = 197
@@ -178,6 +191,11 @@ def main():
     a_star_calls_limit = 200
     to_save_results = True
     # to_save_results = False
+
+    # profiler = None
+    profiler = cProfile.Profile()
+    if profiler:
+        profiler.enable()
     big_test(
         algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
@@ -189,7 +207,14 @@ def main():
         a_star_iter_limit=a_star_iter_limit,
         a_star_calls_limit=a_star_calls_limit,
         to_save_results=to_save_results,
+        profiler=profiler,
     )
+    if profiler:
+        profiler.disable()
+        stats = pstats.Stats(profiler).sort_stats('cumtime')
+        stats.dump_stats('stats/results_scale_experiments.pstat')
+        print('Profile saved to stats/results_scale_experiments.pstat.')
+    plt.show()
 
 
 if __name__ == '__main__':
