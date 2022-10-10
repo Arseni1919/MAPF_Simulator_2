@@ -6,6 +6,7 @@ from funcs_plotter.plotter import Plotter
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.nodes_from_pic import build_graph_from_png
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
+from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets
 
 
 def test_mapf_alg_from_pic(algorithm, **kwargs):
@@ -51,7 +52,8 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     plotter = Plotter(map_dim=map_dim)
     # ------------------------- #
     # ------------------------- #
-    h_dict = build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=plotter, middle_plot=False)
+    # h_dict = build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=plotter, middle_plot=False)
+    h_dict = parallel_build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=plotter, middle_plot=False)
     h_func = h_func_creator(h_dict)
 
     # h_func = dist_heuristic

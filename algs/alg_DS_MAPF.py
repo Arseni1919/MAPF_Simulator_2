@@ -1,6 +1,8 @@
 import random
 import time
 import matplotlib.pyplot as plt
+import cProfile
+import pstats
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
@@ -146,23 +148,34 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
 
 
 def main():
-    for i in range(20):
+    profiler = cProfile.Profile()
+    if to_use_profiler:
+        profiler.enable()
+    for i in range(5):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
-                                              random_seed=random_seed, seed=seed, final_plot=True)
+                                              random_seed=random_seed, seed=seed, final_plot=True,
+                                              a_star_iter_limit=1e4, max_time=1)
 
         if not random_seed:
             break
 
         # plt.show()
         plt.close()
+    if to_use_profiler:
+        profiler.disable()
+        stats = pstats.Stats(profiler).sort_stats('cumtime')
+        stats.dump_stats('../stats/results_ds_mapf.pstat')
 
 
 if __name__ == '__main__':
     random_seed = True
     # random_seed = False
-    seed = 183
-    n_agents = 5
+    seed = 954
+    n_agents = 10
+
+    to_use_profiler = True
+    # to_use_profiler = False
 
     # good example: img_png = '19_20_warehouse.png'
     # random_seed = True

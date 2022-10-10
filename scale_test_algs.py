@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
+from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets
 from funcs_graph.nodes_from_pic import build_graph_from_png
 from funcs_graph.map_dimensions import map_dimensions_dict
 # from algs.test_mapf_alg import test_mapf_alg_from_pic
@@ -59,8 +60,8 @@ def set_seed(random_seed, seed):
 def get_nodes_from_pic():
     # img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
-    img_png = '19_20_warehouse.png'
-    # img_png = 'warehouse-10-20-10-2-1.png'
+    # img_png = '19_20_warehouse.png'
+    img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
     # img_png = 'lak505d.png'
@@ -107,7 +108,8 @@ def big_test(
             start_nodes = sample_nodes[:n_agents]
             goal_nodes = sample_nodes[n_agents:]
 
-            h_dict = build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=inner_plotter, middle_plot=False)
+            # h_dict = build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=inner_plotter, middle_plot=False)
+            h_dict = parallel_build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=inner_plotter, middle_plot=False)
             h_func = h_func_creator(h_dict)
             # h_func = dist_heuristic
 
@@ -148,15 +150,15 @@ def main():
         'PBS': run_pbs,
         'DS-MAPF': run_ds_mapf,
     }
-    n_agents_list = [2, 3]
+    # n_agents_list = [2, 3]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    # n_agents_list = [25, 30, 35, 40]
+    n_agents_list = [25, 30, 35, 40]
     runs_per_n_agents = 3
     max_time_per_alg = 1
-    random_seed = True
-    # random_seed = False
+    # random_seed = True
+    random_seed = False
     seed = 197
     plotter = Plotter()
     a_star_iter_limit = 3e3

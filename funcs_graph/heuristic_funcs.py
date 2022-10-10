@@ -3,7 +3,10 @@ import random
 import numpy as np
 import matplotlib.pyplot as plt
 
+import concurrent.futures
+import threading
 import asyncio
+import logging
 
 from simulator_objects import Node
 from funcs_graph.map_dimensions import map_dimensions_dict
@@ -43,6 +46,30 @@ def get_node(successor_xy_name, node_current, nodes, open_list, close_list):
     return None
 
 
+# class ParallelHDict:
+#     def __init__(self):
+#         self.h_dict = {}
+#         self._lock = threading.Lock()
+
+
+def parallel_update_h_table(node, nodes, map_dim, to_save, plotter, middle_plot, h_dict, node_index):
+    print(f'[HEURISTIC]: Thread {node_index} started.')
+    h_table = build_heuristic_for_one_target(node, nodes, map_dim, to_save, plotter, middle_plot)
+    h_dict[node.xy_name] = h_table
+    print(f'[HEURISTIC]: Thread {node_index} finished.')
+
+
+def parallel_build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
+    print('Started to build heuristic...')
+    h_dict = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(target_nodes)) as executor:
+        for node_index, node in enumerate(target_nodes):
+            executor.submit(parallel_update_h_table, node, nodes, map_dim, to_save, plotter, middle_plot, h_dict, node_index)
+
+    print(f'\nFinished to build heuristic for all nodes.')
+    return h_dict
+
+
 def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
     print('Started to build heuristic...')
     h_dict = {}
@@ -53,7 +80,6 @@ def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=T
 
         print(f'\nFinished to build heuristic for node {iteration}.')
         iteration += 1
-
     return h_dict
 
 

@@ -1,9 +1,9 @@
-import logging
-import threading
-import time
 import concurrent.futures
+import threading
+import logging
 import random
 import queue
+import time
 
 
 class Pipeline(queue.Queue):
