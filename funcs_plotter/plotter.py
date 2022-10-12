@@ -26,7 +26,7 @@ def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_ag
     return curr_list
 
 
-def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_dict, is_json=False):
+def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list, is_json=False):
     """
     {
         alg_name: {
@@ -38,7 +38,6 @@ def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_pe
         } for alg_name, _ in algs_to_test_dict.items()
     }
     """
-    algs_list = list(algs_to_test_dict.keys())
     curr_list = []
     for i_run in range(runs_per_n_agents):
         if is_json:
@@ -47,7 +46,7 @@ def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_pe
         curr_element = statistics_dict[alg_name][n_agents][list_type][i_run]
         if curr_element is not None:
             to_insert = True
-            for another_alg in algs_list:
+            for another_alg in algs_to_test_list:
                 another_element = statistics_dict[another_alg][n_agents][list_type][i_run]
                 if another_element is None:
                     to_insert = False
@@ -196,7 +195,7 @@ class Plotter:
             sq_x = []
             sq_y = []
             for n_agents in n_agents_list:
-                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents, algs_to_test_dict, is_json)
+                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents, algs_to_test_list, is_json)
                 if len(sq_list) > 0:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))

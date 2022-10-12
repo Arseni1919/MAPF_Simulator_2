@@ -179,10 +179,11 @@ def main():
     # n_agents_list = [2, 3]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-    n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    # n_agents_list = [25, 30, 35, 40]
+    # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    n_agents_list = [25, 30, 35, 40]
     runs_per_n_agents = 10
     max_time_per_alg = 10
+    # max_time_per_alg = 50  # According to PBS paper!
     # random_seed = True
     random_seed = False
     seed = 197
