@@ -268,7 +268,7 @@ class Plotter:
         self.ax[3].legend()
 
         # self.fig.tight_layout()
-        self.fig.suptitle(f'{img_png} Map', fontsize=16)
+        self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)
         plt.pause(0.001)
         # plt.show()
 

@@ -95,7 +95,7 @@ def build_graph_from_np(img_np, show_map=False):
 
 
 def main():
-    nodes, nodes_dict = build_graph_from_png(img_png='lak109d.png', path='../maps', show_map=True)
+    nodes, nodes_dict = build_graph_from_png(img_png='22_22_blank_grid_rate_0.1.png', path='../maps', show_map=True)
     print()
 
 

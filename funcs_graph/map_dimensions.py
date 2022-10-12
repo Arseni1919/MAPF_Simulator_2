@@ -4,6 +4,8 @@ map_dimensions_dict = {
     '9_10_no_obstacles.png': (9, 10),
     '10_10_random.png': (10, 10),
     '19_20_warehouse.png': (19, 20),
+    '22_22_blank_grid.png': (22, 22),
+    '22_22_blank_grid_rate_0.1.png': (22, 22),
     'lak108d.png': (26, 27),
     'lak110d.png': (21, 30),
     'lak109d.png': (42, 33),

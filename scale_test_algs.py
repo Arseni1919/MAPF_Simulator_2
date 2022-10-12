@@ -77,9 +77,11 @@ def set_seed(random_seed, seed):
 
 
 def get_nodes_from_pic():
-    img_png = 'lak108d.png'
+    # img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
+    img_png = '22_22_blank_grid.png'
+    # img_png = '22_22_blank_grid_rate_0.1.png'
     # img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
@@ -170,26 +172,30 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
         'PBS': (run_pbs, {}),
-        'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
-        'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
+        # 'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
+        # 'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
+        'DS-MAPF-0.7': (run_ds_mapf, {'alpha': 0.7}),
         'DS-MAPF-0.6': (run_ds_mapf, {'alpha': 0.6}),
-        'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
-        'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
+        'DS-MAPF-0.5': (run_ds_mapf, {'alpha': 0.5}),
+        # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
+        # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
     }
     # n_agents_list = [2, 3]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [25, 30, 35, 40]
-    runs_per_n_agents = 10
-    max_time_per_alg = 10
+    # n_agents_list = [25, 30, 35, 40]
+    n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
+    runs_per_n_agents = 50
+    max_time_per_alg = 1
     # max_time_per_alg = 50  # According to PBS paper!
     # random_seed = True
     random_seed = False
     seed = 197
     plotter = Plotter()
     a_star_iter_limit = 3e3
-    a_star_calls_limit = 200
+    # a_star_calls_limit = 200
+    a_star_calls_limit = 1e100
     to_save_results = True
     # to_save_results = False
 
