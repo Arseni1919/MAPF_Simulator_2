@@ -80,8 +80,8 @@ def get_nodes_from_pic():
     # img_png = 'lak108d.png'
     # img_png = 'lak109d.png'
     # img_png = '19_20_warehouse.png'
-    img_png = '22_22_blank_grid.png'
-    # img_png = '22_22_blank_grid_rate_0.1.png'
+    # img_png = '22_22_blank_grid.png'
+    img_png = '22_22_blank_grid_rate_0.1.png'
     # img_png = 'warehouse-10-20-10-2-1.png'
     # img_png = 'den101d.png'
     # img_png = 'rmtst.png'
@@ -99,7 +99,7 @@ def big_test(
         algs_to_test_dict: dict,
         n_agents_list: list,
         runs_per_n_agents: int,
-        max_time_per_alg,
+        time_per_alg_limit,
         random_seed: bool,
         seed: int,
         plotter,
@@ -146,7 +146,7 @@ def big_test(
                     plotter=inner_plotter,
                     middle_plot=False,
                     final_plot=False,
-                    max_time=max_time_per_alg,
+                    max_time=time_per_alg_limit,
                     a_star_iter_limit=a_star_iter_limit,
                     a_star_calls_limit=a_star_calls_limit,
                     # initial_ordering=[]  # for PBS
@@ -187,10 +187,10 @@ def main():
     # n_agents_list = [25, 30, 35, 40]
     n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     runs_per_n_agents = 50
-    max_time_per_alg = 1
-    # max_time_per_alg = 50  # According to PBS paper!
-    # random_seed = True
-    random_seed = False
+    time_per_alg_limit = 1
+    # time_per_alg_limit = 50  # According to PBS paper!
+    random_seed = True
+    # random_seed = False
     seed = 197
     plotter = Plotter()
     a_star_iter_limit = 3e3
@@ -207,7 +207,7 @@ def main():
         algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
         runs_per_n_agents=runs_per_n_agents,
-        max_time_per_alg=max_time_per_alg,
+        time_per_alg_limit=time_per_alg_limit,
         random_seed=random_seed,
         seed=seed,
         plotter=plotter,
