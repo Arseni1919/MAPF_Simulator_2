@@ -26,6 +26,7 @@ def get_node_from_open(open_list):
     f_dict = {}
     f_vals_list = []
     for node in open_list:
+        # TODO: heap list / prioritized list (they use binary search)
         curr_f = node.f()
         f_vals_list.append(curr_f)
         if curr_f not in f_dict:
@@ -90,6 +91,7 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, clos
     new_ID = f'{successor_xy_name}_{new_t}'
 
     for open_node in open_list:
+        # TODO: dictionary
         if open_node.ID == new_ID:
             return open_node
     for closed_node in close_list:
