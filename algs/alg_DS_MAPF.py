@@ -7,7 +7,8 @@ import pstats
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, crossed_time_limit
+from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
+    crossed_time_limit
 
 
 class DSAgent:
@@ -20,7 +21,7 @@ class DSAgent:
         self.nodes_dict = nodes_dict
         self.h_func = h_func
         self.plotter = plotter
-        self. middle_plot = middle_plot
+        self.middle_plot = middle_plot
         self.iter_limit = iter_limit
         self.path = []
         self.other_paths = {}
@@ -55,12 +56,12 @@ class DSAgent:
         # v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.conf_paths)
         v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, sub_results)
 
-        new_path = a_star(start=self.start_node, goal=self.goal_node, nodes=self.nodes, h_func=self.h_func,
-                          v_constr_dict=v_constr_dict,
-                          e_constr_dict=e_constr_dict,
-                          perm_constr_dict=perm_constr_dict,
-                          plotter=self.plotter, middle_plot=self.middle_plot,
-                          iter_limit=self.iter_limit)
+        new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node, nodes=self.nodes, h_func=self.h_func,
+                                    v_constr_dict=v_constr_dict,
+                                    e_constr_dict=e_constr_dict,
+                                    perm_constr_dict=perm_constr_dict,
+                                    plotter=self.plotter, middle_plot=self.middle_plot,
+                                    iter_limit=self.iter_limit)
 
         elapsed = time.time() - start_time
         if new_path is not None:
@@ -74,8 +75,8 @@ class DSAgent:
             if random.random() < alpha:
                 self.path = new_path
 
-            return True, {'elapsed': elapsed}
-        return False, {'elapsed': elapsed}
+            return True, {'elapsed': elapsed, 'a_s_info': a_s_info}
+        return False, {'elapsed': elapsed, 'a_s_info': a_s_info}
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
@@ -99,6 +100,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         a_star_calls_limit = 1e100
     a_star_calls_counter = 0
     a_star_calls_dist_counter = 0
+    a_star_runtimes = []
     if 'alpha' in kwargs:
         alpha = kwargs['alpha']
     else:
@@ -127,6 +129,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         for agent in agents:
             succeeded, info = agent.plan(alpha=alpha)
             max_time_list.append(info['elapsed'])
+            a_star_runtimes.append(info['a_s_info']['runtime'])
             a_star_calls_counter += 1
         iterations_time += max(max_time_list)
         a_star_calls_dist_counter += 1
@@ -156,7 +159,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                               'runtime': (time.time() - start_time),
                               'iterations_time': iterations_time,
                               'a_star_calls_counter': a_star_calls_counter,
-                              'a_star_calls_dist_counter': a_star_calls_dist_counter}
+                              'a_star_calls_dist_counter': a_star_calls_dist_counter,
+                              'a_star_runtimes': a_star_runtimes}
 
     # partial order
     pass
@@ -201,5 +205,3 @@ if __name__ == '__main__':
     # n_agents = 30
 
     main()
-
-

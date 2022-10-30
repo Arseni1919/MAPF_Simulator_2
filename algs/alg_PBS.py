@@ -4,7 +4,8 @@ import matplotlib.pyplot as plt
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, crossed_time_limit
+from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
+    crossed_time_limit
 from algs.topological_sorting import topological_sorting
 
 
@@ -12,6 +13,7 @@ def preprint_func_name(func):
     def inner(*args, **kwargs):
         print(f'\rFUNC: {func.__name__}', end='')
         return func(*args, **kwargs)
+
     return inner
 
 
@@ -106,9 +108,10 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
     print('\rBEFORE A*', end='')
-    new_path = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
-                      h_func=h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict, perm_constr_dict=perm_constr_dict,
-                      plotter=plotter, middle_plot=middle_plot, iter_limit=iter_limit)
+    new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
+                                h_func=h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict,
+                                perm_constr_dict=perm_constr_dict,
+                                plotter=plotter, middle_plot=middle_plot, iter_limit=iter_limit)
 
     if new_path is not None:
         c_v_list_after = c_v_check_for_agent(update_agent.name, new_path, sub_results)
@@ -116,23 +119,25 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
         if len(c_v_list_after) > 0 or len(c_e_list_after) > 0:
             raise RuntimeError('a_star failed')
 
-    return new_path
+    return new_path, a_s_info
 
 
 # @preprint_func_name
 def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
     print('\rFUNC: update_plan', end='')
     a_star_calls_inner_counter = 0
+    a_star_runtimes = []
     update_list_names = topological_sorting(nodes=[agent.name], sorting_rules=pbs_node.ordering_rules)
     update_list = [pbs_node.agent_dict[agent_name] for agent_name in update_list_names]
     for update_agent in update_list:
         if collide_check(pbs_node, update_agent) or update_agent.name == agent.name:
-            new_path = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+            new_path, a_s_info = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
             a_star_calls_inner_counter += 1
+            a_star_runtimes.append(a_s_info['runtime'])
             if new_path is None:
-                return False, a_star_calls_inner_counter
+                return False, {'a_star_calls_inner_counter': a_star_calls_inner_counter, 'a_star_runtimes': a_star_runtimes}
             pbs_node.plan[update_agent.name] = new_path
-    return True, a_star_calls_inner_counter
+    return True, {'a_star_calls_inner_counter': a_star_calls_inner_counter, 'a_star_runtimes': a_star_runtimes}
 
 
 def choose_conf(c_v, c_e):
@@ -191,6 +196,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     else:
         a_star_calls_limit = 1e100
     a_star_calls_counter = 0
+    a_star_runtimes = []
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -198,8 +204,10 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     root.update_ordering_rules()
 
     for agent in agents:
-        success, a_star_calls_inner_counter = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
-        a_star_calls_counter += a_star_calls_inner_counter
+        success, up_info = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot,
+                                                          iter_limit)
+        a_star_calls_counter += up_info['a_star_calls_inner_counter']
+        a_star_runtimes.extend(up_info['a_star_runtimes'])
         if not success:
             return None, {'success_rate': 0}
 
@@ -230,7 +238,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 'PBSNode': NEXT_pbs_node,
                 'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost,
                 'runtime': runtime, 'iterations_time': runtime,
-                'a_star_calls_counter': a_star_calls_counter, 'a_star_calls_dist_counter': a_star_calls_counter}
+                'a_star_calls_counter': a_star_calls_counter, 'a_star_calls_dist_counter': a_star_calls_counter,
+                'a_star_runtimes': a_star_runtimes}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
@@ -244,8 +253,10 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
 
             agent = NEXT_pbs_node.agent_dict[conf[i]]
             agent = add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf)
-            success, a_star_calls_inner_counter = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
-            a_star_calls_counter += a_star_calls_inner_counter
+            success, up_info = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter,
+                                                              middle_plot, iter_limit)
+            a_star_calls_counter += up_info['a_star_calls_inner_counter']
+            a_star_runtimes.extend(up_info['a_star_runtimes'])
 
             if success:
                 NEW_pbs_node.calc_cost()

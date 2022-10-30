@@ -3,7 +3,7 @@ import math
 import random
 import cProfile
 import pstats
-
+import time
 import matplotlib.pyplot as plt
 import numpy as np
 from simulator_objects import Node
@@ -47,21 +47,6 @@ def get_node_from_open(open_list):
     smallest_h_from_smallest_f_nodes = h_dict[min(h_vals_list)]
     next_node = random.choice(smallest_h_from_smallest_f_nodes)
     return next_node
-
-    # smallest_f = min([node.f() for node in open_list])
-    # smallest_f_nodes = []
-    # h_values = []
-    # for node in open_list:
-    #     if node.f() == smallest_f:
-    #         smallest_f_nodes.append(node)
-    #         h_values.append(node.h)
-    # smallest_h = min(h_values)
-    # # smallest_f_nodes = [node for node in open_list if node.f() == smallest_f]
-    # # v_list = smallest_f_nodes
-    # # smallest_h = min([node.h for node in smallest_f_nodes])
-    # smallest_h_from_smallest_f_nodes = [node for node in smallest_f_nodes if node.h == smallest_h]
-    # next_node = random.choice(smallest_h_from_smallest_f_nodes)
-    # return next_node
 
 
 def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time):
@@ -108,14 +93,6 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, clos
     return None
 
 
-# def deepcopy_nodes(start, goal, nodes):
-#     copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}
-#     copy_start = copy_nodes_dict[start.xy_name]
-#     copy_goal = copy_nodes_dict[goal.xy_name]
-#     copy_nodes = list(copy_nodes_dict.values())
-#     return copy_start, copy_goal, copy_nodes
-
-
 def reset_nodes(start, goal, nodes):
     _ = [node.reset() for node in nodes]
     return start, goal, nodes
@@ -128,6 +105,7 @@ def a_star(start, goal, nodes, h_func,
     """
     new_t in v_constr_dict[successor_xy_name]
     """
+    start_time = time.time()
     # start, goal, nodes = deepcopy_nodes(start, goal, nodes)  # heavy!
     start, goal, nodes = reset_nodes(start, goal, nodes)
     print('\rStarted A*...', end='')
@@ -142,7 +120,7 @@ def a_star(start, goal, nodes, h_func,
         iteration += 1
         if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
-            return None
+            return None, {'runtime': time.time() - start_time, 'n_open': len(open_list), 'n_closed': len(close_list)}
         node_current = get_node_from_open(open_list)  # heavy!
         if node_current.xy_name == goal.xy_name:
             # break
@@ -197,9 +175,9 @@ def a_star(start, goal, nodes, h_func,
     if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
     # print('\rFinished A*.', end='')
-    if path is None:
-        print()
-    return path
+    # if path is None:
+    #     print()
+    return path, {'runtime': time.time() - start_time, 'n_open': len(open_list), 'n_closed': len(close_list)}
 
 
 def main():
@@ -305,3 +283,11 @@ if __name__ == '__main__':
     # stats.print_stats()
     stats = pstats.Stats(profiler).sort_stats('cumtime')
     stats.dump_stats('../stats/results_a_star.pstat')
+
+
+# def deepcopy_nodes(start, goal, nodes):
+#     copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}
+#     copy_start = copy_nodes_dict[start.xy_name]
+#     copy_goal = copy_nodes_dict[goal.xy_name]
+#     copy_nodes = list(copy_nodes_dict.values())
+#     return copy_start, copy_goal, copy_nodes

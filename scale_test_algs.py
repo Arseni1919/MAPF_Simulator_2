@@ -47,6 +47,7 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
                 'iterations_time': {run: None for run in range(runs_per_n_agents)},
                 'a_star_calls_counter': {run: None for run in range(runs_per_n_agents)},
                 'a_star_calls_dist_counter': {run: None for run in range(runs_per_n_agents)},
+                'a_star_runtimes': [],
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -66,6 +67,9 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
 
         if 'a_star_calls_dist_counter' in info:
             statistics_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = info['a_star_calls_dist_counter']
+
+        if 'a_star_runtimes' in info:
+            statistics_dict[alg_name][n_agents]['a_star_runtimes'].extend(info['a_star_runtimes'])
 
 
 def set_seed(random_seed, seed):

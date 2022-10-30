@@ -286,6 +286,21 @@ class Plotter:
         ax.set_xlabel('Solved Instances')
         ax.legend()
 
+    @staticmethod
+    def plot_a_star_runtimes(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                                   is_json=False):
+        for alg_name in algs_to_test_list:
+            a_star_runtimes = []
+            for n_agents in n_agents_list:
+                a_star_runtimes.extend(statistics_dict[alg_name][n_agents]['a_star_runtimes'])
+            ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})', alpha=0.5)  # linewidth=0.5, edgecolor="white"
+
+        ax.set_title('a_star_runtimes (hist)')
+        # ax.set_xlim([0, max_instances + 2])
+        # ax.set_xticks(rt_x)
+        ax.set_xlabel('time')
+        ax.legend()
+
     def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='', is_json=False):
         print('big plot starts')
         self.cla_axes()
@@ -293,6 +308,7 @@ class Plotter:
         self.plot_sol_quality(self.ax[0, 1], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
         self.plot_runtime(self.ax[0, 2], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
         self.plot_a_star_calls_counters(self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
+        self.plot_a_star_runtimes(self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)
