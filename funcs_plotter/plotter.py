@@ -81,7 +81,7 @@ def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_p
 
 
 class Plotter:
-    def __init__(self, map_dim=None, subplot_rows=1, subplot_cols=4):
+    def __init__(self, map_dim=None, subplot_rows=2, subplot_cols=4):
         if map_dim:
             self.side_x, self.side_y = map_dim
         self.subplot_rows = subplot_rows
@@ -174,13 +174,18 @@ class Plotter:
                 # plt.pause(1)
                 plt.pause(0.01)
 
-    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='', is_json=False):
-        for i_ax in self.ax:
-            i_ax.cla()
-        # self.fig, self.ax = plt.subplots(self.subplot_rows, self.subplot_cols)
-        max_instances = 0
-        for alg_name in algs_to_test_list:
+    def cla_axes(self):
+        if self.ax.ndim == 1:
+            for i_ax in self.ax:
+                i_ax.cla()
+        if self.ax.ndim == 2:
+            for row_ax in self.ax:
+                for col_ax in row_ax:
+                    col_ax.cla()
 
+    @staticmethod
+    def plot_success_rate(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json=False):
+        for alg_name in algs_to_test_list:
             # success_rate
             sr_x = []
             sr_y = []
@@ -189,26 +194,51 @@ class Plotter:
                 if len(sr_list) > 0:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
-            self.ax[0].plot(sr_x, sr_y, '-o', label=f'{alg_name}')
+            ax.plot(sr_x, sr_y, '-o', label=f'{alg_name}')
+
+        ax.set_title('success_rate')
+        ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
+        # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+        ax.set_ylim([0, 1.5])
+        ax.set_xticks(n_agents_list)
+        ax.set_xlabel('N agents')
+        ax.legend()
+
+    @staticmethod
+    def plot_sol_quality(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json=False):
+        for alg_name in algs_to_test_list:
 
             # sol_quality
             sq_x = []
             sq_y = []
             for n_agents in n_agents_list:
-                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents, algs_to_test_list, is_json)
+                sq_list = get_list_sol_q_style(statistics_dict, alg_name, n_agents, 'sol_quality', runs_per_n_agents,
+                                               algs_to_test_list, is_json)
                 if len(sq_list) > 0:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))
-            self.ax[1].plot(sq_x, sq_y, '-o', label=f'{alg_name}')
+            ax.plot(sq_x, sq_y, '-o', label=f'{alg_name}')
+
+        ax.set_title('sol_quality')
+        ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        ax.set_xticks(n_agents_list)
+        ax.set_xlabel('N agents')
+        ax.legend()
+
+    @staticmethod
+    def plot_runtime(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json=False):
+        max_instances = 0
+        for alg_name in algs_to_test_list:
 
             # runtime
             rt_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'runtime', runs_per_n_agents, is_json)
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            self.ax[2].plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}')
             if len(rt_x) > 0:
-                self.ax[2].text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+                ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
             # iterations_time
             if 'DS-MAPF' in alg_name:
@@ -216,9 +246,20 @@ class Plotter:
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                self.ax[2].plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
+                ax.plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
                 if len(it_x) > 0:
-                    self.ax[2].text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+                    ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
+        ax.set_title('runtime (cactus)')
+        ax.set_xlim([0, max_instances + 2])
+        # ax.set_xticks(rt_x)
+        ax.set_xlabel('Solved Instances')
+        ax.legend()
+
+    @staticmethod
+    def plot_a_star_calls_counters(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json=False):
+        max_instances = 0
+        for alg_name in algs_to_test_list:
 
             # A* calls
             ac_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_counter', runs_per_n_agents,
@@ -226,9 +267,9 @@ class Plotter:
             ac_y.sort()
             ac_x = list(range(len(ac_y)))
             max_instances = max(max_instances, len(ac_x))
-            self.ax[3].plot(ac_x, ac_y, '-o', label=f'{alg_name}')
+            ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}')
             if len(ac_x) > 0:
-                self.ax[3].text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
+                ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
                                 bbox=dict(facecolor='yellow', alpha=0.75))
 
             if 'DS-MAPF' in alg_name:
@@ -236,40 +277,27 @@ class Plotter:
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
-                self.ax[3].plot(acd_x, acd_y, '-o', label=f'{alg_name} (distributed)')
+                ax.plot(acd_x, acd_y, '-o', label=f'{alg_name} (distributed)')
                 if len(acd_x) > 0:
-                    self.ax[3].text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+                    ax.text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
-        self.ax[0].set_title('success_rate')
-        self.ax[1].set_title('sol_quality')
-        self.ax[2].set_title('runtime (cactus)')
-        self.ax[3].set_title('A* Calls (cactus)')
+        ax.set_title('A* Calls (cactus)')
+        ax.set_xlim([0, max_instances + 2])
+        ax.set_xlabel('Solved Instances')
+        ax.legend()
 
-        self.ax[0].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
-        self.ax[0].set_ylim([0, 1.5])
-        self.ax[1].set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
-        self.ax[2].set_xlim([0, max_instances + 2])
-        self.ax[3].set_xlim([0, max_instances + 2])
-
-        self.ax[0].set_xticks(n_agents_list)
-        # self.ax[0].yaxis.set_major_locator(MaxNLocator(integer=True))
-        # self.ax[0].xaxis.set_major_locator(MaxNLocator(integer=True))
-        self.ax[1].set_xticks(n_agents_list)
-        # self.ax[2].set_xticks(rt_x)
-
-        self.ax[0].set_xlabel('N agents')
-        self.ax[1].set_xlabel('N agents')
-        self.ax[2].set_xlabel('Solved Instances')
-        self.ax[3].set_xlabel('Solved Instances')
-
-        self.ax[0].legend()
-        self.ax[1].legend()
-        self.ax[2].legend()
-        self.ax[3].legend()
+    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='', is_json=False):
+        print('big plot starts')
+        self.cla_axes()
+        self.plot_success_rate(self.ax[0, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
+        self.plot_sol_quality(self.ax[0, 1], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
+        self.plot_runtime(self.ax[0, 2], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
+        self.plot_a_star_calls_counters(self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)
         plt.pause(0.001)
+        print('big plot ends')
         # plt.show()
 
 
