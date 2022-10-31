@@ -26,7 +26,8 @@ def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_ag
     return curr_list
 
 
-def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list, is_json=False):
+def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list,
+                         is_json=False):
     """
     {
         alg_name: {
@@ -156,7 +157,7 @@ class Plotter:
             color_map = plt.cm.get_cmap('hsv', n)
             i = 0
             for agent_name, path in paths_dict.items():
-                t_path = path[:t+1]
+                t_path = path[:t + 1]
                 for node in t_path:
                     field[node.x, node.y] = 3
                 self.ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
@@ -190,7 +191,8 @@ class Plotter:
             sr_x = []
             sr_y = []
             for n_agents in n_agents_list:
-                sr_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'success_rate', runs_per_n_agents, is_json)
+                sr_list = get_list_n_run(statistics_dict, alg_name, n_agents, 'success_rate', runs_per_n_agents,
+                                         is_json)
                 if len(sr_list) > 0:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
@@ -242,7 +244,8 @@ class Plotter:
 
             # iterations_time
             if 'DS-MAPF' in alg_name:
-                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents, is_json)
+                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents,
+                                        is_json)
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
@@ -257,7 +260,8 @@ class Plotter:
         ax.legend()
 
     @staticmethod
-    def plot_a_star_calls_counters(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json=False):
+    def plot_a_star_calls_counters(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                                   is_json=False):
         max_instances = 0
         for alg_name in algs_to_test_list:
 
@@ -270,10 +274,11 @@ class Plotter:
             ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}')
             if len(ac_x) > 0:
                 ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
-                                bbox=dict(facecolor='yellow', alpha=0.75))
+                        bbox=dict(facecolor='yellow', alpha=0.75))
 
             if 'DS-MAPF' in alg_name:
-                acd_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_dist_counter', runs_per_n_agents, is_json)
+                acd_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_dist_counter',
+                                         runs_per_n_agents, is_json)
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
@@ -288,12 +293,15 @@ class Plotter:
 
     @staticmethod
     def plot_a_star_runtimes(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
-                                   is_json=False):
+                             is_json=False):
         for alg_name in algs_to_test_list:
             a_star_runtimes = []
             for n_agents in n_agents_list:
+                if is_json:
+                    n_agents = str(n_agents)
                 a_star_runtimes.extend(statistics_dict[alg_name][n_agents]['a_star_runtimes'])
-            ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})', alpha=0.5)  # linewidth=0.5, edgecolor="white"
+            ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})',
+                    alpha=0.5)  # linewidth=0.5, edgecolor="white"
 
         ax.set_title('a_star_runtimes (hist)')
         # ax.set_xlim([0, max_instances + 2])
@@ -301,24 +309,22 @@ class Plotter:
         ax.set_xlabel('time')
         ax.legend()
 
-    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='', is_json=False):
+    def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='',
+                      is_json=False):
         print('big plot starts')
         self.cla_axes()
-        self.plot_success_rate(self.ax[0, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
-        self.plot_sol_quality(self.ax[0, 1], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
+        self.plot_success_rate(self.ax[0, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                               is_json)
+        self.plot_sol_quality(self.ax[0, 1], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                              is_json)
         self.plot_runtime(self.ax[0, 2], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
-        self.plot_a_star_calls_counters(self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
-        self.plot_a_star_runtimes(self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
+        self.plot_a_star_calls_counters(self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_list,
+                                        n_agents_list, is_json)
+        self.plot_a_star_runtimes(self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                                  is_json)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)
         plt.pause(0.001)
         print('big plot ends')
         # plt.show()
-
-
-
-
-
-
-

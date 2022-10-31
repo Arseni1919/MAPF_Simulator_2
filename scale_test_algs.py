@@ -184,14 +184,15 @@ def main():
         # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
         # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
     }
-    # n_agents_list = [2, 3]
-    n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    n_agents_list = [2, 3]
+    # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [25, 30, 35, 40]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     runs_per_n_agents = 10
+    runs_per_n_agents = 2
     time_per_alg_limit = 1
     # time_per_alg_limit = 50  # According to PBS paper!
     random_seed = True

@@ -175,8 +175,8 @@ def a_star(start, goal, nodes, h_func,
     if plotter and middle_plot:
         plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
     # print('\rFinished A*.', end='')
-    # if path is None:
-    #     print()
+    if path is None:
+        print()
     return path, {'runtime': time.time() - start_time, 'n_open': len(open_list), 'n_closed': len(close_list)}
 
 
