@@ -276,7 +276,7 @@ class Plotter:
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                ax.plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
+                ax.plot(it_x, it_y, '-^', label=f'{alg_name} (iteration time)')
                 if len(it_x) > 0:
                     ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -309,7 +309,7 @@ class Plotter:
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
-                ax.plot(acd_x, acd_y, '-o', label=f'{alg_name} (distributed)')
+                ax.plot(acd_x, acd_y, '-^', label=f'{alg_name} (distributed)')
                 if len(acd_x) > 0:
                     ax.text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
