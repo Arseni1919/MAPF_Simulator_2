@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
 from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets
-from funcs_graph.nodes_from_pic import build_graph_from_png
+from funcs_graph.nodes_from_pic import build_graph_nodes, get_dims_from_pic
 from funcs_graph.map_dimensions import map_dimensions_dict
 # from algs.test_mapf_alg import test_mapf_alg_from_pic
 from funcs_plotter.plotter import Plotter
@@ -21,7 +21,7 @@ def save_and_show_results(statistics_dict, plotter=None, runs_per_n_agents=None,
         'runs_per_n_agents': runs_per_n_agents,
         'n_agents_list': n_agents_list,
         'algs_to_test_names': list(algs_to_test_dict.keys()),
-        'img_png': img_png
+        'img_dir': img_png
 
     }
     json_object = json.dumps(to_save_dict, indent=4)
@@ -87,22 +87,37 @@ def set_seed(random_seed, seed):
 
 
 def get_nodes_from_pic():
-    # img_png = 'lak108d.png'
-    # img_png = 'lak109d.png'
-    # img_png = '19_20_warehouse.png'
-    # img_png = '22_22_blank_grid.png'
-    img_png = '22_22_blank_grid_rate_0.1.png'
-    # img_png = 'warehouse-10-20-10-2-1.png'
-    # img_png = 'den101d.png'
-    # img_png = 'rmtst.png'
-    # img_png = 'lak505d.png'
-    # img_png = 'lak503d.png'
-    # img_png = 'ost003d.png'
-    # img_png = 'brc202d.png'
-    # img_png = 'den520d.png'
-    map_dim = map_dimensions_dict[img_png]
-    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='maps', show_map=False)
-    return nodes, nodes_dict, map_dim, img_png
+    img_dir = 'random-32-32-10.map'  # 32-32
+    # img_dir = 'room-64-64-8.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
+    # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
+    # img_dir = 'ht_chantry.map'  # 141-162
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'lak303d.map'  # 194-194
+    # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
+    # img_dir = 'Berlin_1_256.map'  # 256-256
+    # img_dir = 'den520d.map'  # 257-256
+    # img_dir = 'ht_mansion_n.map'  # 270-133
+    # img_dir = 'brc202d.map'  # 481-530
+
+    # img_dir = 'lak108d.png'
+    # img_dir = 'lak109d.png'
+    # img_dir = '19_20_warehouse.png'
+    # img_dir = '22_22_blank_grid.png'
+    # img_dir = '22_22_blank_grid_rate_0.1.png'
+    # img_dir = 'warehouse-10-20-10-2-1.png'
+    # img_dir = 'den101d.png'
+    # img_dir = 'rmtst.png'
+    # img_dir = 'lak505d.png'
+    # img_dir = 'lak503d.png'
+    # img_dir = 'ost003d.png'
+    # img_dir = 'brc202d.png'
+    # img_dir = 'den520d.png'
+
+    map_dim = get_dims_from_pic(img_dir=img_dir, path='maps')
+    nodes, nodes_dict = build_graph_nodes(img_dir=img_dir, path='maps', show_map=False)
+    return nodes, nodes_dict, map_dim, img_dir
 
 
 def big_test(
@@ -191,10 +206,10 @@ def main():
         # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
         # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
     }
-    # n_agents_list = [2, 3, 4, 5]
+    n_agents_list = [2, 3, 4, 5]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-    n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [25, 30, 35, 40]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!

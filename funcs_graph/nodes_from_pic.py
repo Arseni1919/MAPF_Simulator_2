@@ -1,19 +1,53 @@
 from globals import *
 from funcs_graph.map_dimensions import map_dimensions_dict
 from simulator_objects import Node
+import re
 
 
-def build_graph_from_png(img_png, path='maps', show_map=False):
-    print('Start to build_graph_from_png...')
-    img_tensor = torchvision.io.read_image(f'{path}/{img_png}', ImageReadMode.GRAY)
-    if img_png in map_dimensions_dict:
-        img_np = T.Resize(size=map_dimensions_dict[img_png])(img_tensor).squeeze().numpy()
+def get_np_from_png(img_dir, path='maps'):
+    img_tensor = torchvision.io.read_image(f'{path}/{img_dir}', ImageReadMode.GRAY)
+    if img_dir in map_dimensions_dict:
+        img_np = T.Resize(size=map_dimensions_dict[img_dir])(img_tensor).squeeze().numpy()
     else:
         img_np = img_tensor.squeeze().numpy()
     max_num = np.max(img_np)
     img_filtered_np = np.where(img_np < max_num, 0, 1)
+    return img_filtered_np
 
-    return build_graph_from_np(img_filtered_np, show_map)
+
+def get_dims_from_pic(img_dir, path='maps'):
+    if '.map' in img_dir:
+        with open(f'{path}/{img_dir}') as f:
+            lines = f.readlines()
+            height = int(re.search(r'\d+', lines[1]).group())
+            width = int(re.search(r'\d+', lines[2]).group())
+        return height, width
+    else:
+        map_dim = map_dimensions_dict[img_dir]
+        return map_dim
+
+
+def get_np_from_dot_map(img_dir, path='maps'):
+    with open(f'{path}/{img_dir}') as f:
+        lines = f.readlines()
+        height, width = get_dims_from_pic(img_dir, path)
+        img_np = np.zeros((height, width))
+        for height_index, line in enumerate(lines[4:]):
+            for width_index, curr_str in enumerate(line):
+                if curr_str == '.':
+                    img_np[height_index, width_index] = 1
+        return img_np, (height, width)
+
+
+def build_graph_nodes(img_dir, path='maps', show_map=False):
+    print('Start to build_graph_from_png...')
+    if '.png' in img_dir:
+        img_np = get_np_from_png(img_dir, path)
+    elif '.map' in img_dir:
+        img_np, _ = get_np_from_dot_map(img_dir, path)
+    else:
+        raise RuntimeError('format of the map is not supported')
+    return build_graph_from_np(img_np, show_map)
 
 
 def distance_nodes(node1, node2, h_func: dict = None):
@@ -95,7 +129,19 @@ def build_graph_from_np(img_np, show_map=False):
 
 
 def main():
-    nodes, nodes_dict = build_graph_from_png(img_png='22_22_blank_grid_rate_0.1.png', path='../maps', show_map=True)
+    img_dir = 'room-64-64-8.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
+    # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
+    # img_dir = 'ht_chantry.map'  # 141-162
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'lak303d.map'  # 194-194
+    # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
+    # img_dir = 'Berlin_1_256.map'  # 256-256
+    # img_dir = 'den520d.map'  # 257-256
+    # img_dir = 'ht_mansion_n.map'  # 270-133
+    # img_dir = 'brc202d.map'  # 481-530
+    nodes, nodes_dict = build_graph_nodes(img_dir=img_dir, path='../maps', show_map=True)
     print()
 
 

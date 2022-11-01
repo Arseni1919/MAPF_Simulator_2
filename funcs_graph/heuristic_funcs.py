@@ -10,7 +10,7 @@ import logging
 
 from simulator_objects import Node
 from funcs_graph.map_dimensions import map_dimensions_dict
-from funcs_graph.nodes_from_pic import build_graph_from_png
+from funcs_graph.nodes_from_pic import build_graph_nodes
 from funcs_plotter.plotter import Plotter
 
 
@@ -137,7 +137,7 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
 def main():
     img_png = 'den520d.png'
     map_dim = map_dimensions_dict[img_png]
-    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='../maps', show_map=False)
+    nodes, nodes_dict = build_graph_nodes(img_dir=img_png, path='../maps', show_map=False)
     x_goal, y_goal = 38, 89
     node_goal = [node for node in nodes if node.x == x_goal and node.y == y_goal][0]
     plotter = Plotter(map_dim=map_dim)

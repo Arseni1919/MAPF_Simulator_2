@@ -4,7 +4,7 @@ import numpy as np
 
 from funcs_plotter.plotter import Plotter
 from funcs_graph.map_dimensions import map_dimensions_dict
-from funcs_graph.nodes_from_pic import build_graph_from_png
+from funcs_graph.nodes_from_pic import build_graph_nodes, get_dims_from_pic
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
 from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets
 
@@ -19,21 +19,36 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     random.seed(seed)
     np.random.seed(seed)
 
-    # img_png = 'lak109d.png'
-    # img_png = '19_20_warehouse.png'
-    img_png = 'warehouse-10-20-10-2-1.png'
-    # img_png = 'warehouse-10-20-10-2-2.png'
-    # img_png = 'ht_chantry.png'
-    # img_png = 'Berlin_1_256.png'
-    # img_png = 'den101d.png'
-    # img_png = 'rmtst.png'
-    # img_png = 'lak505d.png'
-    # img_png = 'lak503d.png'
-    # img_png = 'ost003d.png'
-    # img_png = 'brc202d.png'
-    # img_png = 'den520d.png'
-    map_dim = map_dimensions_dict[img_png]
-    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='../maps', show_map=False)
+    # img_dir = 'lak109d.png'
+    # img_dir = '19_20_warehouse.png'
+    # img_dir = 'warehouse-10-20-10-2-1.png'
+    # img_dir = 'warehouse-10-20-10-2-2.png'
+    # img_dir = 'ht_chantry.png'
+    # img_dir = 'Berlin_1_256.png'
+    # img_dir = 'den101d.png'
+    # img_dir = 'rmtst.png'
+    # img_dir = 'lak505d.png'
+    # img_dir = 'lak503d.png'
+    # img_dir = 'ost003d.png'
+    # img_dir = 'brc202d.png'
+    # img_dir = 'den520d.png'
+
+    img_dir = 'random-32-32-10.map'  # 32-32
+    # img_dir = 'room-64-64-8.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
+    # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
+    # img_dir = 'ht_chantry.map'  # 141-162
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'lak303d.map'  # 194-194
+    # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
+    # img_dir = 'Berlin_1_256.map'  # 256-256
+    # img_dir = 'den520d.map'  # 257-256
+    # img_dir = 'ht_mansion_n.map'  # 270-133
+    # img_dir = 'brc202d.map'  # 481-530
+
+    map_dim = get_dims_from_pic(img_dir=img_dir, path='../maps')
+    nodes, nodes_dict = build_graph_nodes(img_dir=img_dir, path='../maps', show_map=False)
     # ------------------------- #
     # x_start, y_start = 97, 99
     # x_goal, y_goal = 38, 89

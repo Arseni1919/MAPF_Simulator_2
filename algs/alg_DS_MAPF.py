@@ -201,7 +201,7 @@ if __name__ == '__main__':
     to_use_profiler = True
     # to_use_profiler = False
 
-    # good example: img_png = '19_20_warehouse.png'
+    # good example: img_dir = '19_20_warehouse.png'
     # random_seed = True
     # random_seed = False
     # seed = 23

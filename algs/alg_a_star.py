@@ -8,9 +8,26 @@ import matplotlib.pyplot as plt
 import numpy as np
 from simulator_objects import Node
 from funcs_plotter.plotter import Plotter
-from funcs_graph.nodes_from_pic import make_neighbours, build_graph_from_png
+from funcs_graph.nodes_from_pic import make_neighbours, build_graph_nodes
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
+
+
+class ListNodes:
+    def __init__(self):
+        self.list = []
+        self.dict = {}
+
+    def remove(self, node):
+        self.list.remove(node)
+        del self.dict[node.ID]
+
+    def add(self, node):
+        self.list.append(node)
+        self.dict[node.ID] = node
+
+    def get(self, ID):
+        return self.dict[ID]
 
 
 def get_max_final(perm_constr_dict):
@@ -49,7 +66,7 @@ def get_node_from_open(open_list):
     return next_node
 
 
-def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict,
+def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes, v_constr_dict, e_constr_dict,
              perm_constr_dict, max_final_time):
     new_t = node_current.t + 1
 
@@ -76,13 +93,16 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, clos
 
     new_ID = f'{successor_xy_name}_{new_t}'
 
-    for open_node in open_list:
-        # TODO: dictionary
-        if open_node.ID == new_ID:
-            return open_node
-    for closed_node in close_list:
-        if closed_node.ID == new_ID:
-            return closed_node
+    # for open_node in open_list:
+    #     if open_node.ID == new_ID:
+    #         return open_node
+    # for closed_node in close_list:
+    #     if closed_node.ID == new_ID:
+    #         return closed_node
+    if new_ID in open_nodes.dict:
+        return open_nodes.dict[new_ID]
+    if new_ID in closed_nodes.dict:
+        return closed_nodes.dict[new_ID]
 
     if nodes_dict:
         node = nodes_dict[successor_xy_name]
@@ -110,19 +130,19 @@ def a_star(start, goal, nodes, h_func,
     # start, goal, nodes = deepcopy_nodes(start, goal, nodes)  # heavy!
     start, goal, nodes = reset_nodes(start, goal, nodes)
     print('\rStarted A*...', end='')
-    open_list = []
-    close_list = []
+    open_nodes = ListNodes()
+    closed_nodes = ListNodes()
     node_current = start
     node_current.h = h_func(node_current, goal)
-    open_list.append(node_current)
+    open_nodes.add(node_current)
     max_final_time = get_max_final(perm_constr_dict)
     iteration = 0
-    while len(open_list) > 0:
+    while len(open_nodes.list) > 0:
         iteration += 1
         if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
-            return None, {'runtime': time.time() - start_time, 'n_open': len(open_list), 'n_closed': len(close_list)}
-        node_current = get_node_from_open(open_list)  # heavy!
+            return None, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.list), 'n_closed': len(closed_nodes.list)}
+        node_current = get_node_from_open(open_nodes.list)  # heavy!
         if node_current.xy_name == goal.xy_name:
             # break
             # if there is a future constraint of a goal
@@ -139,32 +159,32 @@ def a_star(start, goal, nodes, h_func,
             else:
                 break
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list,
+            node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
                                       v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)  # heavy!
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
-            if node_successor in open_list:
+            if node_successor in open_nodes.list:
                 if node_successor.t <= successor_current_time:
                     continue
-            elif node_successor in close_list:
+            elif node_successor in closed_nodes.list:
                 if node_successor.t <= successor_current_time:
                     continue
-                close_list.remove(node_successor)
-                open_list.append(node_successor)
+                closed_nodes.remove(node_successor)
+                open_nodes.add(node_successor)
             else:
-                open_list.append(node_successor)
+                open_nodes.add(node_successor)
                 node_successor.h = h_func(node_successor, goal)
             node_successor.t = successor_current_time
             node_successor.g = node_successor.t
             node_successor.parent = node_current
 
-        open_list.remove(node_current)
-        close_list.append(node_current)
+        open_nodes.remove(node_current)
+        closed_nodes.add(node_current)
 
         if plotter and middle_plot and iteration % 10 == 0:
-            plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, nodes=nodes)
-        print(f'\r(a_star) iter: {iteration}, open: {len(open_list)}', end='')
+            plotter.plot_lists(open_list=open_nodes.list, closed_list=closed_nodes.list, start=start, goal=goal, nodes=nodes)
+        print(f'\r(a_star) iter: {iteration}, open: {len(open_nodes.list)}', end='')
 
     path = None
     if node_current.xy_name == goal.xy_name:
@@ -175,11 +195,11 @@ def a_star(start, goal, nodes, h_func,
         path.reverse()
 
     if plotter and middle_plot:
-        plotter.plot_lists(open_list=open_list, closed_list=close_list, start=start, goal=goal, path=path, nodes=nodes)
+        plotter.plot_lists(open_list=open_nodes.list, closed_list=closed_nodes.list, start=start, goal=goal, path=path, nodes=nodes)
     # print('\rFinished A*.', end='')
     if path is None:
         print()
-    return path, {'runtime': time.time() - start_time, 'n_open': len(open_list), 'n_closed': len(close_list)}
+    return path, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.list), 'n_closed': len(closed_nodes.list)}
 
 
 def main():
@@ -214,18 +234,18 @@ def main():
 
 
 def try_a_map_from_pic():
-    # img_png = 'lak109d.png'
-    # img_png = '19_20_warehouse.png'
-    # img_png = 'den101d.png'
-    # img_png = 'rmtst.png'
-    # img_png = 'lak505d.png'
-    # img_png = 'lak503d.png'
-    # img_png = 'ost003d.png'
-    # img_png = 'brc202d.png'
-    # img_png = 'den520d.png'
+    # img_dir = 'lak109d.png'
+    # img_dir = '19_20_warehouse.png'
+    # img_dir = 'den101d.png'
+    # img_dir = 'rmtst.png'
+    # img_dir = 'lak505d.png'
+    # img_dir = 'lak503d.png'
+    # img_dir = 'ost003d.png'
+    # img_dir = 'brc202d.png'
+    # img_dir = 'den520d.png'
     img_png = 'warehouse-10-20-10-2-1.png'
     map_dim = map_dimensions_dict[img_png]
-    nodes, nodes_dict = build_graph_from_png(img_png=img_png, path='../maps', show_map=False)
+    nodes, nodes_dict = build_graph_nodes(img_dir=img_png, path='../maps', show_map=False)
     # ------------------------- #
     # x_start, y_start = 97, 99
     # x_goal, y_goal = 38, 89
