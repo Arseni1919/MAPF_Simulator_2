@@ -127,6 +127,7 @@ def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot
     print('\rFUNC: update_plan', end='')
     a_star_calls_inner_counter = 0
     a_star_runtimes = []
+    a_star_n_closed = []
     update_list_names = topological_sorting(nodes=[agent.name], sorting_rules=pbs_node.ordering_rules)
     update_list = [pbs_node.agent_dict[agent_name] for agent_name in update_list_names]
     for update_agent in update_list:
@@ -134,10 +135,19 @@ def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot
             new_path, a_s_info = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
             a_star_calls_inner_counter += 1
             a_star_runtimes.append(a_s_info['runtime'])
+            a_star_n_closed.append(a_s_info['n_closed'])
             if new_path is None:
-                return False, {'a_star_calls_inner_counter': a_star_calls_inner_counter, 'a_star_runtimes': a_star_runtimes}
+                return False, {
+                    'a_star_calls_inner_counter': a_star_calls_inner_counter,
+                    'a_star_runtimes': a_star_runtimes,
+                    'a_star_n_closed': a_star_n_closed,
+                }
             pbs_node.plan[update_agent.name] = new_path
-    return True, {'a_star_calls_inner_counter': a_star_calls_inner_counter, 'a_star_runtimes': a_star_runtimes}
+    return True, {
+        'a_star_calls_inner_counter': a_star_calls_inner_counter,
+        'a_star_runtimes': a_star_runtimes,
+        'a_star_n_closed': a_star_n_closed,
+    }
 
 
 def choose_conf(c_v, c_e):
@@ -197,6 +207,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
         a_star_calls_limit = 1e100
     a_star_calls_counter = 0
     a_star_runtimes = []
+    a_star_n_closed = []
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -208,6 +219,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                                                           iter_limit)
         a_star_calls_counter += up_info['a_star_calls_inner_counter']
         a_star_runtimes.extend(up_info['a_star_runtimes'])
+        a_star_n_closed.extend(up_info['a_star_n_closed'])
         if not success:
             return None, {'success_rate': 0}
 
@@ -239,7 +251,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost,
                 'runtime': runtime, 'iterations_time': runtime,
                 'a_star_calls_counter': a_star_calls_counter, 'a_star_calls_dist_counter': a_star_calls_counter,
-                'a_star_runtimes': a_star_runtimes}
+                'a_star_runtimes': a_star_runtimes, 'a_star_n_closed': a_star_n_closed}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
@@ -257,6 +269,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                                                               middle_plot, iter_limit)
             a_star_calls_counter += up_info['a_star_calls_inner_counter']
             a_star_runtimes.extend(up_info['a_star_runtimes'])
+            a_star_n_closed.extend(up_info['a_star_n_closed'])
 
             if success:
                 NEW_pbs_node.calc_cost()

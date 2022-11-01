@@ -32,7 +32,7 @@ def show_results(file_dir, plotter, algs_to_test_dict):
 
 
 def main():
-    file_dir = f'../logs_for_graphs/results_31-10-2022-17-47.json'
+    file_dir = f'../logs_for_graphs/results_30-10-2022-22-00.json'
     plotter = Plotter()
     algs_to_test_dict = {
         'PBS': run_pbs,

@@ -49,7 +49,8 @@ def get_node_from_open(open_list):
     return next_node
 
 
-def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time):
+def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict,
+             perm_constr_dict, max_final_time):
     new_t = node_current.t + 1
 
     if v_constr_dict:
@@ -138,7 +139,8 @@ def a_star(start, goal, nodes, h_func,
             else:
                 break
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list, v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)  # heavy!
+            node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_list, close_list,
+                                      v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)  # heavy!
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
@@ -202,8 +204,9 @@ def main():
     make_neighbours(nodes)
     node_start = nodes[0]
     node_goal = nodes[-1]
-    plotter = Plotter(map_dim=(5, 5))
-    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=dist_heuristic, plotter=plotter, middle_plot=True)
+    plotter = Plotter(map_dim=(5, 5), subplot_rows=1, subplot_cols=3)
+    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=dist_heuristic, plotter=plotter,
+                    middle_plot=True)
 
     plt.show()
     print(result)
@@ -237,7 +240,7 @@ def try_a_map_from_pic():
     print(f'start: {node_start.x}, {node_start.y} -> goal: {node_goal.x}, {node_goal.y}')
     # ------------------------- #
     # ------------------------- #
-    plotter = Plotter(map_dim=map_dim)
+    plotter = Plotter(map_dim=map_dim, subplot_rows=1, subplot_cols=3)
     # plotter = None
     # ------------------------- #
     # ------------------------- #
@@ -256,9 +259,9 @@ def try_a_map_from_pic():
     # ------------------------- #
     # result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func, plotter=plotter, middle_plot=False)
     profiler.enable()
-    result = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
-                    v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
-                    plotter=plotter, middle_plot=True, nodes_dict=nodes_dict)
+    result, info = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
+                          v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
+                          plotter=plotter, middle_plot=True, nodes_dict=nodes_dict)
     profiler.disable()
     print('The result is:', *[node.xy_name for node in result], sep='->')
     print('The result is:', *[node.ID for node in result], sep='->')
@@ -283,7 +286,6 @@ if __name__ == '__main__':
     # stats.print_stats()
     stats = pstats.Stats(profiler).sort_stats('cumtime')
     stats.dump_stats('../stats/results_a_star.pstat')
-
 
 # def deepcopy_nodes(start, goal, nodes):
 #     copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}

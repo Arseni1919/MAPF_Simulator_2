@@ -101,6 +101,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     a_star_calls_counter = 0
     a_star_calls_dist_counter = 0
     a_star_runtimes = []
+    a_star_n_closed = []
     if 'alpha' in kwargs:
         alpha = kwargs['alpha']
     else:
@@ -130,6 +131,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
             succeeded, info = agent.plan(alpha=alpha)
             max_time_list.append(info['elapsed'])
             a_star_runtimes.append(info['a_s_info']['runtime'])
+            a_star_n_closed.append(info['a_s_info']['n_closed'])
             a_star_calls_counter += 1
         iterations_time += max(max_time_list)
         a_star_calls_dist_counter += 1
@@ -160,7 +162,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                               'iterations_time': iterations_time,
                               'a_star_calls_counter': a_star_calls_counter,
                               'a_star_calls_dist_counter': a_star_calls_dist_counter,
-                              'a_star_runtimes': a_star_runtimes}
+                              'a_star_runtimes': a_star_runtimes,
+                              'a_star_n_closed': a_star_n_closed}
 
     # partial order
     pass

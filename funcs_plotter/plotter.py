@@ -26,8 +26,7 @@ def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_ag
     return curr_list
 
 
-def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list,
-                         is_json=False):
+def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list, is_json=False):
     """
     {
         alg_name: {
@@ -81,6 +80,33 @@ def get_list_runtime(statistics_dict, alg_name, n_agents_list, list_type, runs_p
     return curr_list
 
 
+def get_list_a_star(statistics_dict, alg_name, n_agents_list, list_type, is_json=False):
+    """
+    {
+        alg_name: {
+            n_agents: {
+                'success_rate': {run: None for run in range(runs_per_n_agents)},
+                'sol_quality': {run: None for run in range(runs_per_n_agents)},
+                'runtime': {run: None for run in range(runs_per_n_agents)},
+                'iterations_time': {run: None for run in range(runs_per_n_agents)},
+                'a_star_calls_counter': {run: None for run in range(runs_per_n_agents)},
+                'a_star_calls_dist_counter': {run: None for run in range(runs_per_n_agents)},
+                'a_star_runtimes': [],
+                'a_star_n_closed': [],
+            } for n_agents in n_agents_list
+        } for alg_name, _ in algs_to_test_dict.items()
+    }
+    """
+    curr_list = []
+    for n_agents in n_agents_list:
+        if is_json:
+            n_agents = str(n_agents)
+        curr_element = statistics_dict[alg_name][n_agents][list_type]
+        if curr_element is not None:
+            curr_list.extend(curr_element)
+    return curr_list
+
+
 class Plotter:
     def __init__(self, map_dim=None, subplot_rows=2, subplot_cols=4):
         if map_dim:
@@ -92,8 +118,9 @@ class Plotter:
     def plot_lists(self, open_list, closed_list, start, goal=None, path=None, nodes=None):
 
         field = np.zeros((self.side_x, self.side_y))
-        for ax in self.ax:
-            ax.cla()
+        # for ax in self.ax:
+        #     ax.cla()
+        self.cla_axes()
 
         if nodes:
             for node in nodes:
@@ -294,20 +321,89 @@ class Plotter:
     @staticmethod
     def plot_a_star_runtimes(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
                              is_json=False):
+        showfliers = False
+        # showfliers = True
+        big_table = []
         for alg_name in algs_to_test_list:
             a_star_runtimes = []
             for n_agents in n_agents_list:
                 if is_json:
                     n_agents = str(n_agents)
                 a_star_runtimes.extend(statistics_dict[alg_name][n_agents]['a_star_runtimes'])
-            ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})',
-                    alpha=0.5)  # linewidth=0.5, edgecolor="white"
+            # ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})', alpha=0.5)  # linewidth=0.5, edgecolor="white"
+            big_table.append(a_star_runtimes)
+        ax.boxplot(big_table,
+                   # notch=True,  # notch shape
+                   vert=True,  # vertical box alignment
+                   patch_artist=True,  # fill with color
+                   labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
+                   showfliers=showfliers)
 
-        ax.set_title('a_star_runtimes (hist)')
+        # ax.set_title('a_star_runtimes (boxplot)')
         # ax.set_xlim([0, max_instances + 2])
+        # ax.set_xticks()
+        ax.set_ylabel(f'a_star_runtimes')
+        ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
+        # ax.legend()
+
+    @staticmethod
+    def plot_n_closed_cactus(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json=False):
+        max_instances = 0
+        for alg_name in algs_to_test_list:
+
+            # runtime
+            rt_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'n_closed_per_run', is_json)
+            rt_y.sort()
+            rt_x = list(range(len(rt_y)))
+            max_instances = max(max_instances, len(rt_x))
+            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+            if len(rt_x) > 0:
+                ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
+            # iterations_time
+            # if 'DS-MAPF' in alg_name:
+            #     it_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'n_closed_per_run', is_json)
+            #     it_y.sort()
+            #     it_x = list(range(len(it_y)))
+            #     max_instances = max(max_instances, len(it_x))
+            #     ax.plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
+            #     if len(it_x) > 0:
+            #         ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
+        # ax.set_title('n_closed (cactus)')
+        ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
-        ax.set_xlabel('time')
+        ax.set_ylabel('n_closed')
+        ax.set_xlabel('Solved Instances')
         ax.legend()
+
+    @staticmethod
+    def plot_a_star_n_closed_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                                     is_json):
+        showfliers = False
+        # showfliers = True
+        big_table = []
+        for alg_name in algs_to_test_list:
+            a_star_runtimes = []
+            for n_agents in n_agents_list:
+                if is_json:
+                    n_agents = str(n_agents)
+                a_star_runtimes.extend(statistics_dict[alg_name][n_agents]['a_star_n_closed'])
+            # ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})', alpha=0.5)  # linewidth=0.5, edgecolor="white"
+            big_table.append(a_star_runtimes)
+        ax.boxplot(big_table,
+                   # notch=True,  # notch shape
+                   vert=True,  # vertical box alignment
+                   patch_artist=True,  # fill with color
+                   labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
+                   showfliers=showfliers)
+
+        # ax.set_title('a_star_runtimes (boxplot)')
+        # ax.set_xlim([0, max_instances + 2])
+        # ax.set_xticks()
+        ax.set_ylabel(f'a_star_n_closed')
+        ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
+        # ax.legend()
 
     def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, img_png='',
                       is_json=False):
@@ -322,6 +418,11 @@ class Plotter:
                                         n_agents_list, is_json)
         self.plot_a_star_runtimes(self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
                                   is_json)
+        self.plot_a_star_n_closed_boxplot(self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_list,
+                                          n_agents_list,
+                                          is_json)
+        self.plot_n_closed_cactus(self.ax[1, 2], statistics_dict, runs_per_n_agents, algs_to_test_list,
+                                  n_agents_list, is_json)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)

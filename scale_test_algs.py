@@ -48,6 +48,8 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
                 'a_star_calls_counter': {run: None for run in range(runs_per_n_agents)},
                 'a_star_calls_dist_counter': {run: None for run in range(runs_per_n_agents)},
                 'a_star_runtimes': [],
+                'a_star_n_closed': [],
+                'n_closed_per_run': [],
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -70,6 +72,10 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
 
         if 'a_star_runtimes' in info:
             statistics_dict[alg_name][n_agents]['a_star_runtimes'].extend(info['a_star_runtimes'])
+
+        if 'a_star_n_closed' in info:
+            statistics_dict[alg_name][n_agents]['a_star_n_closed'].extend(info['a_star_n_closed'])
+            statistics_dict[alg_name][n_agents]['n_closed_per_run'].append(sum(info['a_star_n_closed']))
 
 
 def set_seed(random_seed, seed):
@@ -163,7 +169,8 @@ def big_test(
                 print(f'#########################################################')
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}, result: {result}\n')
                 update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
-                plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
+                if i_run % 2 == 0:
+                    plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
 
@@ -184,15 +191,15 @@ def main():
         # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
         # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
     }
-    n_agents_list = [2, 3]
+    # n_agents_list = [2, 3, 4, 5]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
-    # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
+    n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [25, 30, 35, 40]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     runs_per_n_agents = 10
-    runs_per_n_agents = 2
+    # runs_per_n_agents = 2
     time_per_alg_limit = 1
     # time_per_alg_limit = 50  # According to PBS paper!
     random_seed = True
