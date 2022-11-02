@@ -223,7 +223,7 @@ class Plotter:
                 if len(sr_list) > 0:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
-            ax.plot(sr_x, sr_y, '-o', label=f'{alg_name}')
+            ax.plot(sr_x, sr_y, '-o', label=f'{alg_name}', alpha=0.75)
 
         ax.set_title('success_rate')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
@@ -247,7 +247,7 @@ class Plotter:
                 if len(sq_list) > 0:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))
-            ax.plot(sq_x, sq_y, '-o', label=f'{alg_name}')
+            ax.plot(sq_x, sq_y, '-o', label=f'{alg_name}', alpha=0.75)
 
         ax.set_title('sol_quality')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
@@ -265,7 +265,7 @@ class Plotter:
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75)
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -276,7 +276,7 @@ class Plotter:
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                ax.plot(it_x, it_y, '-^', label=f'{alg_name} (iteration time)')
+                ax.plot(it_x, it_y, '--^', label=f'{alg_name} (iteration time)')
                 if len(it_x) > 0:
                     ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -298,7 +298,7 @@ class Plotter:
             ac_y.sort()
             ac_x = list(range(len(ac_y)))
             max_instances = max(max_instances, len(ac_x))
-            ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}')
+            ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.75)
             if len(ac_x) > 0:
                 ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
                         bbox=dict(facecolor='yellow', alpha=0.75))
@@ -309,7 +309,7 @@ class Plotter:
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
-                ax.plot(acd_x, acd_y, '-^', label=f'{alg_name} (distributed)')
+                ax.plot(acd_x, acd_y, '--^', label=f'{alg_name} (distributed)')
                 if len(acd_x) > 0:
                     ax.text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -319,8 +319,8 @@ class Plotter:
         ax.legend()
 
     @staticmethod
-    def plot_a_star_runtimes(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
-                             is_json=False):
+    def plot_a_star_runtimes_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                                     is_json=False):
         showfliers = False
         # showfliers = True
         big_table = []
@@ -336,12 +336,13 @@ class Plotter:
                    # notch=True,  # notch shape
                    vert=True,  # vertical box alignment
                    patch_artist=True,  # fill with color
-                   labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
+                   # labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
                    showfliers=showfliers)
 
         # ax.set_title('a_star_runtimes (boxplot)')
         # ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks()
+        ax.set_xticklabels(algs_to_test_list, rotation=15)
         ax.set_ylabel(f'a_star_runtimes')
         ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
         # ax.legend()
@@ -356,7 +357,7 @@ class Plotter:
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}')
+            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75)
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -395,12 +396,13 @@ class Plotter:
                    # notch=True,  # notch shape
                    vert=True,  # vertical box alignment
                    patch_artist=True,  # fill with color
-                   labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
+                   # labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
                    showfliers=showfliers)
 
         # ax.set_title('a_star_runtimes (boxplot)')
         # ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks()
+        ax.set_xticklabels(algs_to_test_list, rotation=15)
         ax.set_ylabel(f'a_star_n_closed')
         ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
         # ax.legend()
@@ -416,8 +418,8 @@ class Plotter:
         self.plot_runtime(self.ax[0, 2], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list, is_json)
         self.plot_a_star_calls_counters(self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_list,
                                         n_agents_list, is_json)
-        self.plot_a_star_runtimes(self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
-                                  is_json)
+        self.plot_a_star_runtimes_boxplot(self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_list, n_agents_list,
+                                          is_json)
         self.plot_a_star_n_closed_boxplot(self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_list,
                                           n_agents_list,
                                           is_json)

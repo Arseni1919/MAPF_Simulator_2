@@ -14,7 +14,7 @@ from algs.alg_PBS import run_pbs
 from globals import *
 
 
-def save_and_show_results(statistics_dict, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None, n_agents_list=None, img_png=None):
+def save_and_show_results(statistics_dict, file_dir, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None, n_agents_list=None, img_png=None):
     # Serializing json
     to_save_dict = {
         'statistics_dict': statistics_dict,
@@ -26,7 +26,7 @@ def save_and_show_results(statistics_dict, plotter=None, runs_per_n_agents=None,
     }
     json_object = json.dumps(to_save_dict, indent=4)
     # Writing to sample.json
-    file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%d-%m-%Y-%H-%M")}.json'
+    # file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%d-%m-%Y-%H-%M")}.json'
     with open(file_dir, "w") as outfile:
         outfile.write(json_object)
     # Results saved.
@@ -146,6 +146,7 @@ def big_test(
     # for plotter
     statistics_dict = create_statistics_dict(algs_to_test_dict=algs_to_test_dict, n_agents_list=n_agents_list,
                                              runs_per_n_agents=runs_per_n_agents)
+    file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d--%H-%M")}.json'
 
     # for num of agents
     for n_agents in n_agents_list:
@@ -187,11 +188,11 @@ def big_test(
                 if i_run % 2 == 0:
                     plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
 
-    print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
+        if to_save_results:
+            save_and_show_results(statistics_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
+            print('Results saved.')
 
-    if to_save_results:
-        save_and_show_results(statistics_dict, plotter, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
-        print('Results saved.')
+    print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
 
 
 def main():
@@ -210,13 +211,13 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    # n_agents_list = [25, 30, 35, 40]
-    n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
+    n_agents_list = [10, 20, 30, 40]
+    # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
-    runs_per_n_agents = 20
+    # runs_per_n_agents = 20
     # runs_per_n_agents = 10
-    # runs_per_n_agents = 2
+    runs_per_n_agents = 3
 
     # time_per_alg_limit = 1  # According to PBS paper!
     time_per_alg_limit = 2
