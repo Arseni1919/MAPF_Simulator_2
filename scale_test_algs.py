@@ -211,17 +211,17 @@ def main():
         'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1'}),
     }
 
-    n_agents_list = [2, 3, 4, 5]
+    # n_agents_list = [2, 3, 4, 5]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    # n_agents_list = [10, 20, 30, 40]
+    n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 20
+    runs_per_n_agents = 20
     # runs_per_n_agents = 10
-    runs_per_n_agents = 3
+    # runs_per_n_agents = 3
 
     # time_per_alg_limit = 1  # According to PBS paper!
     time_per_alg_limit = 2
