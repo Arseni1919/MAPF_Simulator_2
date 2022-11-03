@@ -150,13 +150,13 @@ class Plotter:
 
         field = np.zeros((self.side_x, self.side_y))
         for node in open_list:
-            field[node.x, node.y] = node.g
+            field[node.x, node.y] = node.g_dict[start.xy_name]
         self.ax[1].imshow(field, origin='lower')
         self.ax[1].set_title('open_list')
 
         field = np.zeros((self.side_x, self.side_y))
         for node in closed_list:
-            field[node.x, node.y] = node.g
+            field[node.x, node.y] = node.g_dict[start.xy_name]
         self.ax[2].imshow(field, origin='lower')
         self.ax[2].set_title('closed_list')
 

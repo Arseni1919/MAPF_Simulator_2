@@ -86,10 +86,10 @@ def set_seed(random_seed, seed):
     print(f'SEED: {seed}')
 
 
-def get_nodes_from_pic():
-    img_dir = 'random-32-32-10.map'  # 32-32
+def get_map_nodes():
+    # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'room-64-64-8.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
     # img_dir = 'ht_chantry.map'  # 141-162
@@ -131,6 +131,7 @@ def big_test(
         a_star_iter_limit,
         a_star_calls_limit,
         to_save_results,
+        file_dir,
         profiler=None,
 ):
     print(f'\nTest started at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
@@ -139,14 +140,13 @@ def big_test(
     set_seed(random_seed, seed)
 
     # get nodes and dimensions from image
-    nodes, nodes_dict, map_dim, img_png = get_nodes_from_pic()
+    nodes, nodes_dict, map_dim, img_png = get_map_nodes()
     # inner_plotter = Plotter(map_dim=map_dim)
     inner_plotter = None
 
     # for plotter
     statistics_dict = create_statistics_dict(algs_to_test_dict=algs_to_test_dict, n_agents_list=n_agents_list,
                                              runs_per_n_agents=runs_per_n_agents)
-    file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d--%H-%M")}.json'
 
     # for num of agents
     for n_agents in n_agents_list:
@@ -197,6 +197,7 @@ def big_test(
 
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
+
     algs_to_test_dict = {
         'PBS': (run_pbs, {}),
         # 'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
@@ -207,6 +208,7 @@ def main():
         # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
         'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
     }
+
     # n_agents_list = [2, 3, 4, 5]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -235,6 +237,7 @@ def main():
 
     to_save_results = True
     # to_save_results = False
+    file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.json'
 
     # profiler = None
     profiler = cProfile.Profile()
@@ -252,6 +255,7 @@ def main():
         a_star_iter_limit=a_star_iter_limit,
         a_star_calls_limit=a_star_calls_limit,
         to_save_results=to_save_results,
+        file_dir=file_dir,
         profiler=profiler,
     )
     if profiler:

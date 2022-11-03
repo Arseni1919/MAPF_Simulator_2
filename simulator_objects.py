@@ -17,16 +17,22 @@ class Node:
         self.h = 0
         self.g = t
         self.parent = None
+        self.g_dict = {}
 
     def f(self):
         return self.t + self.h
         # return self.g + self.h
 
-    def reset(self):
+    def reset(self, target_nodes=None):
         self.t = 0
         self.h = 0
         self.g = self.t
         self.ID = f'{self.x}_{self.y}_{self.t}'
         self.parent = None
+        if target_nodes is not None:
+            self.g_dict = {target_node.xy_name: 0 for target_node in target_nodes}
+        else:
+            self.g_dict = {}
+
 
 

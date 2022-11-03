@@ -30,26 +30,33 @@ def h_func_creator(h_dict):
     return h_func
 
 
-def get_node_from_open(open_list):
+def get_node_from_open(open_list, target_name):
     v_list = open_list
-    some_v = min([node.g for node in v_list])
-    out_nodes = [node for node in v_list if node.g == some_v]
+    v_dict = {}
+    v_g_list = []
+    for node in v_list:
+        curr_g = node.g_dict[target_name]
+        v_g_list.append(curr_g)
+        if curr_g not in v_dict:
+            v_dict[curr_g] = []
+        v_dict[curr_g].append(node)
+
+    # some_v = min([node.g for node in v_list])
+    # out_nodes = [node for node in v_list if node.g == some_v]
     # print([node.ID for node in t_nodes])
-    next_node = random.choice(out_nodes)
+    # next_node = random.choice(out_nodes)
+    next_node = random.choice(v_dict[min(v_g_list)])
     return next_node
 
 
-def get_node(successor_xy_name, node_current, nodes, open_list, close_list):
-    for node in nodes:
-        if node.xy_name == successor_xy_name and node_current.xy_name != successor_xy_name:
-            return node
-    return None
-
-
-# class ParallelHDict:
-#     def __init__(self):
-#         self.h_dict = {}
-#         self._lock = threading.Lock()
+def get_node(successor_xy_name, node_current, nodes, nodes_dict):
+    if node_current.xy_name == successor_xy_name:
+        return None
+    return nodes_dict[successor_xy_name]
+    # for node in nodes:
+    #     if node.xy_name == successor_xy_name and node_current.xy_name != successor_xy_name:
+    #         return node
+    # return None
 
 
 def parallel_update_h_table(node, nodes, map_dim, to_save, plotter, middle_plot, h_dict, node_index):
@@ -62,6 +69,7 @@ def parallel_update_h_table(node, nodes, map_dim, to_save, plotter, middle_plot,
 def parallel_build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
     print('Started to build heuristic...')
     h_dict = {}
+    reset_nodes(nodes, target_nodes)
     with concurrent.futures.ThreadPoolExecutor(max_workers=len(target_nodes)) as executor:
         for node_index, node in enumerate(target_nodes):
             executor.submit(parallel_update_h_table, node, nodes, map_dim, to_save, plotter, middle_plot, h_dict, node_index)
@@ -73,6 +81,7 @@ def parallel_build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, 
 def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
     print('Started to build heuristic...')
     h_dict = {}
+    reset_nodes(nodes, target_nodes)
     iteration = 0
     for node in target_nodes:
         h_table = build_heuristic_for_one_target(node, nodes, map_dim, to_save, plotter, middle_plot)
@@ -83,34 +92,41 @@ def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=T
     return h_dict
 
 
+def reset_nodes(nodes, target_nodes=None):
+    _ = [node.reset(target_nodes) for node in nodes]
+
+
 def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):
     # print('Started to build heuristic...')
-    copy_nodes = copy.deepcopy(nodes)
-    target_node = [node for node in copy_nodes if node.xy_name == target_node.xy_name][0]
+    copy_nodes = nodes
+    nodes_dict = {node.xy_name: node for node in copy_nodes}
+    target_name = target_node.xy_name
+    target_node = nodes_dict[target_name]
+    # target_node = [node for node in copy_nodes if node.xy_name == target_node.xy_name][0]
     open_list = []
     close_list = []
     open_list.append(target_node)
     iteration = 0
     while len(open_list) > 0:
         iteration += 1
-        node_current = get_node_from_open(open_list)
+        node_current = get_node_from_open(open_list, target_name)
         # if node_current.xy_name == '30_12':
         #     print()
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, copy_nodes, open_list, close_list)
+            node_successor = get_node(successor_xy_name, node_current, copy_nodes, nodes_dict)
             if node_successor:
-                successor_current_g = node_current.g + 1  # h(now, next)
+                successor_current_g = node_current.g_dict[target_name] + 1  # h(now, next)
                 if node_successor in open_list:
-                    if node_successor.g <= successor_current_g:
+                    if node_successor.g_dict[target_name] <= successor_current_g:
                         continue
                 elif node_successor in close_list:
-                    if node_successor.g <= successor_current_g:
+                    if node_successor.g_dict[target_name] <= successor_current_g:
                         continue
                     close_list.remove(node_successor)
                     open_list.append(node_successor)
                 else:
                     open_list.append(node_successor)
-                node_successor.g = successor_current_g
+                node_successor.g_dict[target_name] = successor_current_g
                 # if node_successor.xy_name == '31_12':
                 #     print()
                 node_successor.parent = node_current
@@ -128,7 +144,7 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
 
     h_table = np.zeros(map_dim)
     for node in copy_nodes:
-        h_table[node.x, node.y] = node.g
+        h_table[node.x, node.y] = node.g_dict[target_name]
     # h_dict = {target_node.xy_name: h_table}
     # print(f'\rFinished to build heuristic at iter {iteration}.')
     return h_table
@@ -140,7 +156,8 @@ def main():
     nodes, nodes_dict = build_graph_nodes(img_dir=img_png, path='../maps', show_map=False)
     x_goal, y_goal = 38, 89
     node_goal = [node for node in nodes if node.x == x_goal and node.y == y_goal][0]
-    plotter = Plotter(map_dim=map_dim)
+    plotter = Plotter(map_dim=map_dim, subplot_rows=1, subplot_cols=3)
+    reset_nodes(nodes, target_nodes=[node_goal])
     h_table = build_heuristic_for_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=True)
     # h_table = build_heuristic_to_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=False)
     print(h_table)
@@ -150,3 +167,9 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+# class ParallelHDict:
+#     def __init__(self):
+#         self.h_dict = {}
+#         self._lock = threading.Lock()

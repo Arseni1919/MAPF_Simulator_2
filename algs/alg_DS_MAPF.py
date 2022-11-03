@@ -105,7 +105,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     if 'alpha' in kwargs:
         alpha = kwargs['alpha']
     else:
-        alpha = 0.8
+        alpha = 0.5
     # Creating agents
     agents = []
     n_agent = 0
@@ -175,7 +175,7 @@ def main():
     profiler = cProfile.Profile()
     if to_use_profiler:
         profiler.enable()
-    for i in range(5):
+    for i in range(3):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
                                               random_seed=random_seed, seed=seed, final_plot=True,
