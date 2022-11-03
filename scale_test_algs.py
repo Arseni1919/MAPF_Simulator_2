@@ -87,9 +87,9 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes():
-    # img_dir = 'random-32-32-10.map'  # 32-32
+    img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'room-64-64-8.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
     # img_dir = 'ht_chantry.map'  # 141-162
@@ -201,19 +201,21 @@ def main():
     algs_to_test_dict = {
         'PBS': (run_pbs, {}),
         # 'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
-        'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
+        # 'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
         # 'DS-MAPF-0.7': (run_ds_mapf, {'alpha': 0.7}),
         # 'DS-MAPF-0.6': (run_ds_mapf, {'alpha': 0.6}),
-        'DS-MAPF-0.5': (run_ds_mapf, {'alpha': 0.5}),
+        # 'DS-MAPF-0.5': (run_ds_mapf, {'alpha': 0.5}),
         # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
-        'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
+        # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
+        'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
+        'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1'}),
     }
 
-    # n_agents_list = [2, 3, 4, 5]
+    n_agents_list = [2, 3, 4, 5]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [10, 20, 30, 40]
+    # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
