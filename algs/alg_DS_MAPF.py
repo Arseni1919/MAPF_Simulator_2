@@ -43,15 +43,27 @@ class DSAgent:
 
         if decision_type == 'opt_1':
             path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
-            # path_lngths.sort()
             max_n = max(path_lngths)
             min_n = min(path_lngths)
-            # if shorter
+            # priority on smaller paths
             if len(new_path) > max_n and random.random() < 0.9:
                 self.path = new_path
             elif len(new_path) < min_n and random.random() < 0.1:
                 self.path = new_path
-            elif random.random() < 0.5:
+            elif random.random() < alpha:
+                self.path = new_path
+            return
+
+        if decision_type == 'opt_2':
+            path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
+            max_n = max(path_lngths)
+            min_n = min(path_lngths)
+            # priority on bigger paths
+            if len(new_path) > max_n and random.random() < 0.1:
+                self.path = new_path
+            elif len(new_path) < min_n and random.random() < 0.9:
+                self.path = new_path
+            elif random.random() < alpha:
                 self.path = new_path
             return
 

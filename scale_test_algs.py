@@ -188,6 +188,12 @@ def big_test(
                 print(f'\n#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}, result: {result}\n')
                 update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
                 if i_run % 2 == 0:
@@ -216,6 +222,7 @@ def main():
         'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
         'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1'}),
+        'DS-opt2': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_2'}),
     }
 
     # n_agents_list = [2, 3, 4, 5]
@@ -223,7 +230,8 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
-    n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
+    n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20
@@ -231,7 +239,7 @@ def main():
     # runs_per_n_agents = 3
 
     # time_per_alg_limit = 1  # According to PBS paper!
-    time_per_alg_limit = 2
+    time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
     random_seed = True
@@ -241,8 +249,8 @@ def main():
     plotter = Plotter()
     a_star_iter_limit = 3e3
 
-    # a_star_calls_limit = 200
-    a_star_calls_limit = 1e100
+    a_star_calls_limit = 200
+    # a_star_calls_limit = 1e100
 
     to_save_results = True
     # to_save_results = False
