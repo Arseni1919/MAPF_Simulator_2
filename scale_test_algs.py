@@ -14,14 +14,19 @@ from algs.alg_PBS import run_pbs
 from globals import *
 
 
-def save_and_show_results(statistics_dict, file_dir, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None, n_agents_list=None, img_png=None):
+def save_and_show_results(statistics_dict, file_dir, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None,
+                          n_agents_list=None, img_png=None, time_per_alg_limit=None, a_star_iter_limit=None,
+                          a_star_calls_limit=None):
     # Serializing json
     to_save_dict = {
         'statistics_dict': statistics_dict,
         'runs_per_n_agents': runs_per_n_agents,
         'n_agents_list': n_agents_list,
         'algs_to_test_names': list(algs_to_test_dict.keys()),
-        'img_dir': img_png
+        'img_dir': img_png,
+        'time_per_alg_limit': time_per_alg_limit,
+        'a_star_iter_limit': a_star_iter_limit,
+        'a_star_calls_limit': a_star_calls_limit,
 
     }
     json_object = json.dumps(to_save_dict, indent=4)
@@ -189,7 +194,7 @@ def big_test(
                     plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
 
         if to_save_results:
-            save_and_show_results(statistics_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
+            save_and_show_results(statistics_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, time_per_alg_limit, a_star_iter_limit, a_star_calls_limit)
             print('Results saved.')
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
@@ -207,7 +212,9 @@ def main():
         # 'DS-MAPF-0.5': (run_ds_mapf, {'alpha': 0.5}),
         # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
         # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
+        'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
+        'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
         'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1'}),
     }
 
@@ -215,12 +222,12 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [10, 20, 30, 40]
-    # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [10, 20, 30, 40]
+    n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
-    runs_per_n_agents = 20
-    # runs_per_n_agents = 10
+    # runs_per_n_agents = 20
+    runs_per_n_agents = 10
     # runs_per_n_agents = 3
 
     # time_per_alg_limit = 1  # According to PBS paper!
