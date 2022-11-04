@@ -38,11 +38,11 @@ def get_max_final(perm_constr_dict):
     return max_final_time
 
 
-def get_node_from_open(open_list):
+def get_node_from_open(open_nodes):
     # v_list = open_list
     f_dict = {}
     f_vals_list = []
-    for node in open_list:
+    for node in open_nodes.list:
         # TODO: heap list / prioritized list (they use binary search)
         curr_f = node.f()
         f_vals_list.append(curr_f)
@@ -142,7 +142,7 @@ def a_star(start, goal, nodes, h_func,
         if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
             return None, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.list), 'n_closed': len(closed_nodes.list)}
-        node_current = get_node_from_open(open_nodes.list)  # heavy!
+        node_current = get_node_from_open(open_nodes)  # heavy!
         if node_current.xy_name == goal.xy_name:
             # break
             # if there is a future constraint of a goal

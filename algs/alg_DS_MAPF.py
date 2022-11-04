@@ -76,22 +76,17 @@ class DSAgent:
 
     def plan(self, alpha, decision_type):
         start_time = time.time()
-        # sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}
 
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
+
         if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
-
-            # no_paths_agents = [k for k, v in self.other_paths.items() if len(v) == 0]
-            # if len(no_paths_agents) > 0:
-            #     raise RuntimeError('len(no_paths_agents) > 0')
-
             print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
             return True, {'elapsed': None, 'a_s_info': None}
+
         agents_in_confs = self.get_agents_in_conf(c_v_list, c_e_list)
         print(f'\n ---------- A* {self.name} ---------- \n')
 
-        # v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.conf_paths)
         v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
 
         new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node, nodes=self.nodes, h_func=self.h_func,
@@ -278,5 +273,9 @@ if __name__ == '__main__':
 # c_e_list_after_2 = c_e_check_for_agent(self.name, new_path, self.other_paths)
 # if len(c_v_list_after_2) > 0 or len(c_e_list_after_2) > 0:
 #     raise RuntimeError('a_star failed')
+
+# no_paths_agents = [k for k, v in self.other_paths.items() if len(v) == 0]
+# if len(no_paths_agents) > 0:
+#     raise RuntimeError('len(no_paths_agents) > 0')
 
 
