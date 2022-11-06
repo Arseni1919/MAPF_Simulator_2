@@ -30,28 +30,31 @@ class DSAgent:
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
 
-    def take_decision(self, alpha, decision_type, new_path, agents_in_confs):
+    def take_decision(self, alpha, decision_type, agents_in_confs, new_path=None):
 
         if len(self.path) == 0:
-            self.path = new_path
-            return
+            # self.path = new_path
+            return True
 
         if decision_type == 'simple':
             if random.random() < alpha:
-                self.path = new_path
-            return
+                # self.path = new_path
+                return True
 
         if decision_type == 'opt_1':
             path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
             max_n = max(path_lngths)
             min_n = min(path_lngths)
             # priority on smaller paths
-            if len(new_path) > max_n and random.random() < 0.9:
-                self.path = new_path
-            elif len(new_path) < min_n and random.random() < 0.1:
-                self.path = new_path
+            if len(self.path) > max_n and random.random() < 0.9:
+                # self.path = new_path
+                return True
+            elif len(self.path) < min_n and random.random() < 0.1:
+                # self.path = new_path
+                return True
             elif random.random() < alpha:
-                self.path = new_path
+                # self.path = new_path
+                return True
             return
 
         if decision_type == 'opt_2':
@@ -59,13 +62,16 @@ class DSAgent:
             max_n = max(path_lngths)
             min_n = min(path_lngths)
             # priority on bigger paths
-            if len(new_path) > max_n and random.random() < 0.1:
-                self.path = new_path
-            elif len(new_path) < min_n and random.random() < 0.9:
-                self.path = new_path
+            if len(self.path) > max_n and random.random() < 0.1:
+                # self.path = new_path
+                return True
+            elif len(self.path) < min_n and random.random() < 0.9:
+                # self.path = new_path
+                return True
             elif random.random() < alpha:
-                self.path = new_path
-            return
+                # self.path = new_path
+                return True
+        return False
 
     @staticmethod
     def get_agents_in_conf(c_v_list, c_e_list):
@@ -85,24 +91,23 @@ class DSAgent:
             return True, {'elapsed': None, 'a_s_info': None}
 
         agents_in_confs = self.get_agents_in_conf(c_v_list, c_e_list)
-        print(f'\n ---------- A* {self.name} ---------- \n')
+        to_change = self.take_decision(alpha, decision_type, agents_in_confs)
+        if to_change:
+            print(f'\n ---------- A* {self.name} ---------- \n')
+            v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
+            new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
+                                        nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
+                                        v_constr_dict=v_constr_dict,
+                                        e_constr_dict=e_constr_dict,
+                                        perm_constr_dict=perm_constr_dict,
+                                        plotter=self.plotter, middle_plot=self.middle_plot,
+                                        iter_limit=self.iter_limit)
+            if new_path is not None:
+                self.path = new_path
+            return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info}
 
-        v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
-
-        new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
-                                    nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
-                                    v_constr_dict=v_constr_dict,
-                                    e_constr_dict=e_constr_dict,
-                                    perm_constr_dict=perm_constr_dict,
-                                    plotter=self.plotter, middle_plot=self.middle_plot,
-                                    iter_limit=self.iter_limit)
-
-        elapsed = time.time() - start_time
-        if new_path is not None:
-            self.take_decision(alpha, decision_type, new_path, agents_in_confs)
-
-            return True, {'elapsed': elapsed, 'a_s_info': a_s_info}
-        return False, {'elapsed': elapsed, 'a_s_info': a_s_info}
+        print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
+        return False, {'elapsed': None, 'a_s_info': None}
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
@@ -215,7 +220,7 @@ def main():
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
                                               random_seed=random_seed, seed=seed, final_plot=True,
-                                              a_star_iter_limit=5e5, max_time=5)
+                                              a_star_iter_limit=5e5, max_time=5, plot_per=plot_per)
 
         if not random_seed:
             break
@@ -232,8 +237,8 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 37
-    n_agents = 150
-
+    n_agents = 100
+    plot_per = 1
     to_use_profiler = True
     # to_use_profiler = False
 
