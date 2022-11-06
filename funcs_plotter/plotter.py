@@ -115,7 +115,7 @@ class Plotter:
         self.subplot_cols = subplot_cols
         self.fig, self.ax = plt.subplots(subplot_rows, subplot_cols, figsize=(14, 7))
 
-    def plot_lists(self, open_list, closed_list, start, goal=None, path=None, nodes=None):
+    def plot_lists(self, open_list, closed_list, start, goal=None, path=None, nodes=None, a_star_run=False):
 
         field = np.zeros((self.side_x, self.side_y))
         # for ax in self.ax:
@@ -150,13 +150,19 @@ class Plotter:
 
         field = np.zeros((self.side_x, self.side_y))
         for node in open_list:
-            field[node.x, node.y] = node.g_dict[start.xy_name]
+            if a_star_run:
+                field[node.x, node.y] = node.g
+            else:
+                field[node.x, node.y] = node.g_dict[start.xy_name]
         self.ax[1].imshow(field, origin='lower')
         self.ax[1].set_title('open_list')
 
         field = np.zeros((self.side_x, self.side_y))
         for node in closed_list:
-            field[node.x, node.y] = node.g_dict[start.xy_name]
+            if a_star_run:
+                field[node.x, node.y] = node.g
+            else:
+                field[node.x, node.y] = node.g_dict[start.xy_name]
         self.ax[2].imshow(field, origin='lower')
         self.ax[2].set_title('closed_list')
 
@@ -365,7 +371,7 @@ class Plotter:
             # if 'DS-MAPF' in alg_name:
             #     it_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'n_closed_per_run', is_json)
             #     it_y.sort()
-            #     it_x = list(range(len(it_y)))
+            #     it_x = heap_list(range(len(it_y)))
             #     max_instances = max(max_instances, len(it_x))
             #     ax.plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
             #     if len(it_x) > 0:

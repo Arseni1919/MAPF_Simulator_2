@@ -4,6 +4,7 @@ import random
 import cProfile
 import pstats
 import time
+import heapq
 import matplotlib.pyplot as plt
 import numpy as np
 from simulator_objects import Node
@@ -15,16 +16,29 @@ from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_he
 
 class ListNodes:
     def __init__(self):
-        self.list = []
+        self.heap_list = []
+        self.nodes_list = []
         self.dict = {}
 
     def remove(self, node):
-        self.list.remove(node)
+        if node.ID not in self.dict:
+            raise RuntimeError('node.ID not in self.dict')
+        self.heap_list.remove(((node.f(), node.h), node.ID))
         del self.dict[node.ID]
+        self.nodes_list.remove(node)
 
     def add(self, node):
-        self.list.append(node)
+        heapq.heappush(self.heap_list, ((node.f(), node.h), node.ID))
+        # self.heap_list.append(node)
         self.dict[node.ID] = node
+        self.nodes_list.append(node)
+
+    def pop(self):
+        heap_tuple = heapq.heappop(self.heap_list)
+        node = self.dict[heap_tuple[1]]
+        del self.dict[node.ID]
+        self.nodes_list.remove(node)
+        return node
 
     def get(self, ID):
         return self.dict[ID]
@@ -36,34 +50,6 @@ def get_max_final(perm_constr_dict):
         final_list = [v[0] for k, v in perm_constr_dict.items() if len(v) > 0]
         max_final_time = max(final_list) if len(final_list) > 0 else None
     return max_final_time
-
-
-def get_node_from_open(open_nodes):
-    # v_list = open_list
-    f_dict = {}
-    f_vals_list = []
-    for node in open_nodes.list:
-        # TODO: heap list / prioritized list (they use binary search)
-        curr_f = node.f()
-        f_vals_list.append(curr_f)
-        if curr_f not in f_dict:
-            f_dict[curr_f] = []
-        f_dict[curr_f].append(node)
-
-    smallest_f_nodes = f_dict[min(f_vals_list)]
-
-    h_dict = {}
-    h_vals_list = []
-    for node in smallest_f_nodes:
-        curr_h = node.h
-        h_vals_list.append(curr_h)
-        if curr_h not in h_dict:
-            h_dict[curr_h] = []
-        h_dict[curr_h].append(node)
-
-    smallest_h_from_smallest_f_nodes = h_dict[min(h_vals_list)]
-    next_node = random.choice(smallest_h_from_smallest_f_nodes)
-    return next_node
 
 
 def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes, v_constr_dict, e_constr_dict,
@@ -92,13 +78,6 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
                 new_t = max_final_time + 1
 
     new_ID = f'{successor_xy_name}_{new_t}'
-
-    # for open_node in open_list:
-    #     if open_node.ID == new_ID:
-    #         return open_node
-    # for closed_node in close_list:
-    #     if closed_node.ID == new_ID:
-    #         return closed_node
     if new_ID in open_nodes.dict:
         return open_nodes.dict[new_ID]
     if new_ID in closed_nodes.dict:
@@ -107,11 +86,11 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
     if nodes_dict:
         node = nodes_dict[successor_xy_name]
         return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
-    else:
-        for node in nodes:
-            if node.xy_name == successor_xy_name:
-                return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
-    return None
+    # else:
+    #     for node in nodes:
+    #         if node.xy_name == successor_xy_name:
+    #             return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
+    raise RuntimeError('No dict')  # return None
 
 
 def reset_nodes(start, goal, nodes):
@@ -137,12 +116,13 @@ def a_star(start, goal, nodes, h_func,
     open_nodes.add(node_current)
     max_final_time = get_max_final(perm_constr_dict)
     iteration = 0
-    while len(open_nodes.list) > 0:
+    while len(open_nodes.nodes_list) > 0:
         iteration += 1
         if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
-            return None, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.list), 'n_closed': len(closed_nodes.list)}
-        node_current = get_node_from_open(open_nodes)  # heavy!
+            return None, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.heap_list), 'n_closed': len(closed_nodes.heap_list)}
+        node_current = open_nodes.pop()
+
         if node_current.xy_name == goal.xy_name:
             # break
             # if there is a future constraint of a goal
@@ -158,33 +138,55 @@ def a_star(start, goal, nodes, h_func,
                 #     print('', end='')
             else:
                 break
+
         for successor_xy_name in node_current.neighbours:
             node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
                                       v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)  # heavy!
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
-            if node_successor in open_nodes.list:
-                if node_successor.t <= successor_current_time:
-                    continue
-            elif node_successor in closed_nodes.list:
-                if node_successor.t <= successor_current_time:
-                    continue
-                closed_nodes.remove(node_successor)
-                open_nodes.add(node_successor)
-            else:
-                open_nodes.add(node_successor)
-                node_successor.h = h_func(node_successor, goal)
-            node_successor.t = successor_current_time
-            node_successor.g = node_successor.t
-            node_successor.parent = node_current
 
-        open_nodes.remove(node_current)
+            # INSIDE OPEN LIST
+            if node_successor.ID in open_nodes.dict:
+                if node_successor.t <= successor_current_time:
+                    continue
+                else:
+                    open_nodes.remove(node_successor)
+                    node_successor.t = successor_current_time
+                    node_successor.g = node_successor.t
+                    node_successor.parent = node_current
+                    open_nodes.add(node_successor)
+
+            # INSIDE CLOSED LIST
+            elif node_successor.ID in closed_nodes.dict:
+                if node_successor.t <= successor_current_time:
+                    continue
+                else:
+                    closed_nodes.remove(node_successor)
+                    node_successor.t = successor_current_time
+                    node_successor.g = node_successor.t
+                    node_successor.parent = node_current
+                    open_nodes.add(node_successor)
+
+            # NOT IN CLOSED AND NOT IN OPEN LISTS
+            else:
+                node_successor.h = h_func(node_successor, goal)
+                node_successor.t = successor_current_time
+                node_successor.g = node_successor.t
+                node_successor.parent = node_current
+                open_nodes.add(node_successor)
+            # node_successor.t = successor_current_time
+            # node_successor.g = node_successor.t
+            # node_successor.parent = node_current
+
+        # open_nodes.remove(node_current)
         closed_nodes.add(node_current)
 
         if plotter and middle_plot and iteration % 10 == 0:
-            plotter.plot_lists(open_list=open_nodes.list, closed_list=closed_nodes.list, start=start, goal=goal, nodes=nodes)
-        print(f'\r(a_star) iter: {iteration}, open: {len(open_nodes.list)}', end='')
+            plotter.plot_lists(open_list=open_nodes.nodes_list,
+                               closed_list=closed_nodes.nodes_list,
+                               start=start, goal=goal, nodes=nodes, a_star_run=True)
+        print(f'\r(a_star) iter: {iteration}, open: {len(open_nodes.heap_list)}', end='')
 
     path = None
     if node_current.xy_name == goal.xy_name:
@@ -195,11 +197,13 @@ def a_star(start, goal, nodes, h_func,
         path.reverse()
 
     if plotter and middle_plot:
-        plotter.plot_lists(open_list=open_nodes.list, closed_list=closed_nodes.list, start=start, goal=goal, path=path, nodes=nodes)
+        plotter.plot_lists(open_list=open_nodes.nodes_list,
+                           closed_list=closed_nodes.nodes_list,
+                           start=start, goal=goal, path=path, nodes=nodes, a_star_run=True)
     # print('\rFinished A*.', end='')
     if path is None:
         print()
-    return path, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.list), 'n_closed': len(closed_nodes.list)}
+    return path, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.heap_list), 'n_closed': len(closed_nodes.heap_list)}
 
 
 def main():
@@ -283,8 +287,9 @@ def try_a_map_from_pic():
                           v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
                           plotter=plotter, middle_plot=True, nodes_dict=nodes_dict)
     profiler.disable()
-    print('The result is:', *[node.xy_name for node in result], sep='->')
-    print('The result is:', *[node.ID for node in result], sep='->')
+    if result:
+        print('The result is:', *[node.xy_name for node in result], sep='->')
+        print('The result is:', *[node.ID for node in result], sep='->')
     # ------------------------- #
     # ------------------------- #
     plt.show()
@@ -311,5 +316,41 @@ if __name__ == '__main__':
 #     copy_nodes_dict = {node.xy_name: copy.deepcopy(node) for node in nodes}
 #     copy_start = copy_nodes_dict[start.xy_name]
 #     copy_goal = copy_nodes_dict[goal.xy_name]
-#     copy_nodes = list(copy_nodes_dict.values())
+#     copy_nodes = heap_list(copy_nodes_dict.values())
 #     return copy_start, copy_goal, copy_nodes
+
+# for open_node in open_list:
+#     if open_node.ID == new_ID:
+#         return open_node
+# for closed_node in close_list:
+#     if closed_node.ID == new_ID:
+#         return closed_node
+
+
+# def get_node_from_open(open_nodes):
+#     # v_list = open_list
+#     # f_dict = {}
+#     # f_vals_list = []
+#     # for node in open_nodes.heap_list:
+#     #     curr_f = node.f()
+#     #     f_vals_list.append(curr_f)
+#     #     if curr_f not in f_dict:
+#     #         f_dict[curr_f] = []
+#     #     f_dict[curr_f].append(node)
+#     #
+#     # smallest_f_nodes = f_dict[min(f_vals_list)]
+#     #
+#     # h_dict = {}
+#     # h_vals_list = []
+#     # for node in smallest_f_nodes:
+#     #     curr_h = node.h
+#     #     h_vals_list.append(curr_h)
+#     #     if curr_h not in h_dict:
+#     #         h_dict[curr_h] = []
+#     #     h_dict[curr_h].append(node)
+#     #
+#     # smallest_h_from_smallest_f_nodes = h_dict[min(h_vals_list)]
+#     # next_node = random.choice(smallest_h_from_smallest_f_nodes)
+#
+#     next_node = open_nodes.pop()
+#     return next_node

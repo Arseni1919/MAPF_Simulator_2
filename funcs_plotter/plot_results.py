@@ -14,7 +14,7 @@ def show_results(file_dir, plotter, algs_to_test_dict):
         'statistics_dict': statistics_dict,
         'runs_per_n_agents': runs_per_n_agents,
         'n_agents_list': n_agents_list,
-        'algs_to_test_names': list(algs_to_test_dict.keys()),
+        'algs_to_test_names': heap_list(algs_to_test_dict.keys()),
         'img_dir': img_dir
 
     }

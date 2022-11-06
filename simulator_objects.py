@@ -1,3 +1,5 @@
+import random
+
 class Node:
     def __init__(self, x, y, t=0, neighbours=None, new_ID=None):
         if new_ID:
@@ -33,6 +35,29 @@ class Node:
             self.g_dict = {target_node.xy_name: 0 for target_node in target_nodes}
         else:
             self.g_dict = {}
+
+    # def decision_rule(self, other):
+    #     # return bool(random.getrandbits(1))
+    #     return self.x > other.x or self.y > other.y
+    #
+    # def __lt__(self, other):
+    #     return self.decision_rule(other)
+    #
+    # def __le__(self, other):
+    #     return self.decision_rule(other)
+    #
+    # def __eq__(self, other):
+    #     return self.decision_rule(other)
+    #
+    # def __ne__(self, other):
+    #     return self.decision_rule(other)
+    #
+    # def __gt__(self, other):
+    #     return self.decision_rule(other)
+    #
+    # def __ge__(self, other):
+    #     return self.decision_rule(other)
+
 
 
 

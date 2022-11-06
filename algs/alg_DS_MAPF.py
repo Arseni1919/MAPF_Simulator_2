@@ -89,7 +89,8 @@ class DSAgent:
 
         v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
 
-        new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node, nodes=self.nodes, h_func=self.h_func,
+        new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
+                                    nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
                                     v_constr_dict=v_constr_dict,
                                     e_constr_dict=e_constr_dict,
                                     perm_constr_dict=perm_constr_dict,
@@ -115,6 +116,10 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         final_plot = kwargs['final_plot']
     else:
         final_plot = True
+    if 'plot_per' in kwargs:
+        plot_per = kwargs['plot_per']
+    else:
+        plot_per = 10
     if 'a_star_iter_limit' in kwargs:
         iter_limit = kwargs['a_star_iter_limit']
     else:
@@ -134,7 +139,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     if 'decision_type' in kwargs:
         decision_type = kwargs['decision_type']
     else:
-        decision_type = 'simple'
+        decision_type = 'opt_1'
     # Creating agents
     agents = []
     n_agent = 0
@@ -175,7 +180,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         # logging.info(f'\rinside ds_mapf')
         cost = None if 0 in plan_lngths else sum([len(path) for path in plan.values()])
         print(f'\r---\n'
-              f'[DS-MAPF ({alpha})][{len(agents)} agents][A* calls: {a_star_calls_counter}][A* dist calls: {a_star_calls_dist_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
+              f'[DS-MAPF ({decision_type})][{len(agents)} agents][A* calls: {a_star_calls_counter}][A* dist calls: {a_star_calls_dist_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
               f'cost: {cost}\n'
               f'---\n')
         if cost:
@@ -185,7 +190,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
-                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=10)
+                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
                 return plan, {'agents': agents,
                               'success_rate': 1,
                               'sol_quality': cost,
@@ -210,7 +215,7 @@ def main():
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
                                               random_seed=random_seed, seed=seed, final_plot=True,
-                                              a_star_iter_limit=5e3, max_time=2)
+                                              a_star_iter_limit=5e5, max_time=5)
 
         if not random_seed:
             break
@@ -226,8 +231,8 @@ def main():
 if __name__ == '__main__':
     random_seed = True
     # random_seed = False
-    seed = 117
-    n_agents = 100
+    seed = 37
+    n_agents = 150
 
     to_use_profiler = True
     # to_use_profiler = False

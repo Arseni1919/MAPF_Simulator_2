@@ -108,7 +108,8 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
     print('\rBEFORE A*', end='')
-    new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node, nodes=nodes,
+    new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node,
+                                nodes=nodes, nodes_dict=nodes_dict,
                                 h_func=h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict,
                                 perm_constr_dict=perm_constr_dict,
                                 plotter=plotter, middle_plot=middle_plot, iter_limit=iter_limit)
@@ -299,6 +300,6 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 710
-    n_agents = 1
+    n_agents = 40
 
     main()

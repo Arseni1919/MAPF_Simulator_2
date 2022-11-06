@@ -93,7 +93,7 @@ def edge_col_check(results):
 
 def check_for_collisions(results):
     """
-    results: {'agents str': [Nodes list]}
+    results: {'agents str': [Nodes heap_list]}
     """
     if results:
         vertex_col_list = vertex_col_check(results)
