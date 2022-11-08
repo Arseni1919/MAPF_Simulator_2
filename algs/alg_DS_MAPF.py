@@ -237,8 +237,8 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 37
-    n_agents = 100
-    plot_per = 1
+    n_agents = 80
+    plot_per = 10
     to_use_profiler = True
     # to_use_profiler = False
 

@@ -177,34 +177,33 @@ class Plotter:
         longest_path = max([len(path) for path in paths_dict.values()])
 
         for t in range(longest_path):
-            field = np.zeros((self.side_x, self.side_y))
-            self.ax.cla()
-            # for ax in self.ax:
-            #     ax.cla()
-
-            if nodes:
-                for node in nodes:
-                    field[node.x, node.y] = -1
-
-            n = len(list(paths_dict.keys()))
-            color_map = plt.cm.get_cmap('hsv', n)
-            i = 0
-            for agent_name, path in paths_dict.items():
-                t_path = path[:t + 1]
-                for node in t_path:
-                    field[node.x, node.y] = 3
-                self.ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
-                self.ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
-                i += 1
-
-            for agent_name, path in paths_dict.items():
-                field[path[0].x, path[0].y] = 4
-                field[path[-1].x, path[-1].y] = 5
-
             if t % plot_per == 0:
+                field = np.zeros((self.side_x, self.side_y))
+                self.ax.cla()
+                # for ax in self.ax:
+                #     ax.cla()
+
+                if nodes:
+                    for node in nodes:
+                        field[node.x, node.y] = -1
+
+                n = len(list(paths_dict.keys()))
+                color_map = plt.cm.get_cmap('hsv', n)
+                i = 0
+                for agent_name, path in paths_dict.items():
+                    t_path = path[:t + 1]
+                    for node in t_path:
+                        field[node.x, node.y] = 3
+                    self.ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
+                    self.ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
+                    i += 1
+
+                for agent_name, path in paths_dict.items():
+                    field[path[0].x, path[0].y] = 4
+                    field[path[-1].x, path[-1].y] = 5
+
                 self.ax.imshow(field, origin='lower')
                 self.ax.set_title('MAPF Paths')
-
                 # plt.pause(1)
                 plt.pause(0.01)
 
