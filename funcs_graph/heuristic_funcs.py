@@ -8,7 +8,7 @@ import threading
 import asyncio
 import logging
 
-from simulator_objects import Node
+from simulator_objects import ListNodes
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.nodes_from_pic import build_graph_nodes
 from funcs_plotter.plotter import Plotter
@@ -49,7 +49,7 @@ def get_node_from_open(open_list, target_name):
     return next_node
 
 
-def get_node(successor_xy_name, node_current, nodes, nodes_dict):
+def get_node(successor_xy_name, node_current, nodes_dict):
     if node_current.xy_name == successor_xy_name:
         return None
     return nodes_dict[successor_xy_name]
@@ -103,44 +103,64 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
     target_name = target_node.xy_name
     target_node = nodes_dict[target_name]
     # target_node = [node for node in copy_nodes if node.xy_name == target_node.xy_name][0]
-    open_list = []
-    close_list = []
-    open_list.append(target_node)
+    # open_list = []
+    # close_list = []
+    open_nodes = ListNodes(h_func_bool=True, target_name=target_node.xy_name)
+    closed_nodes = ListNodes(h_func_bool=True, target_name=target_node.xy_name)
+    # open_list.append(target_node)
+    open_nodes.add(target_node)
     iteration = 0
-    while len(open_list) > 0:
+    # while len(open_list) > 0:
+    while len(open_nodes) > 0:
         iteration += 1
-        node_current = get_node_from_open(open_list, target_name)
+        # node_current = get_node_from_open(open_list, target_name)
+        node_current = open_nodes.pop()
         # if node_current.xy_name == '30_12':
         #     print()
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, copy_nodes, nodes_dict)
+            node_successor = get_node(successor_xy_name, node_current, nodes_dict)
             if node_successor:
                 successor_current_g = node_current.g_dict[target_name] + 1  # h(now, next)
-                if node_successor in open_list:
+
+                # INSIDE OPEN LIST
+                if node_successor.xy_name in open_nodes.dict:
                     if node_successor.g_dict[target_name] <= successor_current_g:
                         continue
-                elif node_successor in close_list:
+                    open_nodes.remove(node_successor)
+                    node_successor.g_dict[target_name] = successor_current_g
+                    node_successor.parent = node_current
+                    open_nodes.add(node_successor)
+
+                # INSIDE CLOSED LIST
+                elif node_successor.xy_name in closed_nodes.dict:
                     if node_successor.g_dict[target_name] <= successor_current_g:
                         continue
-                    close_list.remove(node_successor)
-                    open_list.append(node_successor)
+                    closed_nodes.remove(node_successor)
+                    node_successor.g_dict[target_name] = successor_current_g
+                    node_successor.parent = node_current
+                    open_nodes.add(node_successor)
+
+                # NOT IN CLOSED AND NOT IN OPEN LISTS
                 else:
-                    open_list.append(node_successor)
-                node_successor.g_dict[target_name] = successor_current_g
-                # if node_successor.xy_name == '31_12':
-                #     print()
-                node_successor.parent = node_current
+                    node_successor.g_dict[target_name] = successor_current_g
+                    node_successor.parent = node_current
+                    open_nodes.add(node_successor)
 
-        open_list.remove(node_current)
-        close_list.append(node_current)
+                # node_successor.g_dict[target_name] = successor_current_g
+                # node_successor.parent = node_current
 
-        if plotter and middle_plot and iteration % 100 == 0:
-            plotter.plot_lists(open_list=open_list, closed_list=close_list, start=target_node, nodes=copy_nodes)
+        # open_nodes.remove(node_current, target_name=target_node.xy_name)
+        closed_nodes.add(node_current)
+
+        if plotter and middle_plot and iteration % 1000 == 0:
+            plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
+                               closed_list=closed_nodes.get_nodes_list(), start=target_node, nodes=copy_nodes)
         if iteration % 100 == 0:
             print(f'\riter: {iteration}', end='')
 
     if plotter and middle_plot:
-        plotter.plot_lists(open_list=open_list, closed_list=close_list, start=target_node, nodes=copy_nodes)
+        plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
+                           closed_list=closed_nodes.get_nodes_list(), start=target_node, nodes=copy_nodes)
 
     h_table = np.zeros(map_dim)
     for node in copy_nodes:
@@ -159,7 +179,7 @@ def main():
     plotter = Plotter(map_dim=map_dim, subplot_rows=1, subplot_cols=3)
     reset_nodes(nodes, target_nodes=[node_goal])
     h_table = build_heuristic_for_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=True)
-    # h_table = build_heuristic_to_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=False)
+    # h_table = build_heuristic_for_one_target(node_goal, nodes, map_dim, plotter=plotter, middle_plot=False)
     print(h_table)
     plt.show()
     plt.close()

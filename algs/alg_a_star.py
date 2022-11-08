@@ -7,41 +7,11 @@ import time
 import heapq
 import matplotlib.pyplot as plt
 import numpy as np
-from simulator_objects import Node
+from simulator_objects import Node, ListNodes
 from funcs_plotter.plotter import Plotter
 from funcs_graph.nodes_from_pic import make_neighbours, build_graph_nodes
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
-
-
-class ListNodes:
-    def __init__(self):
-        self.heap_list = []
-        self.nodes_list = []
-        self.dict = {}
-
-    def remove(self, node):
-        if node.ID not in self.dict:
-            raise RuntimeError('node.ID not in self.dict')
-        self.heap_list.remove(((node.f(), node.h), node.ID))
-        del self.dict[node.ID]
-        self.nodes_list.remove(node)
-
-    def add(self, node):
-        heapq.heappush(self.heap_list, ((node.f(), node.h), node.ID))
-        # self.heap_list.append(node)
-        self.dict[node.ID] = node
-        self.nodes_list.append(node)
-
-    def pop(self):
-        heap_tuple = heapq.heappop(self.heap_list)
-        node = self.dict[heap_tuple[1]]
-        del self.dict[node.ID]
-        self.nodes_list.remove(node)
-        return node
-
-    def get(self, ID):
-        return self.dict[ID]
 
 
 def get_max_final(perm_constr_dict):
@@ -116,7 +86,7 @@ def a_star(start, goal, nodes, h_func,
     open_nodes.add(node_current)
     max_final_time = get_max_final(perm_constr_dict)
     iteration = 0
-    while len(open_nodes.nodes_list) > 0:
+    while len(open_nodes) > 0:
         iteration += 1
         if iteration > iter_limit:
             print(f'\n[ERROR]: out of iterations (more than {iteration})')
@@ -150,23 +120,21 @@ def a_star(start, goal, nodes, h_func,
             if node_successor.ID in open_nodes.dict:
                 if node_successor.t <= successor_current_time:
                     continue
-                else:
-                    open_nodes.remove(node_successor)
-                    node_successor.t = successor_current_time
-                    node_successor.g = node_successor.t
-                    node_successor.parent = node_current
-                    open_nodes.add(node_successor)
+                open_nodes.remove(node_successor)
+                node_successor.t = successor_current_time
+                node_successor.g = node_successor.t
+                node_successor.parent = node_current
+                open_nodes.add(node_successor)
 
             # INSIDE CLOSED LIST
             elif node_successor.ID in closed_nodes.dict:
                 if node_successor.t <= successor_current_time:
                     continue
-                else:
-                    closed_nodes.remove(node_successor)
-                    node_successor.t = successor_current_time
-                    node_successor.g = node_successor.t
-                    node_successor.parent = node_current
-                    open_nodes.add(node_successor)
+                closed_nodes.remove(node_successor)
+                node_successor.t = successor_current_time
+                node_successor.g = node_successor.t
+                node_successor.parent = node_current
+                open_nodes.add(node_successor)
 
             # NOT IN CLOSED AND NOT IN OPEN LISTS
             else:
@@ -183,8 +151,8 @@ def a_star(start, goal, nodes, h_func,
         closed_nodes.add(node_current)
 
         if plotter and middle_plot and iteration % 10 == 0:
-            plotter.plot_lists(open_list=open_nodes.nodes_list,
-                               closed_list=closed_nodes.nodes_list,
+            plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
+                               closed_list=closed_nodes.get_nodes_list(),
                                start=start, goal=goal, nodes=nodes, a_star_run=True)
         print(f'\r(a_star) iter: {iteration}, open: {len(open_nodes.heap_list)}', end='')
 
@@ -197,8 +165,8 @@ def a_star(start, goal, nodes, h_func,
         path.reverse()
 
     if plotter and middle_plot:
-        plotter.plot_lists(open_list=open_nodes.nodes_list,
-                           closed_list=closed_nodes.nodes_list,
+        plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
+                           closed_list=closed_nodes.get_nodes_list(),
                            start=start, goal=goal, path=path, nodes=nodes, a_star_run=True)
     # print('\rFinished A*.', end='')
     if path is None:
