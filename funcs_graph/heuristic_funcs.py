@@ -10,7 +10,7 @@ import logging
 
 from simulator_objects import ListNodes
 from funcs_graph.map_dimensions import map_dimensions_dict
-from funcs_graph.nodes_from_pic import build_graph_nodes
+from funcs_graph.nodes_from_pic import build_graph_nodes, get_dims_from_pic
 from funcs_plotter.plotter import Plotter
 
 
@@ -28,25 +28,6 @@ def h_func_creator(h_dict):
         return np.abs(from_node.x - to_node.x) + np.abs(from_node.y - to_node.y)
         # return np.sqrt((from_node.x - to_node.x) ** 2 + (from_node.y - to_node.y) ** 2)
     return h_func
-
-
-def get_node_from_open(open_list, target_name):
-    v_list = open_list
-    v_dict = {}
-    v_g_list = []
-    for node in v_list:
-        curr_g = node.g_dict[target_name]
-        v_g_list.append(curr_g)
-        if curr_g not in v_dict:
-            v_dict[curr_g] = []
-        v_dict[curr_g].append(node)
-
-    # some_v = min([node.g for node in v_list])
-    # out_nodes = [node for node in v_list if node.g == some_v]
-    # print([node.ID for node in t_nodes])
-    # next_node = random.choice(out_nodes)
-    next_node = random.choice(v_dict[min(v_g_list)])
-    return next_node
 
 
 def get_node(successor_xy_name, node_current, nodes_dict):
@@ -105,8 +86,8 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
     # target_node = [node for node in copy_nodes if node.xy_name == target_node.xy_name][0]
     # open_list = []
     # close_list = []
-    open_nodes = ListNodes(h_func_bool=True, target_name=target_node.xy_name)
-    closed_nodes = ListNodes(h_func_bool=True, target_name=target_node.xy_name)
+    open_nodes = ListNodes(target_name=target_node.xy_name)
+    closed_nodes = ListNodes(target_name=target_node.xy_name)
     # open_list.append(target_node)
     open_nodes.add(target_node)
     iteration = 0
@@ -171,9 +152,10 @@ def build_heuristic_for_one_target(target_node, nodes, map_dim, to_save=True, pl
 
 
 def main():
-    img_png = 'den520d.png'
-    map_dim = map_dimensions_dict[img_png]
-    nodes, nodes_dict = build_graph_nodes(img_dir=img_png, path='../maps', show_map=False)
+    # img_dir = 'den520d.png'
+    img_dir = 'Berlin_1_256.map'  # 256-256
+    map_dim = get_dims_from_pic(img_dir=img_dir, path='../maps')
+    nodes, nodes_dict = build_graph_nodes(img_dir=img_dir, path='../maps', show_map=False)
     x_goal, y_goal = 38, 89
     node_goal = [node for node in nodes if node.x == x_goal and node.y == y_goal][0]
     plotter = Plotter(map_dim=map_dim, subplot_rows=1, subplot_cols=3)
@@ -193,3 +175,22 @@ if __name__ == '__main__':
 #     def __init__(self):
 #         self.h_dict = {}
 #         self._lock = threading.Lock()
+
+
+# def get_node_from_open(open_list, target_name):
+#     v_list = open_list
+#     v_dict = {}
+#     v_g_list = []
+#     for node in v_list:
+#         curr_g = node.g_dict[target_name]
+#         v_g_list.append(curr_g)
+#         if curr_g not in v_dict:
+#             v_dict[curr_g] = []
+#         v_dict[curr_g].append(node)
+#
+#     # some_v = min([node.g for node in v_list])
+#     # out_nodes = [node for node in v_list if node.g == some_v]
+#     # print([node.ID for node in t_nodes])
+#     # next_node = random.choice(out_nodes)
+#     next_node = random.choice(v_dict[min(v_g_list)])
+#     return next_node

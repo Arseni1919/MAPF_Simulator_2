@@ -12,7 +12,9 @@ from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_fo
 
 
 class DSAgent:
-    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit=1e100):
+    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func,
+                 plotter, middle_plot,
+                 iter_limit=1e100, map_dim=None, limit_type='simple'):
         self.index = index
         self.name = f'agent_{index}'
         self.start_node = start_node
@@ -26,6 +28,8 @@ class DSAgent:
         self.path = []
         self.other_paths = {}
         self.conf_paths = {}
+        self.map_dim = map_dim
+        self.limit_type = limit_type
 
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
@@ -80,6 +84,18 @@ class DSAgent:
         agents_in_conf = list(set(agents_in_conf))
         return agents_in_conf
 
+    def get_a_star_iter_limit(self, agents_in_confs):
+        iter_limit = self.iter_limit
+        if self.limit_type == 'simple':
+            return iter_limit
+        if self.limit_type == 'smart':
+            if len(agents_in_confs) > 0 and self.map_dim:
+                agent_in_conf_paths_len = [len(self.other_paths[agent]) for agent in agents_in_confs]
+                max_path_len = max(agent_in_conf_paths_len)
+                alt_iter_limit = max_path_len * self.map_dim[0] * self.map_dim[1]
+                iter_limit = min(iter_limit, alt_iter_limit)
+        return iter_limit
+
     def plan(self, alpha, decision_type):
         start_time = time.time()
 
@@ -90,18 +106,22 @@ class DSAgent:
             print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
             return True, {'elapsed': None, 'a_s_info': None}
 
+        if self.index == 32:
+            print()
+
         agents_in_confs = self.get_agents_in_conf(c_v_list, c_e_list)
         to_change = self.take_decision(alpha, decision_type, agents_in_confs)
         if to_change:
-            print(f'\n ---------- A* {self.name} ---------- \n')
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
+            iter_limit = self.get_a_star_iter_limit(agents_in_confs)
+            print(f'\n ---------- A* {self.name}, iter limit: {iter_limit} ---------- \n')
             new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
                                         v_constr_dict=v_constr_dict,
                                         e_constr_dict=e_constr_dict,
                                         perm_constr_dict=perm_constr_dict,
                                         plotter=self.plotter, middle_plot=self.middle_plot,
-                                        iter_limit=self.iter_limit)
+                                        iter_limit=iter_limit)
             if new_path is not None:
                 self.path = new_path
             return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info}
@@ -133,6 +153,14 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         a_star_calls_limit = kwargs['a_star_calls_limit']
     else:
         a_star_calls_limit = 1e100
+    if 'map_dim' in kwargs:
+        map_dim = kwargs['map_dim']
+    else:
+        map_dim = None
+    if 'limit_type' in kwargs:
+        limit_type = kwargs['limit_type']
+    else:
+        limit_type = 'simple'
     a_star_calls_counter = 0
     a_star_calls_dist_counter = 0
     a_star_runtimes = []
@@ -149,7 +177,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     agents = []
     n_agent = 0
     for start_node, goal_node in zip(start_nodes, goal_nodes):
-        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim, limit_type)
         agents.append(agent)
         n_agent += 1
 
@@ -216,11 +244,11 @@ def main():
     profiler = cProfile.Profile()
     if to_use_profiler:
         profiler.enable()
-    for i in range(5):
+    for i in range(3):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
                                               random_seed=random_seed, seed=seed, final_plot=True,
-                                              a_star_iter_limit=5e5, max_time=5, plot_per=plot_per)
+                                              a_star_iter_limit=5e7, max_time=5, plot_per=plot_per, limit_type='smart')
 
         if not random_seed:
             break
@@ -236,8 +264,8 @@ def main():
 if __name__ == '__main__':
     random_seed = True
     # random_seed = False
-    seed = 37
-    n_agents = 80
+    seed = 277
+    n_agents = 200
     plot_per = 10
     to_use_profiler = True
     # to_use_profiler = False

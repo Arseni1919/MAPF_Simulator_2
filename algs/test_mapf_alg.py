@@ -35,15 +35,19 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
 
     # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'room-64-64-8.map'  # 64-64
+    img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'random-64-64-20.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
+    # img_dir = 'maze-128-128-2.map'  # 128-128
     # img_dir = 'ht_chantry.map'  # 141-162
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'ost003d.map'  # 194-194
     # img_dir = 'lak303d.map'  # 194-194
     # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
     # img_dir = 'Berlin_1_256.map'  # 256-256
-    img_dir = 'den520d.map'  # 257-256
+    # img_dir = 'den520d.map'  # 257-256
     # img_dir = 'ht_mansion_n.map'  # 270-133
     # img_dir = 'brc202d.map'  # 481-530
 
@@ -76,7 +80,7 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     # ------------------------- #
     # ------------------------- #
     plan, info = algorithm(start_nodes=start_nodes, goal_nodes=goal_nodes, nodes=nodes, nodes_dict=nodes_dict, h_func=h_func,
-                           plotter=plotter, middle_plot=False, **kwargs)
+                           plotter=plotter, middle_plot=False, map_dim=map_dim, **kwargs)
 
     res_to_print = plan
     if plan:

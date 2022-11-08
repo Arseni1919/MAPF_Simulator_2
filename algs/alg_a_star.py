@@ -15,11 +15,11 @@ from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_he
 
 
 def get_max_final(perm_constr_dict):
-    max_final_time = None
     if perm_constr_dict:
         final_list = [v[0] for k, v in perm_constr_dict.items() if len(v) > 0]
-        max_final_time = max(final_list) if len(final_list) > 0 else None
-    return max_final_time
+        max_final_time = max(final_list) if len(final_list) > 0 else 1
+        return max_final_time
+    return 1
 
 
 def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes, v_constr_dict, e_constr_dict,
@@ -43,9 +43,8 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
                 return None
 
     if max_final_time:
-        if max_final_time > 0:
-            if node_current.t >= max_final_time:
-                new_t = max_final_time + 1
+        if node_current.t >= max_final_time:
+            new_t = max_final_time + 1
 
     new_ID = f'{successor_xy_name}_{new_t}'
     if new_ID in open_nodes.dict:
@@ -111,7 +110,7 @@ def a_star(start, goal, nodes, h_func,
 
         for successor_xy_name in node_current.neighbours:
             node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
-                                      v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)  # heavy!
+                                      v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue

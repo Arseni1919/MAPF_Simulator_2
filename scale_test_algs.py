@@ -92,13 +92,17 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes():
-    img_dir = 'random-32-32-10.map'  # 32-32
+    # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'room-64-64-8.map'  # 64-64
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'random-64-64-20.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
+    img_dir = 'maze-128-128-2.map'  # 128-128
     # img_dir = 'ht_chantry.map'  # 141-162
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'ost003d.map'  # 194-194
     # img_dir = 'lak303d.map'  # 194-194
     # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
     # img_dir = 'Berlin_1_256.map'  # 256-256
@@ -221,8 +225,8 @@ def main():
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
-        'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1'}),
-        'DS-opt2': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_2'}),
+        'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1', 'limit_type': 'smart'}),
+        'DS-opt2': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_2', 'limit_type': 'smart'}),
     }
 
     # n_agents_list = [2, 3, 4, 5]

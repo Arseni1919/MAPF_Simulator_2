@@ -40,12 +40,14 @@ class Node:
 
 
 class ListNodes:
-    def __init__(self, h_func_bool=False, target_name=None):
+    def __init__(self, target_name=None):
         self.heap_list = []
         # self.nodes_list = []
         self.dict = {}
-        self.h_func_bool = h_func_bool
-        self.target_name = target_name
+        self.h_func_bool = False
+        if target_name:
+            self.h_func_bool = True
+            self.target_name = target_name
 
     def __len__(self):
         return len(self.heap_list)
