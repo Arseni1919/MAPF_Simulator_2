@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 import cProfile
 import pstats
 
+import numpy as np
+
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
@@ -124,7 +126,7 @@ class DSAgent:
                                         iter_limit=iter_limit)
             if new_path is not None:
                 self.path = new_path
-            return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info}
+            return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info, 'n_agents_conf': len(agents_in_confs) }
 
         print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
         return False, {'elapsed': None, 'a_s_info': None}
@@ -165,6 +167,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     a_star_calls_dist_counter = 0
     a_star_runtimes = []
     a_star_n_closed = []
+    n_agents_conf_list = []
     if 'alpha' in kwargs:
         alpha = kwargs['alpha']
     else:
@@ -200,6 +203,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                 max_time_list.append(info['elapsed'])
                 a_star_runtimes.append(info['a_s_info']['runtime'])
                 a_star_n_closed.append(info['a_s_info']['n_closed'])
+                if iteration > 0:
+                    n_agents_conf_list.append(info['n_agents_conf'])
                 a_star_calls_counter += 1
         if len(max_time_list) > 0:
             iterations_time += max(max_time_list)
@@ -232,7 +237,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                               'a_star_calls_counter': a_star_calls_counter,
                               'a_star_calls_dist_counter': a_star_calls_dist_counter,
                               'a_star_runtimes': a_star_runtimes,
-                              'a_star_n_closed': a_star_n_closed}
+                              'a_star_n_closed': a_star_n_closed,
+                              'n_agents_conf': n_agents_conf_list}
 
     # partial order
     pass
@@ -248,7 +254,7 @@ def main():
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
                                               random_seed=random_seed, seed=seed, final_plot=True,
-                                              a_star_iter_limit=5e7, max_time=5, plot_per=plot_per, limit_type='smart')
+                                              a_star_iter_limit=5e7, max_time=5, plot_per=PLOT_PER, limit_type='smart')
 
         if not random_seed:
             break
@@ -265,8 +271,8 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 200
-    plot_per = 10
+    n_agents = 150
+    PLOT_PER = 1
     to_use_profiler = True
     # to_use_profiler = False
 

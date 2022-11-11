@@ -55,6 +55,7 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
                 'a_star_runtimes': [],
                 'a_star_n_closed': [],
                 'n_closed_per_run': [],
+                'n_agents_conf': [],
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -81,6 +82,8 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
         if 'a_star_n_closed' in info:
             statistics_dict[alg_name][n_agents]['a_star_n_closed'].extend(info['a_star_n_closed'])
             statistics_dict[alg_name][n_agents]['n_closed_per_run'].append(sum(info['a_star_n_closed']))
+        if 'n_agents_conf' in info:
+            statistics_dict[alg_name][n_agents]['n_agents_conf'].extend(info['n_agents_conf'])
 
 
 def set_seed(random_seed, seed):
@@ -94,12 +97,12 @@ def set_seed(random_seed, seed):
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'room-64-64-8.map'  # 64-64
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'random-64-64-20.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
-    img_dir = 'maze-128-128-2.map'  # 128-128
+    # img_dir = 'maze-128-128-2.map'  # 128-128
     # img_dir = 'ht_chantry.map'  # 141-162
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'ost003d.map'  # 194-194
@@ -198,7 +201,7 @@ def big_test(
                 print(f'#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
-                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}, result length: {len(result)}\n')
+                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}\n')
                 update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
                 if i_run % 2 == 0:
                     plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
@@ -214,7 +217,7 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
 
     algs_to_test_dict = {
-        # 'PBS': (run_pbs, {}),
+        'PBS': (run_pbs, {}),
         # 'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
         # 'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
         # 'DS-MAPF-0.7': (run_ds_mapf, {'alpha': 0.7}),
@@ -226,7 +229,7 @@ def main():
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
         'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1', 'limit_type': 'smart'}),
-        'DS-opt2': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_2', 'limit_type': 'smart'}),
+        # 'DS-opt2': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_2', 'limit_type': 'smart'}),
     }
 
     # n_agents_list = [2, 3, 4, 5]
@@ -239,12 +242,12 @@ def main():
     n_agents_list = [50, 60, 70, 80, 90, 100]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 20
-    runs_per_n_agents = 10
+    runs_per_n_agents = 20
+    # runs_per_n_agents = 10
     # runs_per_n_agents = 3
 
-    # time_per_alg_limit = 1  # According to PBS paper!
-    time_per_alg_limit = 10
+    time_per_alg_limit = 1  # According to PBS paper!
+    # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
     random_seed = True
@@ -252,7 +255,7 @@ def main():
 
     seed = 197
     plotter = Plotter()
-    a_star_iter_limit = 3e3
+    a_star_iter_limit = 1e9
 
     a_star_calls_limit = 500
     # a_star_calls_limit = 1e100

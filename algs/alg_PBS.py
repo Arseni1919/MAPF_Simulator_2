@@ -249,10 +249,14 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
             runtime = time.time() - start_time
             return NEXT_pbs_node.plan, {
                 'PBSNode': NEXT_pbs_node,
-                'success_rate': 1, 'sol_quality': NEXT_pbs_node.cost,
-                'runtime': runtime, 'iterations_time': runtime,
-                'a_star_calls_counter': a_star_calls_counter, 'a_star_calls_dist_counter': a_star_calls_counter,
-                'a_star_runtimes': a_star_runtimes, 'a_star_n_closed': a_star_n_closed}
+                'success_rate': 1,
+                'sol_quality': NEXT_pbs_node.cost,
+                'runtime': runtime,
+                'iterations_time': runtime,
+                'a_star_calls_counter': a_star_calls_counter,
+                'a_star_calls_dist_counter': a_star_calls_counter,
+                'a_star_runtimes': a_star_runtimes,
+                'a_star_n_closed': a_star_n_closed}
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
