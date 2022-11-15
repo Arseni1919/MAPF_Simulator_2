@@ -92,10 +92,10 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
 
-    middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
-    a_star_iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
-    map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
-    limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
+    # middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
+    # a_star_iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
+    # map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
+    # limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
 
     plan = None
 
@@ -121,7 +121,6 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 'n_agents_conf': []}
 
     # ITERATIONS
-
     # PLAN
     for agent in agents:
         agent.plan(alg_info, initial=True)

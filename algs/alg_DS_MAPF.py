@@ -101,7 +101,7 @@ class DSAgent:
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
 
         if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
-            print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
+            print(f'\n ---------- (DS) NO NEED FOR A* {self.name} ---------- \n')
             return False, {'elapsed': None, 'a_s_info': None}
 
         agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
@@ -109,7 +109,7 @@ class DSAgent:
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
-            print(f'\n ---------- A* {self.name}, iter limit: {iter_limit} ---------- \n')
+            print(f'\n ---------- (DS) A* {self.name}, iter limit: {iter_limit} ---------- \n')
             new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
                                         v_constr_dict=v_constr_dict,
