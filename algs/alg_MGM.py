@@ -39,20 +39,22 @@ class MGMAgent:
     def decision_bool(self):
         pass
 
+    def take_decision(self):
+        pass
+
 
 def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     start_time = time.time()
     a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
-
-    plotter = kwargs['plotter'] if 'plotter' in kwargs else None
-    middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
+    plotter = kwargs['plotter'] if 'plotter' in kwargs else None
+
+    middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     a_star_iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
     limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
-    plotter = kwargs['plotter'] if 'plotter' in kwargs else None
 
     plan = None
 
@@ -84,6 +86,49 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
             break
 
+        # PLAN
+        for agent in agents:
+            agent.plan()
+
+        # EXCHANGE PATHS
+        for agent in agents:
+            agent.exchange_paths(agents=agents)
+
+        # UPDATE GAIN
+        for agent in agents:
+            agent.update_gain()
+
+        # EXCHANGE GAINS
+        for agent in agents:
+            agent.exchange_gains(agents=agents)
+
+        # DECISION
+        for agent in agents:
+            agent.take_decision()
+
+        # CHECK PLAN
+        plan = {agent.name: agent.path for agent in agents}
+        plan_lngths = [len(path) for path in plan.values()]
+        if 0 in plan_lngths:
+            raise RuntimeError('0 in plan_lngths')
+        cost = sum([len(path) for path in plan.values()])
+        print(f'\r---\n'
+              f'[MGM][{len(agents)} agents][A* calls: ][A* dist calls: ][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
+              f'cost: {cost}\n'
+              f'---\n')
+
+        there_is_col, c_v, c_e = check_for_collisions(plan)
+        if not there_is_col:
+            if final_plot:
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
+
+            alg_info['success_rate'] = 1
+            alg_info['sol_quality'] = cost
+            alg_info['runtime'] = time.time() - start_time
+            return plan, alg_info
 
     return plan, alg_info
 

@@ -106,7 +106,7 @@ class DSAgent:
 
         if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
             print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
-            return True, {'elapsed': None, 'a_s_info': None}
+            return False, {'elapsed': None, 'a_s_info': None}
 
         agents_in_confs = self.get_agents_in_conf(c_v_list, c_e_list)
         to_change = self.decision_bool(alpha, decision_type, agents_in_confs)
@@ -194,6 +194,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         # if a_star_calls_dist_counter >= a_star_calls_limit:
         #     break
 
+        # PLAN
         for agent in agents:
             succeeded, info = agent.plan(alpha=alpha, decision_type=decision_type)
             if info['elapsed']:
@@ -207,13 +208,16 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
             iterations_time += max(max_time_list)
             a_star_calls_dist_counter += 1
 
+        # EXCHANGE
         for agent in agents:
             agent.exchange(agents=agents)
 
+        # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
         plan_lngths = [len(path) for path in plan.values()]
-        # logging.info(f'\rinside ds_mapf')
-        cost = None if 0 in plan_lngths else sum([len(path) for path in plan.values()])
+        if 0 in plan_lngths:
+            raise RuntimeError('0 in plan_lngths')
+        cost = sum([len(path) for path in plan.values()])
         print(f'\r---\n'
               f'[DS-MAPF ({decision_type})][{len(agents)} agents][A* calls: {a_star_calls_counter}][A* dist calls: {a_star_calls_dist_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
               f'cost: {cost}\n'
