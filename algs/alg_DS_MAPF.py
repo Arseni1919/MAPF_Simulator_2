@@ -42,6 +42,9 @@ class DSAgent:
             # self.path = new_path
             return True
 
+        if len(agents_in_confs) == 0:
+            raise RuntimeError('len(agents_in_confs) == 0')
+
         if decision_type == 'simple':
             if random.random() < alpha:
                 # self.path = new_path
