@@ -36,7 +36,7 @@ class DSAgent:
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
 
-    def take_decision(self, alpha, decision_type, agents_in_confs, new_path=None):
+    def decision_bool(self, alpha, decision_type, agents_in_confs, new_path=None):
 
         if len(self.path) == 0:
             # self.path = new_path
@@ -108,11 +108,8 @@ class DSAgent:
             print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
             return True, {'elapsed': None, 'a_s_info': None}
 
-        if self.index == 32:
-            print()
-
         agents_in_confs = self.get_agents_in_conf(c_v_list, c_e_list)
-        to_change = self.take_decision(alpha, decision_type, agents_in_confs)
+        to_change = self.decision_bool(alpha, decision_type, agents_in_confs)
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
@@ -185,7 +182,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         n_agent += 1
 
     # Distributed Part
-    for iteration in range(100000):
+    for iteration in range(1000000):
         max_time_list = []
         # time constraint
         # if crossed_time_limit(start_time, max_time * len(agents)):
@@ -261,6 +258,7 @@ def main():
 
         # plt.show()
         plt.close()
+
     if to_use_profiler:
         profiler.disable()
         stats = pstats.Stats(profiler).sort_stats('cumtime')
