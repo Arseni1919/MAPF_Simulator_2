@@ -10,7 +10,7 @@ import numpy as np
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    crossed_time_limit
+    crossed_time_limit, get_agents_in_conf
 
 
 class DSAgent:
@@ -79,13 +79,6 @@ class DSAgent:
                 return True
         return False
 
-    @staticmethod
-    def get_agents_in_conf(c_v_list, c_e_list):
-        agents_in_conf = [conf[1] for conf in c_v_list]
-        agents_in_conf.extend([conf[1] for conf in c_e_list])
-        agents_in_conf = list(set(agents_in_conf))
-        return agents_in_conf
-
     def get_a_star_iter_limit(self, agents_in_confs):
         iter_limit = self.iter_limit
         if self.limit_type == 'simple':
@@ -108,7 +101,7 @@ class DSAgent:
             print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
             return False, {'elapsed': None, 'a_s_info': None}
 
-        agents_in_confs = self.get_agents_in_conf(c_v_list, c_e_list)
+        agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
         to_change = self.decision_bool(alpha, decision_type, agents_in_confs)
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)

@@ -1,6 +1,12 @@
 import time
 
 
+def get_agents_in_conf(c_v_list, c_e_list):
+    agents_in_conf = [conf[1] for conf in c_v_list]
+    agents_in_conf.extend([conf[1] for conf in c_e_list])
+    agents_in_conf = list(set(agents_in_conf))
+    return agents_in_conf
+
 
 def crossed_time_limit(start_time, max_time_minutes):
     elapsed = time.time() - start_time
@@ -95,6 +101,7 @@ def check_for_collisions(results):
     """
     results: {'agents str': [Nodes heap_list]}
     """
+    print('Start check_for_collisions...')
     if results:
         vertex_col_list = vertex_col_check(results)
         edge_col_list = edge_col_check(results)
