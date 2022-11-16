@@ -101,7 +101,7 @@ def check_for_collisions(results):
     """
     results: {'agents str': [Nodes heap_list]}
     """
-    print('Start check_for_collisions...')
+    print('\nStart check_for_collisions...')
     if results:
         vertex_col_list = vertex_col_check(results)
         edge_col_list = edge_col_check(results)

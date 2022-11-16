@@ -36,10 +36,9 @@ class DSAgent:
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
 
-    def decision_bool(self, alpha, decision_type, agents_in_confs, new_path=None):
+    def decision_bool(self, alpha, decision_type, agents_in_confs, agents_dict):
 
         if len(self.path) == 0:
-            # self.path = new_path
             return True
 
         if len(agents_in_confs) == 0:
@@ -47,39 +46,83 @@ class DSAgent:
 
         if decision_type == 'simple':
             if random.random() < alpha:
-                # self.path = new_path
                 return True
 
-        if decision_type == 'opt_1':
+        elif decision_type == 'min_prev_1':
             path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
             max_n = max(path_lngths)
             min_n = min(path_lngths)
             # priority on smaller paths
             if len(self.path) > max_n and random.random() < 0.9:
-                # self.path = new_path
                 return True
             elif len(self.path) < min_n and random.random() < 0.1:
-                # self.path = new_path
                 return True
             elif random.random() < alpha:
-                # self.path = new_path
                 return True
             return
 
-        if decision_type == 'opt_2':
+        elif decision_type == 'min_prev_2':
+            # A MORE SMART VERSION
+            path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
+            max_n = max(path_lngths)
+            min_n = min(path_lngths)
+            # priority on smaller paths
+            if len(self.path) > max_n and random.random() < 0.9:
+                return True
+            elif len(self.path) < min_n and random.random() < 0.1:
+                return True
+            else:
+                path_lngths.append(len(self.path))
+                path_lngths.sort()
+                my_order = path_lngths.index(len(self.path))
+                my_alpha = 0.1 + 0.8 * (my_order/len(path_lngths))
+                if random.random() < my_alpha:
+                    return True
+
+        elif decision_type == 'max_prev_1':
             path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
             max_n = max(path_lngths)
             min_n = min(path_lngths)
             # priority on bigger paths
             if len(self.path) > max_n and random.random() < 0.1:
-                # self.path = new_path
                 return True
             elif len(self.path) < min_n and random.random() < 0.9:
-                # self.path = new_path
                 return True
             elif random.random() < alpha:
-                # self.path = new_path
                 return True
+
+        elif decision_type == 'index_1':
+            agents_indecies = [agents_dict[agent_name].index for agent_name in agents_in_confs]
+            max_i = max(agents_indecies)
+            min_i = min(agents_indecies)
+            # priority on bigger paths
+            if self.index > max_i and random.random() < 0.1:
+                return True
+            elif self.index < min_i and random.random() < 0.9:
+                return True
+            elif random.random() < alpha:
+                return True
+
+        elif decision_type == 'index_2':
+            agents_indecies = [agents_dict[agent_name].index for agent_name in agents_in_confs]
+            max_i = max(agents_indecies)
+            min_i = min(agents_indecies)
+            # priority on bigger paths
+            if self.index > max_i and random.random() < 0.9:
+                return True
+            elif self.index < min_i and random.random() < 0.1:
+                return True
+            else:
+                agents_indecies.append(self.index)
+                agents_indecies.sort()
+                my_order = agents_indecies.index(self.index)
+                my_alpha = 0.1 + 0.8 * (my_order / len(agents_indecies))
+                if random.random() < my_alpha:
+                    return True
+
+        else:
+            raise RuntimeError('no such decision_type')
+
         return False
 
     def get_a_star_iter_limit(self, agents_in_confs):
@@ -94,22 +137,22 @@ class DSAgent:
                 iter_limit = min(iter_limit, alt_iter_limit)
         return iter_limit
 
-    def plan(self, alpha, decision_type):
+    def plan(self, alpha, decision_type, agents_dict=None):
         start_time = time.time()
 
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
 
         if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
-            print(f'\n ---------- (DS) NO NEED FOR A* {self.name} ---------- \n')
+            # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
             return False, {'elapsed': None, 'a_s_info': None}
 
         agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
-        to_change = self.decision_bool(alpha, decision_type, agents_in_confs)
+        to_change = self.decision_bool(alpha, decision_type, agents_in_confs, agents_dict)
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
-            print(f'\n ---------- (DS) A* {self.name}, iter limit: {iter_limit} ---------- \n')
+            print(f'\n ---------- (DS {decision_type}) A* {self.name} ---------- \n')
             new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
                                         v_constr_dict=v_constr_dict,
@@ -121,7 +164,7 @@ class DSAgent:
                 self.path = new_path
             return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info, 'n_agents_conf': len(agents_in_confs) }
 
-        print(f'\n ---------- NO NEED FOR A* {self.name} ---------- \n')
+        # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
         return False, {'elapsed': None, 'a_s_info': None}
 
 
@@ -164,17 +207,19 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
     if 'alpha' in kwargs:
         alpha = kwargs['alpha']
     else:
-        alpha = 0.5
+        alpha = None
     if 'decision_type' in kwargs:
         decision_type = kwargs['decision_type']
     else:
         decision_type = 'opt_1'
     # Creating agents
     agents = []
+    agents_dict = {}
     n_agent = 0
     for start_node, goal_node in zip(start_nodes, goal_nodes):
         agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim, limit_type)
         agents.append(agent)
+        agents_dict[agent.name] = agent
         n_agent += 1
 
     # Distributed Part
@@ -192,7 +237,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
 
         # PLAN
         for agent in agents:
-            succeeded, info = agent.plan(alpha=alpha, decision_type=decision_type)
+            succeeded, info = agent.plan(alpha=alpha, decision_type=decision_type, agents_dict=agents_dict)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
                 a_star_runtimes.append(info['a_s_info']['runtime'])
@@ -249,9 +294,19 @@ def main():
         profiler.enable()
     for i in range(3):
         print(f'\n[run {i}]')
-        result, info = test_mapf_alg_from_pic(algorithm=run_ds_mapf, initial_ordering=[], n_agents=n_agents,
-                                              random_seed=random_seed, seed=seed, final_plot=True,
-                                              a_star_iter_limit=5e7, max_time=5, plot_per=PLOT_PER, limit_type='smart')
+        result, info = test_mapf_alg_from_pic(
+            algorithm=run_ds_mapf,
+            initial_ordering=[],
+            n_agents=n_agents,
+            random_seed=random_seed,
+            seed=seed,
+            final_plot=True,
+            a_star_iter_limit=5e7,
+            max_time=5,
+            plot_per=PLOT_PER,
+            limit_type='smart',
+            decision_type=DECISION_TYPE
+        )
 
         if not random_seed:
             break
@@ -269,16 +324,16 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 150
-    PLOT_PER = 1
+    n_agents = 80
+    PLOT_PER = 10
     to_use_profiler = True
     # to_use_profiler = False
-
-    # good example: img_dir = '19_20_warehouse.png'
-    # random_seed = True
-    # random_seed = False
-    # seed = 23
-    # n_agents = 30
+    # DECISION_TYPE = 'simple'
+    # DECISION_TYPE = 'min_prev_1'
+    # DECISION_TYPE = 'min_prev_2'
+    DECISION_TYPE = 'max_prev_1'
+    # DECISION_TYPE = 'index_1'
+    # DECISION_TYPE = 'index_2'
 
     main()
 

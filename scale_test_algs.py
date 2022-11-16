@@ -218,20 +218,16 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
 
     algs_to_test_dict = {
-        'PBS': (run_pbs, {}),
+        # 'PBS': (run_pbs, {}),
         'MGM': (run_mgm, {}),
-        # 'DS-MAPF-1': (run_ds_mapf, {'alpha': 1.0}),
-        # 'DS-MAPF-0.8': (run_ds_mapf, {'alpha': 0.8}),
-        # 'DS-MAPF-0.7': (run_ds_mapf, {'alpha': 0.7}),
-        # 'DS-MAPF-0.6': (run_ds_mapf, {'alpha': 0.6}),
-        # 'DS-MAPF-0.5': (run_ds_mapf, {'alpha': 0.5}),
-        # 'DS-MAPF-0.4': (run_ds_mapf, {'alpha': 0.4}),
-        # 'DS-MAPF-0.2': (run_ds_mapf, {'alpha': 0.2}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
-        # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
+        'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
-        'DS-opt1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_1', 'limit_type': 'smart'}),
-        # 'DS-opt2': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'opt_2', 'limit_type': 'smart'}),
+        'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
+        'DS-max_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'max_prev_1', 'limit_type': 'simple'}),
+        'DS-index_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'index_1', 'limit_type': 'simple'}),
+        'DS-min_prev_2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple'}),
+        'DS-index_2': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
 
     # n_agents_list = [2, 3, 4, 5]
@@ -239,16 +235,17 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
-    n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    # n_agents_list = [50, 60, 70, 80, 90, 100]
+    n_agents_list = [50, 60, 70, 80, 90, 100]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20
-    runs_per_n_agents = 10
-    # runs_per_n_agents = 3
+    # runs_per_n_agents = 10
+    runs_per_n_agents = 3
 
     time_per_alg_limit = 1  # According to PBS paper!
+    # time_per_alg_limit = 3
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
@@ -259,8 +256,9 @@ def main():
     plotter = Plotter()
     a_star_iter_limit = 1e9
 
-    a_star_calls_limit = 500
-    # a_star_calls_limit = 1e100
+    # a_star_calls_limit = 100
+    # a_star_calls_limit = 500
+    a_star_calls_limit = 1e100
 
     to_save_results = True
     # to_save_results = False
