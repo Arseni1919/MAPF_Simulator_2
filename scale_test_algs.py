@@ -101,10 +101,10 @@ def get_map_nodes():
     # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'random-64-64-20.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
+    img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
     # img_dir = 'maze-128-128-2.map'  # 128-128
-    img_dir = 'ht_chantry.map'  # 141-162
+    # img_dir = 'ht_chantry.map'  # 141-162
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'ost003d.map'  # 194-194
     # img_dir = 'lak303d.map'  # 194-194
@@ -237,7 +237,9 @@ def main():
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    n_agents_list = [50, 60, 70, 80, 90, 100]
+    # n_agents_list = [50, 60, 70, 80, 90, 100]
+    n_agents_list = [100, 120, 140, 160, 180, 200]
+    # n_agents_list = [100, 150, 200, 250]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20

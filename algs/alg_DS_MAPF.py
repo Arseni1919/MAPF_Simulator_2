@@ -260,7 +260,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
             raise RuntimeError('0 in plan_lngths')
         cost = sum([len(path) for path in plan.values()])
         print(f'\r---\n'
-              f'[DS-MAPF ({decision_type})][{len(agents)} agents][A* calls: {a_star_calls_counter}][A* dist calls: {a_star_calls_dist_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
+              f'[DS-MAPF ({decision_type})][{len(agents)} agents][A* calls: {a_star_calls_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
               f'cost: {cost}\n'
               f'---\n')
         if cost:
@@ -324,16 +324,16 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 80
+    n_agents = 150
     PLOT_PER = 10
     to_use_profiler = True
     # to_use_profiler = False
     # DECISION_TYPE = 'simple'
     # DECISION_TYPE = 'min_prev_1'
     # DECISION_TYPE = 'min_prev_2'
-    DECISION_TYPE = 'max_prev_1'
+    # DECISION_TYPE = 'max_prev_1'
     # DECISION_TYPE = 'index_1'
-    # DECISION_TYPE = 'index_2'
+    DECISION_TYPE = 'index_2'
 
     main()
 
