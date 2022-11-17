@@ -28,11 +28,11 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
 
     if v_constr_dict:
         if new_t in v_constr_dict[successor_xy_name]:
-            return None
+            return None, ''
 
     if e_constr_dict:
         if (node_current.x, node_current.y, new_t) in e_constr_dict[successor_xy_name]:
-            return None
+            return None, ''
 
     if perm_constr_dict:
         if len(perm_constr_dict[successor_xy_name]) > 0:
@@ -40,13 +40,13 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
                 raise RuntimeError('len(perm_constr_dict[successor_xy_name]) != 1')
             final_time = perm_constr_dict[successor_xy_name][0]
             if new_t >= final_time:
-                return None
+                return None, ''
 
     if max_final_time:
         if node_current.t >= max_final_time:
             new_t = max_final_time + 1
 
-    # node_current_xy_name = node_current.xy_name
+    # NO NEED FOR wasted waiting
     if successor_xy_name == node_current.xy_name:
         no_constraints = True
         for nei_xy_name in node_current.neighbours:
@@ -58,19 +58,16 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
                 no_constraints = False
                 break
         if no_constraints:
-            return None
+            return None, ''
 
     new_ID = f'{successor_xy_name}_{new_t}'
     if new_ID in open_nodes.dict:
-        return open_nodes.dict[new_ID]
+        return open_nodes.dict[new_ID], 'open_nodes'
     if new_ID in closed_nodes.dict:
-        return closed_nodes.dict[new_ID]
+        return closed_nodes.dict[new_ID], 'closed_nodes'
 
-    if nodes_dict:
-        node = nodes_dict[successor_xy_name]
-        return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
-
-    raise RuntimeError('No dict')
+    node = nodes_dict[successor_xy_name]
+    return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours), 'new'
 
 
 def reset_nodes(start, goal, nodes):
@@ -118,14 +115,16 @@ def a_star(start, goal, nodes, h_func,
                 break
 
         for successor_xy_name in node_current.neighbours:
-            node_successor = get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
-                                      v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time)
+            node_successor, node_successor_status = get_node(
+                successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
+                v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time
+            )
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
 
             # INSIDE OPEN LIST
-            if node_successor.ID in open_nodes.dict:
+            if node_successor_status == 'open_nodes':
                 if node_successor.t <= successor_current_time:
                     continue
                 open_nodes.remove(node_successor)
@@ -135,7 +134,7 @@ def a_star(start, goal, nodes, h_func,
                 # open_nodes.add(node_successor)
 
             # INSIDE CLOSED LIST
-            elif node_successor.ID in closed_nodes.dict:
+            elif node_successor_status == 'closed_nodes':
                 if node_successor.t <= successor_current_time:
                     continue
                 closed_nodes.remove(node_successor)

@@ -46,8 +46,8 @@ def c_v_check_for_agent(agent_1: str, path_1, results):
     if len(path_1) < 1:
         return c_v_for_agent_list
     for agent_2, path_2 in results.items():
-        if type(agent_2) is not str:
-            raise RuntimeError('type(agent_2) is not str')
+        # if type(agent_2) is not str:
+        #     raise RuntimeError('type(agent_2) is not str')
         if agent_2 != agent_1:
             for t in range(max(len(path_1), len(path_2))):
                 node_1 = path_1[min(t, len(path_1) - 1)]
