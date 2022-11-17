@@ -46,6 +46,20 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
         if node_current.t >= max_final_time:
             new_t = max_final_time + 1
 
+    # node_current_xy_name = node_current.xy_name
+    if successor_xy_name == node_current.xy_name:
+        no_constraints = True
+        for nei_xy_name in node_current.neighbours:
+            if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
+                no_constraints = False
+                break
+
+            if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
+                no_constraints = False
+                break
+        if no_constraints:
+            return None
+
     new_ID = f'{successor_xy_name}_{new_t}'
     if new_ID in open_nodes.dict:
         return open_nodes.dict[new_ID]
@@ -55,11 +69,8 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
     if nodes_dict:
         node = nodes_dict[successor_xy_name]
         return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
-    # else:
-    #     for node in nodes:
-    #         if node.xy_name == successor_xy_name:
-    #             return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours)
-    raise RuntimeError('No dict')  # return None
+
+    raise RuntimeError('No dict')
 
 
 def reset_nodes(start, goal, nodes):
@@ -103,8 +114,6 @@ def a_star(start, goal, nodes, h_func,
                 if node_current.t > max_t:
                     # otherwise break
                     break
-                # else:
-                #     print('', end='')
             else:
                 break
 
@@ -120,31 +129,28 @@ def a_star(start, goal, nodes, h_func,
                 if node_successor.t <= successor_current_time:
                     continue
                 open_nodes.remove(node_successor)
-                node_successor.t = successor_current_time
-                node_successor.g = node_successor.t
-                node_successor.parent = node_current
-                open_nodes.add(node_successor)
+                # node_successor.t = successor_current_time
+                # node_successor.g = node_successor.t
+                # node_successor.parent = node_current
+                # open_nodes.add(node_successor)
 
             # INSIDE CLOSED LIST
             elif node_successor.ID in closed_nodes.dict:
                 if node_successor.t <= successor_current_time:
                     continue
                 closed_nodes.remove(node_successor)
-                node_successor.t = successor_current_time
-                node_successor.g = node_successor.t
-                node_successor.parent = node_current
-                open_nodes.add(node_successor)
+                # node_successor.t = successor_current_time
+                # node_successor.g = node_successor.t
+                # node_successor.parent = node_current
+                # open_nodes.add(node_successor)
 
             # NOT IN CLOSED AND NOT IN OPEN LISTS
             else:
                 node_successor.h = h_func(node_successor, goal)
-                node_successor.t = successor_current_time
-                node_successor.g = node_successor.t
-                node_successor.parent = node_current
-                open_nodes.add(node_successor)
-            # node_successor.t = successor_current_time
-            # node_successor.g = node_successor.t
-            # node_successor.parent = node_current
+            node_successor.t = successor_current_time
+            node_successor.g = node_successor.t
+            node_successor.parent = node_current
+            open_nodes.add(node_successor)
 
         # open_nodes.remove(node_current)
         closed_nodes.add(node_current)
