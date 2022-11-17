@@ -6,7 +6,7 @@ import pstats
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 
 from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
-from algs.metrics import build_constraints, get_agents_in_conf
+from algs.metrics import build_constraints, get_agents_in_conf, check_plan
 from algs.metrics import crossed_time_limit
 from algs.alg_a_star import a_star
 
@@ -147,16 +147,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        plan_lngths = [len(path) for path in plan.values()]
-        if 0 in plan_lngths:
-            raise RuntimeError('0 in plan_lngths')
-        cost = sum([len(path) for path in plan.values()])
-        print(f'\r---\n'
-              f'[MGM][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {time.time() - start_time:0.2f}s][iter {iteration}][A* dist calls: ]\n'
-              f'cost: {cost}\n'
-              f'---\n')
-
-        there_is_col, c_v, c_e = check_for_collisions(plan)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, 'MGM', alg_info, start_time, iteration)
         if not there_is_col:
             if final_plot:
                 print(f'#########################################################')

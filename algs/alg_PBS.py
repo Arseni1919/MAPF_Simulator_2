@@ -87,11 +87,11 @@ def get_order_lists(pbs_node, agent):
 def collide_check(pbs_node, update_agent):
     print('\rFUNC: collide_check', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
-    sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
-    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
+    sub_results = {agent.name: pbs_node.path[agent.name] for agent in higher_order_list}
+    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
     if len(c_v_list) > 0:
         return True
-    e_v_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
+    e_v_list = c_e_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
     if len(e_v_list):
         return True
     return False
@@ -100,10 +100,10 @@ def collide_check(pbs_node, update_agent):
 def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
     print('\rFUNC: update_path', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
-    sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
+    sub_results = {agent.name: pbs_node.path[agent.name] for agent in higher_order_list}
 
-    # c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
-    # c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
+    # c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
+    # c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
 
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
@@ -114,11 +114,11 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
                                 perm_constr_dict=perm_constr_dict,
                                 plotter=plotter, middle_plot=middle_plot, iter_limit=iter_limit)
 
-    if new_path is not None:
-        c_v_list_after = c_v_check_for_agent(update_agent.name, new_path, sub_results)
-        c_e_list_after = c_e_check_for_agent(update_agent.name, new_path, sub_results)
-        if len(c_v_list_after) > 0 or len(c_e_list_after) > 0:
-            raise RuntimeError('a_star failed')
+    # if new_path is not None:
+    #     c_v_list_after = c_v_check_for_agent(update_agent.name, new_path, sub_results)
+    #     c_e_list_after = c_e_check_for_agent(update_agent.name, new_path, sub_results)
+    #     if len(c_v_list_after) > 0 or len(c_e_list_after) > 0:
+    #         raise RuntimeError('a_star failed')
 
     return new_path, a_s_info
 
@@ -143,7 +143,7 @@ def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot
                     'a_star_runtimes': a_star_runtimes,
                     'a_star_n_closed': a_star_n_closed,
                 }
-            pbs_node.plan[update_agent.name] = new_path
+            pbs_node.path[update_agent.name] = new_path
     return True, {
         'a_star_calls_inner_counter': a_star_calls_inner_counter,
         'a_star_runtimes': a_star_runtimes,

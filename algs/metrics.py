@@ -110,6 +110,20 @@ def check_for_collisions(results):
     return True, [], []
 
 
+def check_plan(agents, plan, alg_name, alg_info, start_time, iteration):
+    plan_lngths = [len(path) for path in plan.values()]
+    if 0 in plan_lngths:
+        raise RuntimeError('0 in plan_lngths')
+    cost = sum([len(path) for path in plan.values()])
+    print(f'\r---\n'
+          f'[{alg_name}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {time.time() - start_time:0.2f}s][iter {iteration}][A* dist calls: ]\n'
+          f'cost: {cost}\n'
+          f'---\n')
+
+    there_is_col, c_v, c_e = check_for_collisions(plan)
+    return there_is_col, c_v, c_e, cost
+
+
 def main():
     pass
 

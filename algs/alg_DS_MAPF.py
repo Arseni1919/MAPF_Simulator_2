@@ -10,7 +10,7 @@ import numpy as np
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    crossed_time_limit, get_agents_in_conf
+    crossed_time_limit, get_agents_in_conf, check_plan
 
 
 class DSAgent:
@@ -255,32 +255,24 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        plan_lngths = [len(path) for path in plan.values()]
-        if 0 in plan_lngths:
-            raise RuntimeError('0 in plan_lngths')
-        cost = sum([len(path) for path in plan.values()])
-        print(f'\r---\n'
-              f'[DS-MAPF ({decision_type})][{len(agents)} agents][A* calls: {a_star_calls_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
-              f'cost: {cost}\n'
-              f'---\n')
-        if cost:
-            there_is_col, c_v, c_e = check_for_collisions(plan)
-            if not there_is_col:
-                if final_plot:
-                    print(f'#########################################################')
-                    print(f'#########################################################')
-                    print(f'#########################################################')
-                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
-                return plan, {'agents': agents,
-                              'success_rate': 1,
-                              'sol_quality': cost,
-                              'runtime': (time.time() - start_time),
-                              'iterations_time': iterations_time,
-                              'a_star_calls_counter': a_star_calls_counter,
-                              'a_star_calls_dist_counter': a_star_calls_dist_counter,
-                              'a_star_runtimes': a_star_runtimes,
-                              'a_star_n_closed': a_star_n_closed,
-                              'n_agents_conf': n_agents_conf_list}
+        there_is_col, c_v, c_e, cost = check_plan(agents, f'DS ({decision_type})', {'a_star_calls_counter': a_star_calls_counter}, start_time, iteration)
+        there_is_col, c_v, c_e = check_for_collisions(plan)
+        if not there_is_col:
+            if final_plot:
+                print(f'#########################################################')
+                print(f'#########################################################')
+                print(f'#########################################################')
+                plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
+            return plan, {'agents': agents,
+                          'success_rate': 1,
+                          'sol_quality': cost,
+                          'runtime': (time.time() - start_time),
+                          'iterations_time': iterations_time,
+                          'a_star_calls_counter': a_star_calls_counter,
+                          'a_star_calls_dist_counter': a_star_calls_dist_counter,
+                          'a_star_runtimes': a_star_runtimes,
+                          'a_star_n_closed': a_star_n_closed,
+                          'n_agents_conf': n_agents_conf_list}
 
     # partial order
     pass
@@ -330,10 +322,10 @@ if __name__ == '__main__':
     # to_use_profiler = False
     # DECISION_TYPE = 'simple'
     # DECISION_TYPE = 'min_prev_1'
-    # DECISION_TYPE = 'min_prev_2'
+    DECISION_TYPE = 'min_prev_2'
     # DECISION_TYPE = 'max_prev_1'
     # DECISION_TYPE = 'index_1'
-    DECISION_TYPE = 'index_2'
+    # DECISION_TYPE = 'index_2'
 
     main()
 
