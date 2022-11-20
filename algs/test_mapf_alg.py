@@ -33,16 +33,17 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     # img_dir = 'brc202d.png'
     # img_dir = 'den520d.png'
 
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+
     # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'room-64-64-8.map'  # 64-64
-    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'random-64-64-20.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
     # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
     # img_dir = 'maze-128-128-2.map'  # 128-128
     # img_dir = 'ht_chantry.map'  # 141-162
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'ost003d.map'  # 194-194
     # img_dir = 'lak303d.map'  # 194-194
     # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340

@@ -199,7 +199,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 100
+    n_agents = 150
     A_STAR_ITER_LIMIT = 5e7
     A_STAR_CALLS_LIMIT = 1000
     MAX_TIME = 5

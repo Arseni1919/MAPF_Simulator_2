@@ -86,18 +86,20 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # PLAN
         higher_agents = []
-        to_break = False
+        to_continue = False
         for agent in agents:
             new_path, a_s_info = update_path(agent, higher_agents, nodes, nodes_dict, h_func)
             alg_info['a_star_calls_counter'] += 1
+            alg_info['a_star_runtimes'].append(time.time() - start_time)
+            alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
             if new_path:
                 agent.path = new_path
             else:
-                to_break = True
+                to_continue = True
                 break
             higher_agents.append(agent)
-        if to_break:
-            break
+        if to_continue:
+            continue
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
@@ -152,7 +154,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 350
+    n_agents = 250
     A_STAR_ITER_LIMIT = 5e7
     A_STAR_CALLS_LIMIT = 1000
     MAX_TIME = 5

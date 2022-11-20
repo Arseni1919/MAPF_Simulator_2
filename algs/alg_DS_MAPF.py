@@ -255,8 +255,9 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        there_is_col, c_v, c_e, cost = check_plan(agents, f'DS ({decision_type})', {'a_star_calls_counter': a_star_calls_counter}, start_time, iteration)
-        there_is_col, c_v, c_e = check_for_collisions(plan)
+        # check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, f'DS ({decision_type})', {'a_star_calls_counter': a_star_calls_counter}, start_time, iteration)
+        # there_is_col, c_v, c_e = check_for_collisions(plan)
         if not there_is_col:
             if final_plot:
                 print(f'#########################################################')
