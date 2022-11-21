@@ -9,8 +9,8 @@ import numpy as np
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    crossed_time_limit, get_agents_in_conf, check_plan
+from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
+    crossed_time_limit, get_agents_in_conf, check_plan, get_alg_info_dict
 
 
 class DSAgent:
@@ -168,50 +168,20 @@ class DSAgent:
         return False, {'elapsed': None, 'a_s_info': None}
 
 
-def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
+def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     start_time = time.time()
-    iterations_time = 0
-    if 'max_time' in kwargs:
-        max_time = kwargs['max_time']
-    else:
-        max_time = 60
-    if 'final_plot' in kwargs:
-        final_plot = kwargs['final_plot']
-    else:
-        final_plot = True
-    if 'plot_per' in kwargs:
-        plot_per = kwargs['plot_per']
-    else:
-        plot_per = 10
-    if 'a_star_iter_limit' in kwargs:
-        iter_limit = kwargs['a_star_iter_limit']
-    else:
-        iter_limit = 1e100
-    if 'a_star_calls_limit' in kwargs:
-        a_star_calls_limit = kwargs['a_star_calls_limit']
-    else:
-        a_star_calls_limit = 1e100
-    if 'map_dim' in kwargs:
-        map_dim = kwargs['map_dim']
-    else:
-        map_dim = None
-    if 'limit_type' in kwargs:
-        limit_type = kwargs['limit_type']
-    else:
-        limit_type = 'simple'
-    a_star_calls_counter = 0
-    a_star_calls_dist_counter = 0
-    a_star_runtimes = []
-    a_star_n_closed = []
-    n_agents_conf_list = []
-    if 'alpha' in kwargs:
-        alpha = kwargs['alpha']
-    else:
-        alpha = None
-    if 'decision_type' in kwargs:
-        decision_type = kwargs['decision_type']
-    else:
-        decision_type = 'opt_1'
+    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
+    iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
+    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
+    plotter = kwargs['plotter'] if 'plotter' in kwargs else None
+    middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
+    final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
+    plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
+    map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
+    limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
+    alpha = kwargs['alpha'] if 'alpha' in kwargs else None
+    decision_type = kwargs['decision_type'] if 'decision_type' in kwargs else 'opt_1'
+
     # Creating agents
     agents = []
     agents_dict = {}
@@ -222,6 +192,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         agents_dict[agent.name] = agent
         n_agent += 1
 
+    alg_info = get_alg_info_dict()
+
     # Distributed Part
     for iteration in range(1000000):
         max_time_list = []
@@ -230,7 +202,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         if crossed_time_limit(start_time, max_time):
             break
 
-        if a_star_calls_counter >= a_star_calls_limit:
+        if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
             break
         # if a_star_calls_dist_counter >= a_star_calls_limit:
         #     break
@@ -240,14 +212,14 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
             succeeded, info = agent.plan(alpha=alpha, decision_type=decision_type, agents_dict=agents_dict)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
-                a_star_runtimes.append(info['a_s_info']['runtime'])
-                a_star_n_closed.append(info['a_s_info']['n_closed'])
+                alg_info['a_star_runtimes'].append(info['a_s_info']['runtime'])
+                alg_info['a_star_n_closed'].append(info['a_s_info']['n_closed'])
                 if iteration > 0:
-                    n_agents_conf_list.append(info['n_agents_conf'])
-                a_star_calls_counter += 1
+                    alg_info['n_agents_conf'].append(info['n_agents_conf'])
+                alg_info['a_star_calls_counter'] += 1
+
         if len(max_time_list) > 0:
-            iterations_time += max(max_time_list)
-            a_star_calls_dist_counter += 1
+            alg_info['dist_runtime'] += max(max_time_list)
 
         # EXCHANGE
         for agent in agents:
@@ -256,7 +228,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
         # check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, f'DS ({decision_type})', {'a_star_calls_counter': a_star_calls_counter}, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, f'DS ({decision_type})', alg_info, start_time, iteration)
         # there_is_col, c_v, c_e = check_for_collisions(plan)
         if not there_is_col:
             if final_plot:
@@ -264,16 +236,10 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None
                 print(f'#########################################################')
                 print(f'#########################################################')
                 plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
-            return plan, {'agents': agents,
-                          'success_rate': 1,
-                          'sol_quality': cost,
-                          'runtime': (time.time() - start_time),
-                          'iterations_time': iterations_time,
-                          'a_star_calls_counter': a_star_calls_counter,
-                          'a_star_calls_dist_counter': a_star_calls_dist_counter,
-                          'a_star_runtimes': a_star_runtimes,
-                          'a_star_n_closed': a_star_n_closed,
-                          'n_agents_conf': n_agents_conf_list}
+            alg_info['success_rate'] = 1
+            alg_info['sol_quality'] = cost
+            alg_info['runtime'] = time.time() - start_time
+            return plan, alg_info
 
     # partial order
     pass
@@ -317,7 +283,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 150
+    n_agents = 50
     PLOT_PER = 10
     to_use_profiler = True
     # to_use_profiler = False

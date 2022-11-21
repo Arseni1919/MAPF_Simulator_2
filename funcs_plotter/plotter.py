@@ -276,12 +276,12 @@ class Plotter:
 
             # iterations_time
             if 'DS-MAPF' in alg_name:
-                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'iterations_time', runs_per_n_agents,
+                it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'dist_runtime', runs_per_n_agents,
                                         is_json)
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                ax.plot(it_x, it_y, '--^', label=f'{alg_name} (iteration time)')
+                ax.plot(it_x, it_y, '--^', label=f'{alg_name} (dist_runtime)')
                 if len(it_x) > 0:
                     ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 

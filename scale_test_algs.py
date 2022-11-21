@@ -15,24 +15,10 @@ from algs.alg_MGM import run_mgm
 from globals import *
 
 
-def save_and_show_results(statistics_dict, file_dir, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None,
-                          n_agents_list=None, img_png=None, time_per_alg_limit=None, a_star_iter_limit=None,
-                          a_star_calls_limit=None):
+def save_and_show_results(to_save_dict, file_dir, plotter=None, runs_per_n_agents=None, algs_to_test_dict=None,
+                          n_agents_list=None, img_png=None):
     # Serializing json
-    to_save_dict = {
-        'statistics_dict': statistics_dict,
-        'runs_per_n_agents': runs_per_n_agents,
-        'n_agents_list': n_agents_list,
-        'algs_to_test_names': list(algs_to_test_dict.keys()),
-        'img_dir': img_png,
-        'time_per_alg_limit': time_per_alg_limit,
-        'a_star_iter_limit': a_star_iter_limit,
-        'a_star_calls_limit': a_star_calls_limit,
-
-    }
     json_object = json.dumps(to_save_dict, indent=4)
-    # Writing to sample.json
-    # file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%d-%m-%Y-%H-%M")}.json'
     with open(file_dir, "w") as outfile:
         outfile.write(json_object)
     # Results saved.
@@ -40,11 +26,11 @@ def save_and_show_results(statistics_dict, file_dir, plotter=None, runs_per_n_ag
         with open(f'{file_dir}', 'r') as openfile:
             # Reading from json file
             json_object = json.load(openfile)
-        plotter.plot_big_test(json_object['statistics_dict'], runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png, is_json=True)
+        plotter.plot_big_test(json_object['stats_dict'], runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png, is_json=True)
 
 
-def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
-    return {
+def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **kwargs):
+    stats_dict = {
         alg_name: {
             n_agents: {
                 'success_rate': {run: None for run in range(runs_per_n_agents)},
@@ -60,6 +46,15 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents):
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
+    dict_to_save = {
+        'stats_dict': stats_dict,
+        'runs_per_n_agents': runs_per_n_agents,
+        'n_agents_list': n_agents_list,
+        'algs_to_test_names': list(algs_to_test_dict.keys()),
+    }
+    dict_to_save.update(kwargs)
+    return dict_to_save
+
 
 
 def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info):
@@ -68,14 +63,14 @@ def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, i
         statistics_dict[alg_name][n_agents]['sol_quality'][i_run] = info['sol_quality']
         statistics_dict[alg_name][n_agents]['runtime'][i_run] = info['runtime']
 
-        if 'iterations_time' in info:
-            statistics_dict[alg_name][n_agents]['iterations_time'][i_run] = info['iterations_time']
+        if 'dist_runtime' in info:
+            statistics_dict[alg_name][n_agents]['dist_runtime'][i_run] = info['dist_runtime']
 
         if 'a_star_calls_counter' in info:
             statistics_dict[alg_name][n_agents]['a_star_calls_counter'][i_run] = info['a_star_calls_counter']
 
-        if 'a_star_calls_dist_counter' in info:
-            statistics_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = info['a_star_calls_dist_counter']
+        if 'dist_a_star_calls_counter' in info:
+            statistics_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = info['dist_a_star_calls_counter']
 
         if 'a_star_runtimes' in info:
             statistics_dict[alg_name][n_agents]['a_star_runtimes'].extend(info['a_star_runtimes'])
@@ -160,8 +155,16 @@ def big_test(
     inner_plotter = None
 
     # for plotter
-    statistics_dict = create_statistics_dict(algs_to_test_dict=algs_to_test_dict, n_agents_list=n_agents_list,
-                                             runs_per_n_agents=runs_per_n_agents)
+    to_save_dict = create_statistics_dict(
+        algs_to_test_dict=algs_to_test_dict,
+        n_agents_list=n_agents_list,
+        runs_per_n_agents=runs_per_n_agents,
+        img_png=img_png,
+        time_per_alg_limit=time_per_alg_limit,
+        a_star_iter_limit=a_star_iter_limit,
+        a_star_calls_limit=a_star_calls_limit
+    )
+    stats_dict = to_save_dict['stats_dict']
 
     # for num of agents
     for n_agents in n_agents_list:
@@ -205,12 +208,12 @@ def big_test(
                 print(f'#########################################################')
                 print(f'#########################################################')
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}\n')
-                update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info)
+                update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, info)
                 if i_run % 2 == 0:
-                    plotter.plot_big_test(statistics_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
+                    plotter.plot_big_test(stats_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
 
         if to_save_results:
-            save_and_show_results(statistics_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, time_per_alg_limit, a_star_iter_limit, a_star_calls_limit)
+            save_and_show_results(to_save_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
             print('Results saved.')
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')

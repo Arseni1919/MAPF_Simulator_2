@@ -5,7 +5,7 @@ import cProfile
 import pstats
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
+from algs.metrics import get_alg_info_dict, c_v_check_for_agent, c_e_check_for_agent
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan
 from algs.metrics import crossed_time_limit
 from algs.alg_a_star import a_star
@@ -47,14 +47,14 @@ class MGMAgent:
             self.path = new_path
         if self.path is None:
             raise RuntimeError('self.path is None')
-
+        runtime = time.time() - start_time
         # stats
         alg_info['a_star_calls_counter'] += 1
-        alg_info['a_star_runtimes'].append(time.time() - start_time)
+        alg_info['a_star_runtimes'].append(runtime)
         alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
         if not initial:
             alg_info['n_agents_conf'].append(len(self.agents_in_confs))
-        # return {'elapsed': time.time() - start_time, 'a_s_info': a_s_info, 'n_agents_conf': len(agents_in_confs)}
+        return {'runtime': runtime}
 
     def exchange_gains(self, agents):
         self.other_gains = {agent.name: agent.gain for agent in agents if agent.name != self.name}
@@ -78,8 +78,10 @@ class MGMAgent:
 
     def take_decision(self, agents_dict, alg_info):
         # take max value
+        plan_info = {'runtime': 0}
         if self.decision_bool(agents_dict):
-            self.plan(alg_info)
+            plan_info = self.plan(alg_info)
+        return plan_info
         # else:
         #     print(f'\n ---------- (MGM) NO NEED FOR A* {self.name} ---------- \n')
 
@@ -91,11 +93,6 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
-
-    # middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
-    # a_star_iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
-    # map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
-    # limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
 
     plan = None
 
@@ -109,16 +106,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         agents_dict[agent.name] = agent
         n_agent += 1
 
-    alg_info = {'agents': agents,
-                'success_rate': 0,
-                'sol_quality': 0,
-                'runtime': 0,
-                # 'iterations_time': 0,
-                'a_star_calls_counter': 0,
-                # 'a_star_calls_dist_counter': 0,
-                'a_star_runtimes': [],
-                'a_star_n_closed': [],
-                'n_agents_conf': []}
+    alg_info = get_alg_info_dict()
 
     # ITERATIONS
     # PLAN
@@ -126,6 +114,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         agent.plan(alg_info, initial=True)
 
     for iteration in range(1000000):
+        max_time_list = []
 
         # LIMITS
         if crossed_time_limit(start_time, max_time):
@@ -143,7 +132,11 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # DECISION
         for agent in agents:
-            agent.take_decision(agents_dict, alg_info)
+            plan_info = agent.take_decision(agents_dict, alg_info)
+            max_time_list.append(plan_info['runtime'])
+
+        if len(max_time_list) > 0:
+            alg_info['dist_runtime'] += max(max_time_list)
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}

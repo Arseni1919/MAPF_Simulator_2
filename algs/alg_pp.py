@@ -5,8 +5,8 @@ import cProfile
 import pstats
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
-from algs.metrics import build_constraints, get_agents_in_conf, check_plan
+# from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
+from algs.metrics import build_constraints, get_agents_in_conf, check_plan, get_alg_info_dict
 from algs.metrics import crossed_time_limit
 from algs.alg_a_star import a_star
 
@@ -60,16 +60,7 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     agent_names = [agent.name for agent in agents]
 
     plan = None
-    alg_info = {'agents': agents,
-                'success_rate': 0,
-                'sol_quality': 0,
-                'runtime': 0,
-                # 'iterations_time': 0,
-                'a_star_calls_counter': 0,
-                # 'a_star_calls_dist_counter': 0,
-                'a_star_runtimes': [],
-                'a_star_n_closed': [],
-                'n_agents_conf': []}
+    alg_info = get_alg_info_dict()
 
     # ITERATIONS
     for iteration in range(1000000):
@@ -154,7 +145,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 250
+    n_agents = 50
     A_STAR_ITER_LIMIT = 5e7
     A_STAR_CALLS_LIMIT = 1000
     MAX_TIME = 5

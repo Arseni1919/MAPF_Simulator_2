@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    crossed_time_limit
+from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
+    crossed_time_limit, get_alg_info_dict, check_plan
 from algs.topological_sorting import topological_sorting
 
 
@@ -87,11 +87,11 @@ def get_order_lists(pbs_node, agent):
 def collide_check(pbs_node, update_agent):
     print('\rFUNC: collide_check', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
-    sub_results = {agent.name: pbs_node.path[agent.name] for agent in higher_order_list}
-    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
+    sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
+    c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     if len(c_v_list) > 0:
         return True
-    e_v_list = c_e_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
+    e_v_list = c_e_check_for_agent(update_agent.name, pbs_node.plan[update_agent.name], sub_results)
     if len(e_v_list):
         return True
     return False
@@ -100,7 +100,7 @@ def collide_check(pbs_node, update_agent):
 def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
     print('\rFUNC: update_path', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
-    sub_results = {agent.name: pbs_node.path[agent.name] for agent in higher_order_list}
+    sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
 
     # c_v_list = c_v_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
     # c_e_list = c_e_check_for_agent(update_agent.name, pbs_node.path[update_agent.name], sub_results)
@@ -143,7 +143,7 @@ def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot
                     'a_star_runtimes': a_star_runtimes,
                     'a_star_n_closed': a_star_n_closed,
                 }
-            pbs_node.path[update_agent.name] = new_path
+            pbs_node.plan[update_agent.name] = new_path
     return True, {
         'a_star_calls_inner_counter': a_star_calls_inner_counter,
         'a_star_runtimes': a_star_runtimes,
@@ -184,31 +184,20 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
     return agent
 
 
-def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, middle_plot=False, **kwargs):
+def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     start_time = time.time()
-    if 'max_time' in kwargs:
-        max_time = kwargs['max_time']
-    else:
-        max_time = 10
-    if 'final_plot' in kwargs:
-        final_plot = kwargs['final_plot']
-    else:
-        final_plot = True
-    if 'initial_ordering' in kwargs:
-        partial_order = kwargs['initial_ordering']
-    else:
-        partial_order = []
-    if 'a_star_iter_limit' in kwargs:
-        iter_limit = kwargs['a_star_iter_limit']
-    else:
-        iter_limit = 1e100
-    if 'a_star_calls_limit' in kwargs:
-        a_star_calls_limit = kwargs['a_star_calls_limit']
-    else:
-        a_star_calls_limit = 1e100
-    a_star_calls_counter = 0
-    a_star_runtimes = []
-    a_star_n_closed = []
+    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
+    iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
+    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
+    plotter = kwargs['plotter'] if 'plotter' in kwargs else None
+    middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
+    final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
+    partial_order = kwargs['initial_ordering'] if 'initial_ordering' in kwargs else []
+
+    alg_info = get_alg_info_dict()
+    # a_star_calls_counter = 0
+    # a_star_runtimes = []
+    # a_star_n_closed = []
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -218,21 +207,23 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
     for agent in agents:
         success, up_info = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot,
                                                           iter_limit)
-        a_star_calls_counter += up_info['a_star_calls_inner_counter']
-        a_star_runtimes.extend(up_info['a_star_runtimes'])
-        a_star_n_closed.extend(up_info['a_star_n_closed'])
+        alg_info['a_star_calls_counter'] += up_info['a_star_calls_inner_counter']
+        alg_info['a_star_runtimes'].extend(up_info['a_star_runtimes'])
+        alg_info['a_star_n_closed'].extend(up_info['a_star_n_closed'])
         if not success:
             return None, {'success_rate': 0}
 
     root.calc_cost()
     stack = [root]
     iteration = 0
-    while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and a_star_calls_counter < a_star_calls_limit:
+    while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and alg_info['a_star_calls_counter'] < a_star_calls_limit:
         iteration += 1
         NEXT_pbs_node = stack.pop()
-        there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
+        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, f'PBS', alg_info, start_time,
+                                                  iteration)
+        # there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'\r---\n'
-              f'[PBS][{len(agents)} agents][A* calls: {a_star_calls_counter}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
+              f'[PBS][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
               f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
               f'partial order: {NEXT_pbs_node.partial_order}\n'
               f'cost: {NEXT_pbs_node.cost}\n'
@@ -246,17 +237,10 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
                 print(f'#########################################################')
                 plotter.plot_mapf_paths(paths_dict=NEXT_pbs_node.plan, nodes=nodes, plot_per=1)
 
-            runtime = time.time() - start_time
-            return NEXT_pbs_node.plan, {
-                'PBSNode': NEXT_pbs_node,
-                'success_rate': 1,
-                'sol_quality': NEXT_pbs_node.cost,
-                'runtime': runtime,
-                'iterations_time': runtime,
-                'a_star_calls_counter': a_star_calls_counter,
-                'a_star_calls_dist_counter': a_star_calls_counter,
-                'a_star_runtimes': a_star_runtimes,
-                'a_star_n_closed': a_star_n_closed}
+            alg_info['success_rate'] = 1
+            alg_info['sol_quality'] = cost
+            alg_info['runtime'] = time.time() - start_time
+            return NEXT_pbs_node.plan, alg_info
 
         conf, conf_type = choose_conf(c_v, c_e)
         for i in range(2):
@@ -265,16 +249,13 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter=None, mi
             NEW_pbs_node.plan = copy.deepcopy(NEXT_pbs_node.plan)
             NEW_pbs_node.ordering_rules = copy.deepcopy(NEXT_pbs_node.ordering_rules)
 
-            # NEW_pbs_node.constraints = copy.deepcopy(NEXT_pbs_node.constraints)
-            # add_new_constraint(NEW_pbs_node, i, conf, conf_type)
-
             agent = NEXT_pbs_node.agent_dict[conf[i]]
             agent = add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf)
             success, up_info = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter,
                                                               middle_plot, iter_limit)
-            a_star_calls_counter += up_info['a_star_calls_inner_counter']
-            a_star_runtimes.extend(up_info['a_star_runtimes'])
-            a_star_n_closed.extend(up_info['a_star_n_closed'])
+            alg_info['a_star_calls_counter'] += up_info['a_star_calls_inner_counter']
+            alg_info['a_star_runtimes'].extend(up_info['a_star_runtimes'])
+            alg_info['a_star_n_closed'].extend(up_info['a_star_n_closed'])
 
             if success:
                 NEW_pbs_node.calc_cost()
@@ -290,8 +271,15 @@ def main():
     # result = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=initial_ordering, n_agents=n_agents)
     for i in range(20):
         print(f'\n[run {i}]')
-        result, info = test_mapf_alg_from_pic(algorithm=run_pbs, initial_ordering=[], n_agents=n_agents,
-                                              random_seed=random_seed, seed=seed, max_time=5, final_plot=True)
+        result, info = test_mapf_alg_from_pic(
+            algorithm=run_pbs,
+            initial_ordering=[],
+            n_agents=n_agents,
+            random_seed=random_seed,
+            seed=seed,
+            max_time=5,
+            final_plot=True
+        )
 
         if not random_seed:
             break
@@ -304,6 +292,6 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 710
-    n_agents = 40
+    n_agents = 50
 
     main()

@@ -1,6 +1,20 @@
 import time
 
 
+def get_alg_info_dict(**kwargs):
+    alg_info = {'success_rate': 0,
+                'sol_quality': 0,
+                'runtime': 0,
+                'a_star_calls_counter': 0,
+                'dist_runtime': 0,
+                # 'dist_a_star_calls_counter': 0,
+                'a_star_runtimes': [],
+                'a_star_n_closed': [],
+                'n_agents_conf': []}
+    alg_info.update(kwargs)
+    return alg_info
+
+
 def get_agents_in_conf(c_v_list, c_e_list):
     agents_in_conf = [conf[1] for conf in c_v_list]
     agents_in_conf.extend([conf[1] for conf in c_e_list])
