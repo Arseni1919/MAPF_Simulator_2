@@ -92,9 +92,9 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes():
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
 
     # img_dir = 'random-32-32-10.map'  # 32-32
@@ -151,7 +151,7 @@ def big_test(
     set_seed(random_seed, seed)
 
     # get nodes and dimensions from image
-    nodes, nodes_dict, map_dim, img_png = get_map_nodes()
+    nodes, nodes_dict, map_dim, img_dir = get_map_nodes()
     # inner_plotter = Plotter(map_dim=map_dim)
     inner_plotter = None
 
@@ -160,7 +160,7 @@ def big_test(
         algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
         runs_per_n_agents=runs_per_n_agents,
-        img_png=img_png,
+        img_dir=img_dir,
         time_per_alg_limit=time_per_alg_limit,
         a_star_iter_limit=a_star_iter_limit,
         a_star_calls_limit=a_star_calls_limit
@@ -211,10 +211,10 @@ def big_test(
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {alg_info["success_rate"]}\n')
                 update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
                 if i_run % 2 == 0:
-                    plotter.plot_big_test(stats_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
+                    plotter.plot_big_test(stats_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_dir)
 
         if to_save_results:
-            save_and_show_results(to_save_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png)
+            save_and_show_results(to_save_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir)
             print('Results saved.')
 
     print(f'\nTest finished at: {datetime.now().strftime("%d/%m/%Y %H:%M:%S")}')
@@ -225,8 +225,8 @@ def main():
 
     algs_to_test_dict = {
         # 'PBS': (run_pbs, {}),
-        'MGM_d': (run_mgm, {}),
         'PP': (run_pp, {}),
+        'MGM_d': (run_mgm, {}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),

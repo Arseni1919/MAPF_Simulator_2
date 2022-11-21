@@ -8,7 +8,7 @@ from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
 
 
-def show_results(file_dir, plotter, algs_to_test_dict):
+def show_results(file_dir, plotter):
     """
     to_save_dict = {
         'statistics_dict': statistics_dict,
@@ -22,7 +22,7 @@ def show_results(file_dir, plotter, algs_to_test_dict):
     with open(f'{file_dir}', 'r') as openfile:
         # Reading from json file
         json_object = json.load(openfile)
-    statistics_dict = json_object['statistics_dict']
+    statistics_dict = json_object['stats_dict']
     runs_per_n_agents = json_object['runs_per_n_agents']
     n_agents_list = json_object['n_agents_list']
     img_png = json_object['img_dir']
@@ -32,15 +32,9 @@ def show_results(file_dir, plotter, algs_to_test_dict):
 
 
 def main():
-    file_dir = f'../logs_for_graphs/results_30-10-2022-22-00.json'
+    file_dir = f'../logs_for_graphs/results_2022-11-21_13-40.json'
     plotter = Plotter()
-    algs_to_test_dict = {
-        'PBS': run_pbs,
-        'DS-MAPF': run_ds_mapf,
-    }
-    show_results(file_dir,
-                 plotter=plotter,
-                 algs_to_test_dict=algs_to_test_dict)
+    show_results(file_dir, plotter=plotter)
 
 
 if __name__ == '__main__':
