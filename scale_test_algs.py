@@ -12,6 +12,7 @@ from funcs_plotter.plotter import Plotter
 from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
 from algs.alg_MGM import run_mgm
+from algs.alg_pp import run_pp
 from globals import *
 
 
@@ -29,14 +30,14 @@ def save_and_show_results(to_save_dict, file_dir, plotter=None, runs_per_n_agent
         plotter.plot_big_test(json_object['stats_dict'], runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png, is_json=True)
 
 
-def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **kwargs):
+def create_to_save_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **kwargs):
     stats_dict = {
         alg_name: {
             n_agents: {
                 'success_rate': {run: None for run in range(runs_per_n_agents)},
                 'sol_quality': {run: None for run in range(runs_per_n_agents)},
                 'runtime': {run: None for run in range(runs_per_n_agents)},
-                'iterations_time': {run: None for run in range(runs_per_n_agents)},
+                'dist_runtime': {run: None for run in range(runs_per_n_agents)},
                 'a_star_calls_counter': {run: None for run in range(runs_per_n_agents)},
                 'a_star_calls_dist_counter': {run: None for run in range(runs_per_n_agents)},
                 'a_star_runtimes': [],
@@ -46,40 +47,40 @@ def create_statistics_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, 
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
-    dict_to_save = {
+    to_save_dict = {
         'stats_dict': stats_dict,
         'runs_per_n_agents': runs_per_n_agents,
         'n_agents_list': n_agents_list,
         'algs_to_test_names': list(algs_to_test_dict.keys()),
     }
-    dict_to_save.update(kwargs)
-    return dict_to_save
+    to_save_dict.update(kwargs)
+    return to_save_dict
 
 
+def update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info):
+    stats_dict[alg_name][n_agents]['success_rate'][i_run] = alg_info['success_rate']
+    if alg_info['success_rate'] == 1:
+        stats_dict[alg_name][n_agents]['sol_quality'][i_run] = alg_info['sol_quality']
+        stats_dict[alg_name][n_agents]['runtime'][i_run] = alg_info['runtime']
 
-def update_statistics_dict(statistics_dict, alg_name, n_agents, i_run, result, info):
-    statistics_dict[alg_name][n_agents]['success_rate'][i_run] = info['success_rate']
-    if info['success_rate'] == 1:
-        statistics_dict[alg_name][n_agents]['sol_quality'][i_run] = info['sol_quality']
-        statistics_dict[alg_name][n_agents]['runtime'][i_run] = info['runtime']
+        if 'dist_runtime' in alg_info:
+            stats_dict[alg_name][n_agents]['dist_runtime'][i_run] = alg_info['dist_runtime']
 
-        if 'dist_runtime' in info:
-            statistics_dict[alg_name][n_agents]['dist_runtime'][i_run] = info['dist_runtime']
+        if 'a_star_calls_counter' in alg_info:
+            stats_dict[alg_name][n_agents]['a_star_calls_counter'][i_run] = alg_info['a_star_calls_counter']
 
-        if 'a_star_calls_counter' in info:
-            statistics_dict[alg_name][n_agents]['a_star_calls_counter'][i_run] = info['a_star_calls_counter']
+        if 'dist_a_star_calls_counter' in alg_info:
+            stats_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = alg_info['dist_a_star_calls_counter']
 
-        if 'dist_a_star_calls_counter' in info:
-            statistics_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = info['dist_a_star_calls_counter']
+        if 'a_star_runtimes' in alg_info:
+            stats_dict[alg_name][n_agents]['a_star_runtimes'].extend(alg_info['a_star_runtimes'])
 
-        if 'a_star_runtimes' in info:
-            statistics_dict[alg_name][n_agents]['a_star_runtimes'].extend(info['a_star_runtimes'])
+        if 'a_star_n_closed' in alg_info:
+            stats_dict[alg_name][n_agents]['a_star_n_closed'].extend(alg_info['a_star_n_closed'])
+            stats_dict[alg_name][n_agents]['n_closed_per_run'].append(sum(alg_info['a_star_n_closed']))
 
-        if 'a_star_n_closed' in info:
-            statistics_dict[alg_name][n_agents]['a_star_n_closed'].extend(info['a_star_n_closed'])
-            statistics_dict[alg_name][n_agents]['n_closed_per_run'].append(sum(info['a_star_n_closed']))
-        if 'n_agents_conf' in info:
-            statistics_dict[alg_name][n_agents]['n_agents_conf'].extend(info['n_agents_conf'])
+        if 'n_agents_conf' in alg_info:
+            stats_dict[alg_name][n_agents]['n_agents_conf'].extend(alg_info['n_agents_conf'])
 
 
 def set_seed(random_seed, seed):
@@ -155,7 +156,7 @@ def big_test(
     inner_plotter = None
 
     # for plotter
-    to_save_dict = create_statistics_dict(
+    to_save_dict = create_to_save_dict(
         algs_to_test_dict=algs_to_test_dict,
         n_agents_list=n_agents_list,
         runs_per_n_agents=runs_per_n_agents,
@@ -181,7 +182,7 @@ def big_test(
 
             # for at max 5 minutes
             for alg_name, (alg, params) in algs_to_test_dict.items():
-                result, info = alg(
+                result, alg_info = alg(
                     start_nodes=start_nodes,
                     goal_nodes=goal_nodes,
                     nodes=nodes,
@@ -207,8 +208,8 @@ def big_test(
                 print(f'#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
-                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {info["success_rate"]}\n')
-                update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, info)
+                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {alg_info["success_rate"]}\n')
+                update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
                 if i_run % 2 == 0:
                     plotter.plot_big_test(stats_dict, runs_per_n_agents, list(algs_to_test_dict.keys()), n_agents_list, img_png)
 
@@ -224,15 +225,16 @@ def main():
 
     algs_to_test_dict = {
         # 'PBS': (run_pbs, {}),
-        'MGM': (run_mgm, {}),
+        'MGM_d': (run_mgm, {}),
+        'PP': (run_pp, {}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
-        'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
+        # 'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
         # 'DS-max_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'max_prev_1', 'limit_type': 'simple'}),
         # 'DS-index_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'index_1', 'limit_type': 'simple'}),
-        'DS-min_prev_2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple'}),
-        'DS-index_2': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
+        'DS-min_prev_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple'}),
+        # 'DS-index_2': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
 
     # n_agents_list = [2, 3, 4, 5]

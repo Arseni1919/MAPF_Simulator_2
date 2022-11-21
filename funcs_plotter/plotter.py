@@ -274,14 +274,14 @@ class Plotter:
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
-            # iterations_time
-            if 'DS-MAPF' in alg_name:
+            # dist_runtime
+            if '_d' in alg_name:
                 it_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'dist_runtime', runs_per_n_agents,
                                         is_json)
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                ax.plot(it_x, it_y, '--^', label=f'{alg_name} (dist_runtime)')
+                ax.plot(it_x, it_y, '--^', label=f'{alg_name} (dist)')
                 if len(it_x) > 0:
                     ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
