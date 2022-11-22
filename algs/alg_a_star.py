@@ -129,20 +129,12 @@ def a_star(start, goal, nodes, h_func,
                 if node_successor.t <= successor_current_time:
                     continue
                 open_nodes.remove(node_successor)
-                # node_successor.t = successor_current_time
-                # node_successor.g = node_successor.t
-                # node_successor.parent = node_current
-                # open_nodes.add(node_successor)
 
             # INSIDE CLOSED LIST
             elif node_successor_status == 'closed_nodes':
                 if node_successor.t <= successor_current_time:
                     continue
                 closed_nodes.remove(node_successor)
-                # node_successor.t = successor_current_time
-                # node_successor.g = node_successor.t
-                # node_successor.parent = node_current
-                # open_nodes.add(node_successor)
 
             # NOT IN CLOSED AND NOT IN OPEN LISTS
             else:

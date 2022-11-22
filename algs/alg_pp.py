@@ -38,7 +38,7 @@ def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func, **kwargs
     sub_results = {agent.name: agent.path for agent in higher_agents}
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
     # print('\rBEFORE A*', end='')
-    print(f'\n ---------- (PP) A* {update_agent.name} ---------- \n')
+    print(f'\n ---------- (PP {kwargs["a_star_mode"]}) A* {update_agent.name} ---------- \n')
     new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node,
                                 nodes=nodes, nodes_dict=nodes_dict,
                                 h_func=h_func,
