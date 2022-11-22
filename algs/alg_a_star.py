@@ -23,7 +23,7 @@ def get_max_final(perm_constr_dict):
 
 
 def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes, v_constr_dict, e_constr_dict,
-             perm_constr_dict, max_final_time):
+             perm_constr_dict, max_final_time, **kwargs):
     new_t = node_current.t + 1
 
     if v_constr_dict:
@@ -47,18 +47,19 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
             new_t = max_final_time + 1
 
     # NO NEED FOR wasted waiting
-    # if successor_xy_name == node_current.xy_name:
-    #     no_constraints = True
-    #     for nei_xy_name in node_current.neighbours:
-    #         if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
-    #             no_constraints = False
-    #             break
-    #
-    #         if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
-    #             no_constraints = False
-    #             break
-    #     if no_constraints:
-    #         return None, ''
+    if 'a_star_mode' in kwargs and kwargs['a_star_mode'] == 'fast':
+        if successor_xy_name == node_current.xy_name:
+            no_constraints = True
+            for nei_xy_name in node_current.neighbours:
+                if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
+                    no_constraints = False
+                    break
+
+                if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
+                    no_constraints = False
+                    break
+            if no_constraints:
+                return None, ''
 
     new_ID = f'{successor_xy_name}_{new_t}'
     if new_ID in open_nodes.dict:
@@ -78,7 +79,7 @@ def reset_nodes(start, goal, nodes):
 def a_star(start, goal, nodes, h_func,
            v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None,
            plotter=None, middle_plot=False,
-           iter_limit=1e100, nodes_dict=None):
+           iter_limit=1e100, nodes_dict=None, **kwargs):
     """
     new_t in v_constr_dict[successor_xy_name]
     """
@@ -117,7 +118,7 @@ def a_star(start, goal, nodes, h_func,
         for successor_xy_name in node_current.neighbours:
             node_successor, node_successor_status = get_node(
                 successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
-                v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time
+                v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time, **kwargs
             )
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
@@ -154,7 +155,7 @@ def a_star(start, goal, nodes, h_func,
         # open_nodes.remove(node_current)
         closed_nodes.add(node_current)
 
-        if plotter and middle_plot and iteration % 10 == 0:
+        if plotter and middle_plot and iteration % 1 == 0:
             plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
                                closed_list=closed_nodes.get_nodes_list(),
                                start=start, goal=goal, nodes=nodes, a_star_run=True)
@@ -257,7 +258,9 @@ def try_a_map_from_pic():
     profiler.enable()
     result, info = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
                           v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
-                          plotter=plotter, middle_plot=True, nodes_dict=nodes_dict)
+                          plotter=plotter, middle_plot=True, nodes_dict=nodes_dict,
+                          a_star_mode='fast'
+                          )
     profiler.disable()
     if result:
         print('The result is:', *[node.xy_name for node in result], sep='->')

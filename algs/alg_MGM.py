@@ -25,6 +25,7 @@ class MGMAgent:
         self.other_paths = {}
         self.other_gains = {}
         self.agents_in_confs = []
+        self.alpha = 0.9
 
     def exchange_paths(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
@@ -68,12 +69,12 @@ class MGMAgent:
         }
         for agent_name, gain in other_nei_gains.items():
             if self.gain < gain:
-                return False
+                return random.random() > self.alpha
             if self.gain == gain:
                 equal_agents_indecies.append(agents_dict[agent_name].index)
 
         if len(equal_agents_indecies) > 0 and min(equal_agents_indecies) < self.index:
-            return False
+            return random.random() > self.alpha
         return True
 
     def take_decision(self, agents_dict, alg_info):

@@ -33,7 +33,7 @@ def create_agents(start_nodes, goal_nodes):
     return agents, agents_dict
 
 
-def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func):
+def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func, **kwargs):
     # print('\rFUNC: update_path', end='')
     sub_results = {agent.name: agent.path for agent in higher_agents}
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
@@ -44,7 +44,7 @@ def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func):
                                 h_func=h_func,
                                 v_constr_dict=v_constr_dict,
                                 e_constr_dict=e_constr_dict,
-                                perm_constr_dict=perm_constr_dict)
+                                perm_constr_dict=perm_constr_dict, **kwargs)
     return new_path, a_s_info
 
 
@@ -55,6 +55,7 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
+    a_star_mode = kwargs['a_star_mode'] if 'a_star_mode' in kwargs else 'simple'
 
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     agent_names = [agent.name for agent in agents]
@@ -78,8 +79,8 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         # PLAN
         higher_agents = []
         to_continue = False
-        for agent in agents:
-            new_path, a_s_info = update_path(agent, higher_agents, nodes, nodes_dict, h_func)
+        for agent in new_order:
+            new_path, a_s_info = update_path(agent, higher_agents, nodes, nodes_dict, h_func, a_star_mode=a_star_mode)
             alg_info['a_star_calls_counter'] += 1
             alg_info['a_star_runtimes'].append(time.time() - start_time)
             alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
