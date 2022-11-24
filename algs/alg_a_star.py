@@ -11,7 +11,7 @@ from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
 
 
-def check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, ignore_dict, max_final_time):
+def check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, ignore_dict):
     # NO NEED FOR wasted waiting
     if node_current.xy_name in ignore_dict:
         return False
@@ -139,7 +139,7 @@ def a_star(start, goal, nodes, h_func,
             else:
                 break
         if 'df_dict' in kwargs:
-            future_constr = check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, kwargs['df_dict'], max_final_time)
+            future_constr = check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, kwargs['df_dict'])
             if future_constr:
                 goal = node_current
                 break

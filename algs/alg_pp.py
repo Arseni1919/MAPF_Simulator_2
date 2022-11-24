@@ -67,7 +67,6 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # ITERATIONS
     for iteration in range(1000000):
-        start_time = time.time()
         # LIMITS
         if runtime > max_time * 60:
             break
@@ -84,17 +83,16 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         for agent in new_order:
             new_path, a_s_info = update_path(agent, higher_agents, nodes, nodes_dict, h_func, **kwargs)
             alg_info['a_star_calls_counter'] += 1
-            alg_info['a_star_runtimes'].append(time.time() - start_time)
+            alg_info['a_star_runtimes'].append(a_s_info['runtime'])
             alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
+            # STATS
+            runtime += a_s_info['runtime']
             if new_path:
                 agent.path = new_path
             else:
                 to_continue = True
                 break
             higher_agents.append(agent)
-
-        # STATS
-        runtime += time.time() - start_time
 
         if to_continue:
             continue
