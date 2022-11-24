@@ -96,8 +96,8 @@ def set_seed(random_seed, seed):
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
 
@@ -230,8 +230,8 @@ def main():
     algs_to_test_dict = {
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
-        'PP_a1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
-        'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
+        # 'PP_a1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
+        # 'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
         'MGM_d_a1': (run_mgm, {'a_star_func': a_star}),
         'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
@@ -241,8 +241,8 @@ def main():
         # 'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
         # 'DS-max_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'max_prev_1', 'limit_type': 'simple'}),
         # 'DS-index_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'index_1', 'limit_type': 'simple'}),
-        'DS-min_2_d_a1': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': a_star}),
-        'DS-min_2_d_a2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': df_a_star}),
+        # 'DS-min_2_d_a1': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': a_star}),
+        # 'DS-min_2_d_a2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': df_a_star}),
         # 'DS-index_2_d': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
 

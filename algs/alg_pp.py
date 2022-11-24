@@ -92,11 +92,13 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 to_continue = True
                 break
             higher_agents.append(agent)
-        if to_continue:
-            continue
 
         # STATS
         runtime += time.time() - start_time
+
+        if to_continue:
+            continue
+
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
         there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
