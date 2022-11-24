@@ -13,6 +13,8 @@ from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
 from algs.alg_MGM import run_mgm
 from algs.alg_pp import run_pp
+from algs.alg_a_star import a_star
+from algs.alg_depth_first_a_star import df_a_star
 from globals import *
 
 
@@ -93,9 +95,9 @@ def set_seed(random_seed, seed):
 
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
-    img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
 
@@ -226,18 +228,21 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
 
     algs_to_test_dict = {
-        # 'PBS': (run_pbs, {}),
-        'PP_1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': 'a_star'}),
-        'PP_2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': 'df_a_star'}),
+        # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
+        # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
+        'PP_a1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
+        'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
-        # 'MGM_d': (run_mgm, {}),
+        'MGM_d_a1': (run_mgm, {'a_star_func': a_star}),
+        'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),
         # 'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
         # 'DS-max_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'max_prev_1', 'limit_type': 'simple'}),
         # 'DS-index_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'index_1', 'limit_type': 'simple'}),
-        # 'DS-min_prev_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple'}),
+        'DS-min_2_d_a1': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': a_star}),
+        'DS-min_2_d_a2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': df_a_star}),
         # 'DS-index_2_d': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
 
@@ -248,8 +253,8 @@ def main():
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    n_agents_list = [50, 60, 70, 80, 90, 100]
-    # n_agents_list = [100, 120, 140, 160, 180, 200]
+    # n_agents_list = [50, 60, 70, 80, 90, 100]
+    n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
     # n_agents_list = [100, 150, 200, 250, 300]
 
@@ -259,9 +264,10 @@ def main():
     runs_per_n_agents = 5
 
     # time_per_alg_limit = 1  # According to PBS paper!
+    time_per_alg_limit = 0.5
     # time_per_alg_limit = 3
     # time_per_alg_limit = 10
-    time_per_alg_limit = 50
+    # time_per_alg_limit = 50
 
     # random_seed = True
     random_seed = False
@@ -275,8 +281,8 @@ def main():
     a_star_calls_limit = 1500
     # a_star_calls_limit = 1e100
 
-    to_save_results = True
-    # to_save_results = False
+    # to_save_results = True
+    to_save_results = False
     file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.json'
 
     # profiler = None

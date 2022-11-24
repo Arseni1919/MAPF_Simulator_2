@@ -75,7 +75,7 @@ class DSAgent:
                 path_lngths.append(len(self.path))
                 path_lngths.sort()
                 my_order = path_lngths.index(len(self.path))
-                my_alpha = 0.1 + 0.8 * (my_order/len(path_lngths))
+                my_alpha = 0.1 + 0.8 * (my_order / len(path_lngths))
                 if random.random() < my_alpha:
                     return True
 
@@ -137,7 +137,7 @@ class DSAgent:
                 iter_limit = min(iter_limit, alt_iter_limit)
         return iter_limit
 
-    def plan(self, alpha, decision_type, agents_dict=None):
+    def plan(self, alpha, decision_type, agents_dict=None, **kwargs):
         start_time = time.time()
 
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
@@ -152,17 +152,19 @@ class DSAgent:
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
-            print(f'\n ---------- (DS {decision_type}) A* {self.name} ---------- \n')
-            new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
-                                        nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
-                                        v_constr_dict=v_constr_dict,
-                                        e_constr_dict=e_constr_dict,
-                                        perm_constr_dict=perm_constr_dict,
-                                        plotter=self.plotter, middle_plot=self.middle_plot,
-                                        iter_limit=iter_limit)
+            print(f'\n ---------- ({kwargs["alg_name"]}) A* {self.name} ---------- \n')
+            a_star_func = kwargs['a_star_func']
+            new_path, a_s_info = a_star_func(start=self.start_node, goal=self.goal_node,
+                                             nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
+                                             v_constr_dict=v_constr_dict,
+                                             e_constr_dict=e_constr_dict,
+                                             perm_constr_dict=perm_constr_dict,
+                                             plotter=self.plotter, middle_plot=self.middle_plot,
+                                             iter_limit=iter_limit)
             if new_path is not None:
                 self.path = new_path
-            return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info, 'n_agents_conf': len(agents_in_confs) }
+            return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info,
+                          'n_agents_conf': len(agents_in_confs)}
 
         # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
         return False, {'elapsed': None, 'a_s_info': None}
@@ -180,15 +182,15 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
     limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
     alpha = kwargs['alpha'] if 'alpha' in kwargs else None
-    decision_type = kwargs['decision_type'] if 'decision_type' in kwargs else 'opt_1'
-    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'DS ({decision_type})'
+    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'DS'
 
     # Creating agents
     agents = []
     agents_dict = {}
     n_agent = 0
     for start_node, goal_node in zip(start_nodes, goal_nodes):
-        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim, limit_type)
+        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
+                        map_dim, limit_type)
         agents.append(agent)
         agents_dict[agent.name] = agent
         n_agent += 1
@@ -210,7 +212,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # PLAN
         for agent in agents:
-            succeeded, info = agent.plan(alpha=alpha, decision_type=decision_type, agents_dict=agents_dict)
+            succeeded, info = agent.plan(alpha=alpha, agents_dict=agents_dict, **kwargs)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
                 alg_info['a_star_runtimes'].append(info['a_s_info']['runtime'])
@@ -231,7 +233,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
         # check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
         # there_is_col, c_v, c_e = check_for_collisions(plan)
         if not there_is_col:
             if final_plot:
@@ -336,5 +338,3 @@ if __name__ == '__main__':
 # no_paths_agents = [k for k, v in self.other_paths.items() if len(v) == 0]
 # if len(no_paths_agents) > 0:
 #     raise RuntimeError('len(no_paths_agents) > 0')
-
-

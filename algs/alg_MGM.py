@@ -34,16 +34,17 @@ class MGMAgent:
         self.gain = len(c_v_list) + len(c_e_list)
         self.agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
 
-    def plan(self, alg_info, initial=False):
+    def plan(self, alg_info, initial=False, **kwargs):
         start_time = time.time()
         v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
         # iter_limit = self.get_a_star_iter_limit(agents_in_confs)
-        print(f'\n ---------- (MGM) A* {self.name} ---------- \n')
-        new_path, a_s_info = a_star(start=self.start_node, goal=self.goal_node,
-                                    nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
-                                    v_constr_dict=v_constr_dict,
-                                    e_constr_dict=e_constr_dict,
-                                    perm_constr_dict=perm_constr_dict)
+        print(f'\n ---------- ({kwargs["alg_name"]}) A* {self.name} ---------- \n')
+        a_star_func = kwargs['a_star_func']
+        new_path, a_s_info = a_star_func(start=self.start_node, goal=self.goal_node,
+                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
+                                         v_constr_dict=v_constr_dict,
+                                         e_constr_dict=e_constr_dict,
+                                         perm_constr_dict=perm_constr_dict)
         if new_path is not None:
             self.path = new_path
         if self.path is None:
@@ -77,11 +78,11 @@ class MGMAgent:
             return random.random() > self.alpha
         return True
 
-    def take_decision(self, agents_dict, alg_info):
+    def take_decision(self, agents_dict, alg_info, **kwargs):
         # take max value
         plan_info = {'runtime': 0}
         if self.decision_bool(agents_dict):
-            plan_info = self.plan(alg_info)
+            plan_info = self.plan(alg_info, **kwargs)
         return plan_info
         # else:
         #     print(f'\n ---------- (MGM) NO NEED FOR A* {self.name} ---------- \n')
@@ -114,7 +115,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # PLAN
     start_time = time.time()
     for agent in agents:
-        agent.plan(alg_info, initial=True)
+        agent.plan(alg_info, initial=True, **kwargs)
     runtime += time.time() - start_time
 
     for iteration in range(1000000):
@@ -137,7 +138,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # DECISION
         for agent in agents:
-            plan_info = agent.take_decision(agents_dict, alg_info)
+            plan_info = agent.take_decision(agents_dict, alg_info, **kwargs)
             max_time_list.append(plan_info['runtime'])
 
         if len(max_time_list) > 0:
@@ -148,7 +149,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
         if not there_is_col:
             if final_plot:
                 print(f'#########################################################')

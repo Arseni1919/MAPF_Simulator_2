@@ -39,26 +39,14 @@ def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func, **kwargs
     sub_results = {agent.name: agent.path for agent in higher_agents}
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
     # print('\rBEFORE A*', end='')
-    print(f'\n ---------- (PP {kwargs["a_star_mode"]}) A* {update_agent.name} ---------- \n')
+    print(f'\n ---------- ({kwargs["alg_name"]}) A* {update_agent.name} ---------- \n')
     a_star_func = kwargs['a_star_func']
-    # if update_agent.name == 'agent_7':
-    #     print()
-    if a_star_func == 'a_star':
-        new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node,
-                                    nodes=nodes, nodes_dict=nodes_dict,
-                                    h_func=h_func,
-                                    v_constr_dict=v_constr_dict,
-                                    e_constr_dict=e_constr_dict,
-                                    perm_constr_dict=perm_constr_dict, **kwargs)
-    elif a_star_func == 'df_a_star':
-        new_path, a_s_info = df_a_star(start=update_agent.start_node, goal=update_agent.goal_node,
-                                       nodes=nodes, nodes_dict=nodes_dict,
-                                       h_func=h_func,
-                                       v_constr_dict=v_constr_dict,
-                                       e_constr_dict=e_constr_dict,
-                                       perm_constr_dict=perm_constr_dict, **kwargs)
-    else:
-        raise RuntimeError('no type a_star')
+    new_path, a_s_info = a_star_func(start=update_agent.start_node, goal=update_agent.goal_node,
+                                     nodes=nodes, h_func=h_func,
+                                     nodes_dict=nodes_dict,
+                                     v_constr_dict=v_constr_dict,
+                                     e_constr_dict=e_constr_dict,
+                                     perm_constr_dict=perm_constr_dict, **kwargs)
     return new_path, a_s_info
 
 
@@ -111,7 +99,7 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         runtime += time.time() - start_time
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
         if not there_is_col:
             if final_plot:
                 print(f'#########################################################')

@@ -97,7 +97,7 @@ def collide_check(pbs_node, update_agent):
     return False
 
 
-def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
+def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, iter_limit, **kwargs):
     print('\rFUNC: update_path', end='')
     higher_order_list, _ = get_order_lists(pbs_node, update_agent)
     sub_results = {agent.name: pbs_node.plan[agent.name] for agent in higher_order_list}
@@ -108,11 +108,12 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
 
     print('\rBEFORE A*', end='')
-    new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node,
-                                nodes=nodes, nodes_dict=nodes_dict,
-                                h_func=h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict,
-                                perm_constr_dict=perm_constr_dict,
-                                plotter=plotter, middle_plot=middle_plot, iter_limit=iter_limit)
+    a_star_func = kwargs['a_star_func']
+    new_path, a_s_info = a_star_func(start=update_agent.start_node, goal=update_agent.goal_node,
+                                     nodes=nodes, nodes_dict=nodes_dict,
+                                     h_func=h_func, v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict,
+                                     perm_constr_dict=perm_constr_dict,
+                                     plotter=None, middle_plot=False, iter_limit=iter_limit)
 
     # if new_path is not None:
     #     c_v_list_after = c_v_check_for_agent(update_agent.name, new_path, sub_results)
@@ -124,7 +125,7 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, midd
 
 
 # @preprint_func_name
-def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit):
+def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, iter_limit, **kwargs):
     print('\rFUNC: update_plan', end='')
     a_star_calls_inner_counter = 0
     a_star_runtimes = []
@@ -133,7 +134,8 @@ def update_plan(pbs_node, agent, nodes, nodes_dict, h_func, plotter, middle_plot
     update_list = [pbs_node.agent_dict[agent_name] for agent_name in update_list_names]
     for update_agent in update_list:
         if collide_check(pbs_node, update_agent) or update_agent.name == agent.name:
-            new_path, a_s_info = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit)
+            new_path, a_s_info = update_path(pbs_node, update_agent, nodes, nodes_dict, h_func,
+                                             iter_limit, **kwargs)
             a_star_calls_inner_counter += 1
             a_star_runtimes.append(a_s_info['runtime'])
             a_star_n_closed.append(a_s_info['n_closed'])
@@ -206,8 +208,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     root.update_ordering_rules()
     start_time = time.time()
     for agent in agents:
-        success, up_info = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot,
-                                                          iter_limit)
+        success, up_info = update_plan(root, agent, nodes, nodes_dict, h_func, iter_limit, **kwargs)
         alg_info['a_star_calls_counter'] += up_info['a_star_calls_inner_counter']
         alg_info['a_star_runtimes'].extend(up_info['a_star_runtimes'])
         alg_info['a_star_n_closed'].extend(up_info['a_star_n_closed'])
@@ -219,14 +220,15 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     root.calc_cost()
     stack = [root]
     iteration = 0
-    while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and alg_info['a_star_calls_counter'] < a_star_calls_limit:
+    while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and alg_info[
+        'a_star_calls_counter'] < a_star_calls_limit:
         iteration += 1
         NEXT_pbs_node = stack.pop()
-        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, start_time,
+        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, runtime,
                                                   iteration)
         # there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'\r---\n'
-              f'[PBS][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {time.time() - start_time:0.2f}s][iter {iteration}]\n'
+              f'[{kwargs["alg_name"]}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {runtime:0.2f}s][iter {iteration}]\n'
               f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
               f'partial order: {NEXT_pbs_node.partial_order}\n'
               f'cost: {NEXT_pbs_node.cost}\n'
@@ -255,8 +257,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
             agent = NEXT_pbs_node.agent_dict[conf[i]]
             agent = add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf)
-            success, up_info = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, plotter,
-                                                              middle_plot, iter_limit)
+            success, up_info = update_plan(NEW_pbs_node, agent, nodes, nodes_dict, h_func, iter_limit, **kwargs)
             alg_info['a_star_calls_counter'] += up_info['a_star_calls_inner_counter']
             alg_info['a_star_runtimes'].extend(up_info['a_star_runtimes'])
             alg_info['a_star_n_closed'].extend(up_info['a_star_n_closed'])
