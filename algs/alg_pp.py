@@ -9,6 +9,7 @@ from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan, get_alg_info_dict
 from algs.metrics import crossed_time_limit
 from algs.alg_a_star import a_star
+from algs.alg_depth_first_a_star import df_a_star
 
 
 class PPAgent:
@@ -39,23 +40,36 @@ def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func, **kwargs
     v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(nodes, sub_results)
     # print('\rBEFORE A*', end='')
     print(f'\n ---------- (PP {kwargs["a_star_mode"]}) A* {update_agent.name} ---------- \n')
-    new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node,
-                                nodes=nodes, nodes_dict=nodes_dict,
-                                h_func=h_func,
-                                v_constr_dict=v_constr_dict,
-                                e_constr_dict=e_constr_dict,
-                                perm_constr_dict=perm_constr_dict, **kwargs)
+    a_star_func = kwargs['a_star_func']
+    # if update_agent.name == 'agent_7':
+    #     print()
+    if a_star_func == 'a_star':
+        new_path, a_s_info = a_star(start=update_agent.start_node, goal=update_agent.goal_node,
+                                    nodes=nodes, nodes_dict=nodes_dict,
+                                    h_func=h_func,
+                                    v_constr_dict=v_constr_dict,
+                                    e_constr_dict=e_constr_dict,
+                                    perm_constr_dict=perm_constr_dict, **kwargs)
+    elif a_star_func == 'df_a_star':
+        new_path, a_s_info = df_a_star(start=update_agent.start_node, goal=update_agent.goal_node,
+                                       nodes=nodes, nodes_dict=nodes_dict,
+                                       h_func=h_func,
+                                       v_constr_dict=v_constr_dict,
+                                       e_constr_dict=e_constr_dict,
+                                       perm_constr_dict=perm_constr_dict, **kwargs)
+    else:
+        raise RuntimeError('no type a_star')
     return new_path, a_s_info
 
 
 def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
-    start_time = time.time()
+    runtime = 0
     a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
-    a_star_mode = kwargs['a_star_mode'] if 'a_star_mode' in kwargs else 'simple'
+    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else 'PP'
 
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     agent_names = [agent.name for agent in agents]
@@ -65,9 +79,9 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # ITERATIONS
     for iteration in range(1000000):
-
+        start_time = time.time()
         # LIMITS
-        if crossed_time_limit(start_time, max_time):
+        if runtime > max_time * 60:
             break
         if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
             break
@@ -80,7 +94,7 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         higher_agents = []
         to_continue = False
         for agent in new_order:
-            new_path, a_s_info = update_path(agent, higher_agents, nodes, nodes_dict, h_func, a_star_mode=a_star_mode)
+            new_path, a_s_info = update_path(agent, higher_agents, nodes, nodes_dict, h_func, **kwargs)
             alg_info['a_star_calls_counter'] += 1
             alg_info['a_star_runtimes'].append(time.time() - start_time)
             alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
@@ -93,9 +107,11 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         if to_continue:
             continue
 
+        # STATS
+        runtime += time.time() - start_time
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, 'PP', alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
         if not there_is_col:
             if final_plot:
                 print(f'#########################################################')
@@ -105,7 +121,7 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
-            alg_info['runtime'] = time.time() - start_time
+            alg_info['runtime'] = runtime
             return plan, alg_info
 
     return plan, alg_info

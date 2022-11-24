@@ -169,7 +169,7 @@ class DSAgent:
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
-    start_time = time.time()
+    runtime = 0
     a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
@@ -181,6 +181,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
     alpha = kwargs['alpha'] if 'alpha' in kwargs else None
     decision_type = kwargs['decision_type'] if 'decision_type' in kwargs else 'opt_1'
+    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'DS ({decision_type})'
 
     # Creating agents
     agents = []
@@ -196,12 +197,12 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # Distributed Part
     for iteration in range(1000000):
+        start_time = time.time()
         max_time_list = []
-        # time constraint
-        # if crossed_time_limit(start_time, max_time * len(agents)):
-        if crossed_time_limit(start_time, max_time):
-            break
 
+        # LIMITS
+        if runtime > max_time * 60:
+            break
         if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
             break
         # if a_star_calls_dist_counter >= a_star_calls_limit:
@@ -225,10 +226,12 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         for agent in agents:
             agent.exchange(agents=agents)
 
+        # STATS
+        runtime += time.time() - start_time
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
         # check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, f'DS ({decision_type})', alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
         # there_is_col, c_v, c_e = check_for_collisions(plan)
         if not there_is_col:
             if final_plot:
@@ -238,7 +241,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
-            alg_info['runtime'] = time.time() - start_time
+            alg_info['runtime'] = runtime
             return plan, alg_info
 
     # partial order

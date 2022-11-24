@@ -27,8 +27,11 @@ class Node:
         return self.t + self.h
         # return self.g + self.h
 
-    def reset(self, target_nodes=None):
-        self.t = 0
+    def reset(self, target_nodes=None, **kwargs):
+        if 'start_time' in kwargs:
+            self.t = kwargs['start_time']
+        else:
+            self.t = 0
         self.h = 0
         self.g = self.t
         self.ID = f'{self.x}_{self.y}_{self.t}'

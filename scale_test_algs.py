@@ -93,8 +93,8 @@ def set_seed(random_seed, seed):
 
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
-    # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
@@ -196,7 +196,8 @@ def big_test(
                     a_star_iter_limit=a_star_iter_limit,
                     a_star_calls_limit=a_star_calls_limit,
                     # initial_ordering=[]  # for PBS
-                    **params
+                    alg_name=alg_name,
+                    **params,
                 )
 
                 # plot + print
@@ -226,8 +227,9 @@ def main():
 
     algs_to_test_dict = {
         # 'PBS': (run_pbs, {}),
-        'PP': (run_pp, {'a_star_mode': 'simple'}),
-        'PP_f': (run_pp, {'a_star_mode': 'fast'}),
+        'PP_1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': 'a_star'}),
+        'PP_2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': 'df_a_star'}),
+        # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
         # 'MGM_d': (run_mgm, {}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
@@ -246,10 +248,10 @@ def main():
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    # n_agents_list = [50, 60, 70, 80, 90, 100]
+    n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
-    n_agents_list = [100, 150, 200, 250, 300]
+    # n_agents_list = [100, 150, 200, 250, 300]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20
@@ -261,10 +263,10 @@ def main():
     # time_per_alg_limit = 10
     time_per_alg_limit = 50
 
-    random_seed = True
-    # random_seed = False
+    # random_seed = True
+    random_seed = False
 
-    seed = 521
+    seed = 116
     plotter = Plotter()
     a_star_iter_limit = 1e9
 
@@ -273,8 +275,8 @@ def main():
     a_star_calls_limit = 1500
     # a_star_calls_limit = 1e100
 
-    # to_save_results = True
-    to_save_results = False
+    to_save_results = True
+    # to_save_results = False
     file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.json'
 
     # profiler = None

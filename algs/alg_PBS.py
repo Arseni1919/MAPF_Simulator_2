@@ -185,7 +185,7 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
 
 
 def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
-    start_time = time.time()
+    runtime = 0
     a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
@@ -193,6 +193,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     partial_order = kwargs['initial_ordering'] if 'initial_ordering' in kwargs else []
+    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else 'PBS'
 
     alg_info = get_alg_info_dict()
     # a_star_calls_counter = 0
@@ -203,7 +204,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     root = PBSNode(agents, agents_dict, pbs_node_index)
     root.partial_order = partial_order
     root.update_ordering_rules()
-
+    start_time = time.time()
     for agent in agents:
         success, up_info = update_plan(root, agent, nodes, nodes_dict, h_func, plotter, middle_plot,
                                                           iter_limit)
@@ -212,14 +213,16 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         alg_info['a_star_n_closed'].extend(up_info['a_star_n_closed'])
         if not success:
             return None, {'success_rate': 0}
-
+    # STATS
+    runtime += time.time() - start_time
+    start_time = time.time()
     root.calc_cost()
     stack = [root]
     iteration = 0
     while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and alg_info['a_star_calls_counter'] < a_star_calls_limit:
         iteration += 1
         NEXT_pbs_node = stack.pop()
-        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, f'PBS', alg_info, start_time,
+        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, start_time,
                                                   iteration)
         # there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
         print(f'\r---\n'
@@ -239,7 +242,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
-            alg_info['runtime'] = time.time() - start_time
+            runtime += time.time() - start_time
+            alg_info['runtime'] = runtime
             return NEXT_pbs_node.plan, alg_info
 
         conf, conf_type = choose_conf(c_v, c_e)

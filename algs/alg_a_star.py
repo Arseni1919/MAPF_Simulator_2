@@ -1,10 +1,7 @@
-import copy
-import math
 import random
 import cProfile
 import pstats
 import time
-import heapq
 import matplotlib.pyplot as plt
 import numpy as np
 from simulator_objects import Node, ListNodes
@@ -12,6 +9,31 @@ from funcs_plotter.plotter import Plotter
 from funcs_graph.nodes_from_pic import make_neighbours, build_graph_nodes
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
+
+
+def check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, ignore_dict, max_final_time):
+    # NO NEED FOR wasted waiting
+    if node_current.xy_name in ignore_dict:
+        return False
+    new_t = node_current.t + 1
+    # if max_final_time:
+    #     if node_current.t >= max_final_time:
+    #         new_t = max_final_time + 1
+
+    future_constr = False
+    for nei_xy_name in node_current.neighbours:
+        if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
+            future_constr = True
+            break
+        if e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
+            future_constr = True
+            break
+        if perm_constr_dict:
+            if len(perm_constr_dict[nei_xy_name]) > 0:
+                if new_t >= perm_constr_dict[nei_xy_name][0]:
+                    future_constr = True
+                    break
+    return future_constr
 
 
 def get_max_final(perm_constr_dict):
@@ -47,19 +69,19 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
             new_t = max_final_time + 1
 
     # NO NEED FOR wasted waiting
-    if 'a_star_mode' in kwargs and kwargs['a_star_mode'] == 'fast':
-        if successor_xy_name == node_current.xy_name:
-            no_constraints = True
-            for nei_xy_name in node_current.neighbours:
-                if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
-                    no_constraints = False
-                    break
-
-                if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
-                    no_constraints = False
-                    break
-            if no_constraints:
-                return None, ''
+    # if 'a_star_mode' in kwargs and kwargs['a_star_mode'] == 'fast':
+    #     if successor_xy_name == node_current.xy_name:
+    #         no_constraints = True
+    #         for nei_xy_name in node_current.neighbours:
+    #             if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
+    #                 no_constraints = False
+    #                 break
+    #
+    #             if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
+    #                 no_constraints = False
+    #                 break
+    #         if no_constraints:
+    #             return None, 'future_constr'
 
     new_ID = f'{successor_xy_name}_{new_t}'
     if new_ID in open_nodes.dict:
@@ -71,8 +93,9 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
     return Node(x=node.x, y=node.y, t=new_t, neighbours=node.neighbours), 'new'
 
 
-def reset_nodes(start, goal, nodes):
+def reset_nodes(start, goal, nodes, **kwargs):
     _ = [node.reset() for node in nodes]
+    start.reset(**kwargs)
     return start, goal, nodes
 
 
@@ -85,7 +108,7 @@ def a_star(start, goal, nodes, h_func,
     """
     start_time = time.time()
     # start, goal, nodes = deepcopy_nodes(start, goal, nodes)  # heavy!
-    start, goal, nodes = reset_nodes(start, goal, nodes)
+    start, goal, nodes = reset_nodes(start, goal, nodes, **kwargs)
     print('\rStarted A*...', end='')
     open_nodes = ListNodes()
     closed_nodes = ListNodes()
@@ -93,6 +116,7 @@ def a_star(start, goal, nodes, h_func,
     node_current.h = h_func(node_current, goal)
     open_nodes.add(node_current)
     max_final_time = get_max_final(perm_constr_dict)
+    future_constr = False
     iteration = 0
     while len(open_nodes) > 0:
         iteration += 1
@@ -114,12 +138,17 @@ def a_star(start, goal, nodes, h_func,
                     break
             else:
                 break
-
+        if 'df_dict' in kwargs:
+            future_constr = check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, kwargs['df_dict'], max_final_time)
+            if future_constr:
+                goal = node_current
+                break
         for successor_xy_name in node_current.neighbours:
             node_successor, node_successor_status = get_node(
                 successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
                 v_constr_dict, e_constr_dict, perm_constr_dict, max_final_time, **kwargs
             )
+
             successor_current_time = node_current.t + 1  # h(now, next)
             if node_successor is None:
                 continue
@@ -147,7 +176,7 @@ def a_star(start, goal, nodes, h_func,
         # open_nodes.remove(node_current)
         closed_nodes.add(node_current)
 
-        if plotter and middle_plot and iteration % 1 == 0:
+        if plotter and middle_plot and iteration % 10 == 0:
             plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
                                closed_list=closed_nodes.get_nodes_list(),
                                start=start, goal=goal, nodes=nodes, a_star_run=True)
@@ -168,7 +197,7 @@ def a_star(start, goal, nodes, h_func,
     # print('\rFinished A*.', end='')
     if path is None:
         print()
-    return path, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.heap_list), 'n_closed': len(closed_nodes.heap_list)}
+    return path, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.heap_list), 'n_closed': len(closed_nodes.heap_list), 'future_constr': future_constr}
 
 
 def main():

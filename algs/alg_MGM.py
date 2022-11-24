@@ -88,12 +88,13 @@ class MGMAgent:
 
 
 def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
-    start_time = time.time()
+    runtime = 0
     a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
+    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else 'MGM'
 
     plan = None
 
@@ -111,14 +112,17 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # ITERATIONS
     # PLAN
+    start_time = time.time()
     for agent in agents:
         agent.plan(alg_info, initial=True)
+    runtime += time.time() - start_time
 
     for iteration in range(1000000):
+        start_time = time.time()
         max_time_list = []
 
         # LIMITS
-        if crossed_time_limit(start_time, max_time):
+        if runtime > max_time * 60:
             break
         if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
             break
@@ -139,9 +143,12 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         if len(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
 
+        # STATS
+        runtime += time.time() - start_time
+
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, 'MGM', alg_info, start_time, iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
         if not there_is_col:
             if final_plot:
                 print(f'#########################################################')
@@ -151,7 +158,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
-            alg_info['runtime'] = time.time() - start_time
+            alg_info['runtime'] = runtime
             return plan, alg_info
 
     return plan, alg_info

@@ -24,9 +24,7 @@ def get_agents_in_conf(c_v_list, c_e_list):
 
 def crossed_time_limit(start_time, max_time_minutes):
     elapsed = time.time() - start_time
-    if elapsed > max_time_minutes * 60:
-        return True
-    return False
+    return elapsed > max_time_minutes * 60
 
 
 def build_constraints(nodes, other_paths):
