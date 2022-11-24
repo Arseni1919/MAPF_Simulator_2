@@ -25,7 +25,7 @@ def df_a_star(start, goal, nodes, h_func, **kwargs):
         iteration = 0
         while last_node.xy_name != goal.xy_name or future_constr:
             iteration += 1
-            # print(last_node.xy_name)
+            print(f'\ndf_a_star iteration {1}')
             df_dict.update({last_node.xy_name: True})
             if len(initial_path) - 1 != last_node.t:
                 raise ValueError('len(initial_path) - 1 != last_node.t')

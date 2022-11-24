@@ -96,8 +96,8 @@ def set_seed(random_seed, seed):
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
 
@@ -231,7 +231,7 @@ def main():
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
         # 'PP_a1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
-        # 'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
+        'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
         'MGM_d_a1': (run_mgm, {'a_star_func': a_star}),
         'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
@@ -264,8 +264,8 @@ def main():
     runs_per_n_agents = 5
 
     # time_per_alg_limit = 1  # According to PBS paper!
-    time_per_alg_limit = 0.5
-    # time_per_alg_limit = 3
+    # time_per_alg_limit = 0.5
+    time_per_alg_limit = 3
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
