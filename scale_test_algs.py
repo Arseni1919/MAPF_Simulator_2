@@ -12,7 +12,7 @@ from funcs_plotter.plotter import Plotter
 from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
 from algs.alg_MGM import run_mgm
-from algs.alg_pp import run_pp
+from algs.alg_PP import run_pp
 from algs.alg_a_star import a_star
 from algs.alg_depth_first_a_star import df_a_star
 from globals import *
@@ -230,11 +230,11 @@ def main():
     algs_to_test_dict = {
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
-        # 'PP_a1': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
-        'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
+        'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
+        # 'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
-        'MGM_d_a1': (run_mgm, {'a_star_func': a_star}),
-        'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
+        'MGM_d': (run_mgm, {'a_star_func': a_star}),
+        # 'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
         # 'DS-0.8': (run_ds_mapf, {'alpha': 0.8, 'decision_type': 'simple'}),

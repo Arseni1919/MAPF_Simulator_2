@@ -17,7 +17,7 @@ def check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_
         return False
     new_t = node_current.t + 1
     time_window = node_current.t - start.t
-    if time_window < 10:
+    if time_window < 20:
         return False
 
     future_constr = False
