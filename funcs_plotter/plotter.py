@@ -26,7 +26,8 @@ def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_ag
     return curr_list
 
 
-def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list, is_json=False):
+def get_list_sol_q_style(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, algs_to_test_list,
+                         is_json=False):
     """
     {
         alg_name: {
@@ -308,13 +309,13 @@ class Plotter:
                 ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
                         bbox=dict(facecolor='yellow', alpha=0.75))
 
-            if 'DS-MAPF' in alg_name:
-                acd_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_dist_counter',
-                                         runs_per_n_agents, is_json)
+            if '_d' in alg_name:
+                # get_list_a_star(statistics_dict, alg_name, n_agents_list, list_type, is_json=False)
+                acd_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'a_star_calls_counter_dist', is_json)
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
-                ax.plot(acd_x, acd_y, '--^', label=f'{alg_name} (distributed)')
+                ax.plot(acd_x, acd_y, '--^', label=f'{alg_name} (dist)')
                 if len(acd_x) > 0:
                     ax.text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -366,15 +367,14 @@ class Plotter:
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
-            # iterations_time
-            # if 'DS-MAPF' in alg_name:
-            #     it_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'n_closed_per_run', is_json)
-            #     it_y.sort()
-            #     it_x = heap_list(range(len(it_y)))
-            #     max_instances = max(max_instances, len(it_x))
-            #     ax.plot(it_x, it_y, '-o', label=f'{alg_name} (iteration time)')
-            #     if len(it_x) > 0:
-            #         ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+            if '_d' in alg_name:
+                l_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'a_star_n_closed_dist', is_json)
+                l_y.sort()
+                l_x = list(range(len(l_y)))
+                max_instances = max(max_instances, len(l_x))
+                ax.plot(l_x, l_y, '--^', label=f'{alg_name} (dist)')
+                if len(l_x) > 0:
+                    ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
         # ax.set_title('n_closed (cactus)')
         ax.set_xlim([0, max_instances + 2])

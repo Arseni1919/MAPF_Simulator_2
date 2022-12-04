@@ -6,8 +6,9 @@ def get_alg_info_dict(**kwargs):
                 'sol_quality': 0,
                 'runtime': 0,
                 'a_star_calls_counter': 0,
+                'a_star_calls_counter_dist': 0,
                 'dist_runtime': 0,
-                # 'dist_a_star_calls_counter': 0,
+                'a_star_n_closed_dist': 0,
                 'a_star_runtimes': [],
                 'a_star_n_closed': [],
                 'n_agents_conf': []}

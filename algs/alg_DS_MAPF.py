@@ -201,13 +201,14 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     for iteration in range(1000000):
         start_time = time.time()
         max_time_list = []
+        max_n_closed_list = []
 
         # LIMITS
         if runtime > max_time * 60:
             break
         if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
             break
-        # if a_star_calls_dist_counter >= a_star_calls_limit:
+        # if a_star_calls_counter_dist >= a_star_calls_limit:
         #     break
 
         # PLAN
@@ -215,14 +216,17 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             succeeded, info = agent.plan(alpha=alpha, agents_dict=agents_dict, **kwargs)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
+                max_n_closed_list.append(info['a_s_info']['n_closed'])
                 alg_info['a_star_runtimes'].append(info['a_s_info']['runtime'])
                 alg_info['a_star_n_closed'].append(info['a_s_info']['n_closed'])
                 if iteration > 0:
                     alg_info['n_agents_conf'].append(info['n_agents_conf'])
                 alg_info['a_star_calls_counter'] += 1
 
-        if len(max_time_list) > 0:
+        if len(max_time_list) > 0 and max(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
+            alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
+            alg_info['a_star_calls_counter_dist'] += 1
 
         # EXCHANGE
         for agent in agents:

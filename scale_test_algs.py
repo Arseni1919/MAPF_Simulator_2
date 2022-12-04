@@ -41,9 +41,10 @@ def create_to_save_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **k
                 'runtime': {run: None for run in range(runs_per_n_agents)},
                 'dist_runtime': {run: None for run in range(runs_per_n_agents)},
                 'a_star_calls_counter': {run: None for run in range(runs_per_n_agents)},
-                'a_star_calls_dist_counter': {run: None for run in range(runs_per_n_agents)},
+                'a_star_calls_counter_dist': [],
                 'a_star_runtimes': [],
                 'a_star_n_closed': [],
+                'a_star_n_closed_dist': [],
                 'n_closed_per_run': [],
                 'n_agents_conf': [],
             } for n_agents in n_agents_list
@@ -67,12 +68,11 @@ def update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_in
 
         if 'dist_runtime' in alg_info:
             stats_dict[alg_name][n_agents]['dist_runtime'][i_run] = alg_info['dist_runtime']
+            stats_dict[alg_name][n_agents]['a_star_n_closed_dist'].append(alg_info['a_star_n_closed_dist'])
+            stats_dict[alg_name][n_agents]['a_star_calls_counter_dist'].append(alg_info['a_star_calls_counter_dist'])
 
         if 'a_star_calls_counter' in alg_info:
             stats_dict[alg_name][n_agents]['a_star_calls_counter'][i_run] = alg_info['a_star_calls_counter']
-
-        if 'dist_a_star_calls_counter' in alg_info:
-            stats_dict[alg_name][n_agents]['a_star_calls_dist_counter'][i_run] = alg_info['dist_a_star_calls_counter']
 
         if 'a_star_runtimes' in alg_info:
             stats_dict[alg_name][n_agents]['a_star_runtimes'].extend(alg_info['a_star_runtimes'])
@@ -95,9 +95,9 @@ def set_seed(random_seed, seed):
 
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
 
@@ -241,7 +241,7 @@ def main():
         # 'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
         # 'DS-max_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'max_prev_1', 'limit_type': 'simple'}),
         # 'DS-index_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'index_1', 'limit_type': 'simple'}),
-        # 'DS-min_2_d_a1': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': a_star}),
+        'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': a_star}),
         # 'DS-min_2_d_a2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': df_a_star}),
         # 'DS-index_2_d': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
@@ -254,9 +254,9 @@ def main():
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
-    n_agents_list = [100, 120, 140, 160, 180, 200]
+    # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
-    # n_agents_list = [100, 150, 200, 250, 300]
+    n_agents_list = [100, 150, 200, 250, 300]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20

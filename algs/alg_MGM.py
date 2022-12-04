@@ -54,6 +54,7 @@ class MGMAgent:
         alg_info['a_star_calls_counter'] += 1
         alg_info['a_star_runtimes'].append(runtime)
         alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
+        kwargs['max_n_closed_list'].append(a_s_info['n_closed'])
         if not initial:
             alg_info['n_agents_conf'].append(len(self.agents_in_confs))
         return {'runtime': runtime}
@@ -114,13 +115,22 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # ITERATIONS
     # PLAN
     start_time = time.time()
+    max_time_list = []
+    max_n_closed_list = []
+    kwargs['max_n_closed_list'] = max_n_closed_list
     for agent in agents:
-        agent.plan(alg_info, initial=True, **kwargs)
+        plan_info = agent.plan(alg_info, initial=True, **kwargs)
+        max_time_list.append(plan_info['runtime'])
     runtime += time.time() - start_time
+    alg_info['dist_runtime'] += max(max_time_list)
+    alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
+    alg_info['a_star_calls_counter_dist'] += 1
 
     for iteration in range(1000000):
         start_time = time.time()
         max_time_list = []
+        max_n_closed_list = []
+        kwargs['max_n_closed_list'] = max_n_closed_list
 
         # LIMITS
         if runtime > max_time * 60:
@@ -141,8 +151,10 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             plan_info = agent.take_decision(agents_dict, alg_info, **kwargs)
             max_time_list.append(plan_info['runtime'])
 
-        if len(max_time_list) > 0:
+        if len(max_time_list) > 0 and max(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
+            alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
+            alg_info['a_star_calls_counter_dist'] += 1
 
         # STATS
         runtime += time.time() - start_time
