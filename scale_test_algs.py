@@ -265,15 +265,15 @@ def main():
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
     # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
-    n_agents_list = [150, 200, 250, 300, 350]
+    n_agents_list = [150, 200, 250, 300, 350, 400]
     # n_agents_list = [300, 350, 400, 450, 500]
     # n_agents_list = [250, 300, 350, 400, 450, 500, 550]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20
     # runs_per_n_agents = 10
-    # runs_per_n_agents = 5
-    runs_per_n_agents = 3
+    runs_per_n_agents = 5
+    # runs_per_n_agents = 3
 
     random_seed = True
     # random_seed = False
@@ -291,7 +291,8 @@ def main():
     a_star_calls_limit = 1e100
 
     # a_star_closed_nodes_limit = 1e100
-    a_star_closed_nodes_limit = 8e4
+    # a_star_closed_nodes_limit = 8e5
+    a_star_closed_nodes_limit = 1e6
 
     a_star_iter_limit = 1e100
 

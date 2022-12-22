@@ -11,13 +11,13 @@ def limit_is_crossed(runtime, alg_info, **kwargs):
     a_star_closed_nodes_limit = kwargs['a_star_closed_nodes_limit'] if 'a_star_closed_nodes_limit' in kwargs else 1e100
 
     # PRINT
-    a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
-    print(f'\n{runtime =}'
-          f'\n{alg_info["dist_runtime"] = }'
-          f'\n{alg_info["a_star_calls_counter"] = }'
-          f'\n{alg_info["a_star_calls_counter_dist"] = }'
-          f'\n{a_star_n_closed_counter = }'
-          f'\n{alg_info["a_star_n_closed_dist"] = }')
+    # a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
+    # print(f'\n{runtime =}'
+    #       f'\n{alg_info["dist_runtime"] = } ({max_time})'
+    #       f'\n{alg_info["a_star_calls_counter"] = } ({a_star_calls_limit})'
+    #       f'\n{alg_info["a_star_calls_counter_dist"] = } ({a_star_calls_limit})'
+    #       f'\n{a_star_n_closed_counter = } ({a_star_closed_nodes_limit})'
+    #       f'\n{alg_info["a_star_n_closed_dist"] = } ({a_star_closed_nodes_limit})')
 
     if limit_type == 'norm_time':
         return runtime > max_time * 60
