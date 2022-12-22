@@ -230,10 +230,11 @@ def main():
     algs_to_test_dict = {
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
-        'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star}),
+        'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star, 'limit_type': 'norm_time'}),
         # 'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
-        'MGM_d': (run_mgm, {'a_star_func': a_star}),
+        # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
+        'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
         # 'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
@@ -241,8 +242,8 @@ def main():
         # 'DS-min_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'min_prev_1', 'limit_type': 'simple'}),
         # 'DS-max_prev_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'max_prev_1', 'limit_type': 'simple'}),
         # 'DS-index_1': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'index_1', 'limit_type': 'simple'}),
-        'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': a_star}),
-        # 'DS-min_2_d_a2': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'simple', 'a_star_func': df_a_star}),
+        # 'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'norm_time', 'a_star_func': a_star}),
+        'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'dist_time', 'a_star_func': a_star}),
         # 'DS-index_2_d': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
 
@@ -256,33 +257,35 @@ def main():
     # n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
-    n_agents_list = [100, 150, 200, 250, 300]
+    # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
+    n_agents_list = [250, 300, 350, 400, 450, 500, 550]
 
     # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20
     # runs_per_n_agents = 10
     runs_per_n_agents = 5
 
-    # time_per_alg_limit = 1  # According to PBS paper!
+    random_seed = True
+    # random_seed = False
+    seed = 116
+
+    time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.5
-    time_per_alg_limit = 3
+    # time_per_alg_limit = 3
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
-    # random_seed = True
-    random_seed = False
-
-    seed = 116
-    plotter = Plotter()
-    a_star_iter_limit = 1e9
-
     # a_star_calls_limit = 100
     # a_star_calls_limit = 500
-    a_star_calls_limit = 1500
-    # a_star_calls_limit = 1e100
+    # a_star_calls_limit = 1500
+    a_star_calls_limit = 1e100
 
-    # to_save_results = True
-    to_save_results = False
+    a_star_iter_limit = 1e100
+
+    plotter = Plotter()
+
+    to_save_results = True
+    # to_save_results = False
     file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.json'
 
     # profiler = None

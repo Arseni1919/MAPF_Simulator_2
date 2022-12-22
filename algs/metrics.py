@@ -1,6 +1,46 @@
 import time
 
 
+def limit_is_crossed(runtime, alg_info, **kwargs):
+    if 'limit_type' not in kwargs:
+        raise RuntimeError('limit_type not in kwargs')
+
+    limit_type = kwargs['limit_type']
+    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
+    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
+    a_star_n_closed_limit = kwargs['a_star_n_closed_limit'] if 'a_star_n_closed_limit' in kwargs else 1e100
+
+    # PRINT
+    print(f'\n{runtime =}')
+    print(f'{alg_info["dist_runtime"] = }')
+    print(f'{alg_info["a_star_calls_counter"] = }')
+    print(f'{alg_info["a_star_calls_counter_dist"] = }')
+    a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
+    print(f'{a_star_n_closed_counter = }')
+    print(f'{alg_info["a_star_n_closed_dist"] = }')
+
+    if limit_type == 'norm_time':
+        return runtime > max_time * 60
+    elif limit_type == 'dist_time':
+        return alg_info['dist_runtime'] > max_time * 60
+    elif limit_type == 'norm_a_star_calls':
+        return alg_info['a_star_calls_counter'] >= a_star_calls_limit
+    elif limit_type == 'dist_a_star_calls':
+        return alg_info['a_star_calls_counter_dist'] >= a_star_calls_limit
+    elif limit_type == 'norm_a_star_closed':
+        a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
+        return a_star_n_closed_counter >= a_star_n_closed_limit
+    elif limit_type == 'dist_a_star_closed':
+        return alg_info['a_star_n_closed_dist'] >= a_star_n_closed_limit
+    else:
+        raise RuntimeError('no valid limit_type')
+
+
+def crossed_time_limit(start_time, max_time_minutes):
+    elapsed = time.time() - start_time
+    return elapsed > max_time_minutes * 60
+
+
 def get_alg_info_dict(**kwargs):
     alg_info = {'success_rate': 0,
                 'sol_quality': 0,
@@ -21,11 +61,6 @@ def get_agents_in_conf(c_v_list, c_e_list):
     agents_in_conf.extend([conf[1] for conf in c_e_list])
     agents_in_conf = list(set(agents_in_conf))
     return agents_in_conf
-
-
-def crossed_time_limit(start_time, max_time_minutes):
-    elapsed = time.time() - start_time
-    return elapsed > max_time_minutes * 60
 
 
 def build_constraints(nodes, other_paths):

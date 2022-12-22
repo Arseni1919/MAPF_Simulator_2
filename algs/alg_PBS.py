@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    crossed_time_limit, get_alg_info_dict, check_plan
+    limit_is_crossed, get_alg_info_dict, check_plan
 from algs.topological_sorting import topological_sorting
 
 
@@ -188,11 +188,8 @@ def add_new_ordering(NEW_pbs_node, NEXT_pbs_node, agent, conf):
 
 def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
-    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
-    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
-    middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     partial_order = kwargs['initial_ordering'] if 'initial_ordering' in kwargs else []
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else 'PBS'
@@ -220,8 +217,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     root.calc_cost()
     stack = [root]
     iteration = 0
-    while len(stack) > 0 and not crossed_time_limit(start_time, max_time) and alg_info[
-        'a_star_calls_counter'] < a_star_calls_limit:
+    while len(stack) > 0 and not limit_is_crossed(runtime, alg_info, **kwargs):
         iteration += 1
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, runtime,

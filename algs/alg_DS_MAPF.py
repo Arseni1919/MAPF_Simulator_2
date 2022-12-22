@@ -10,7 +10,7 @@ import numpy as np
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    crossed_time_limit, get_agents_in_conf, check_plan, get_alg_info_dict
+    limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict
 
 
 class DSAgent:
@@ -172,9 +172,7 @@ class DSAgent:
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
-    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
-    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
@@ -199,20 +197,18 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # Distributed Part
     for iteration in range(1000000):
-        start_time = time.time()
+        # start_time = time.time()
         max_time_list = []
         max_n_closed_list = []
 
         # LIMITS
-        if runtime > max_time * 60:
+        if limit_is_crossed(runtime, alg_info, **kwargs):
             break
-        if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
-            break
-        # if a_star_calls_counter_dist >= a_star_calls_limit:
-        #     break
 
         # PLAN
         for agent in agents:
+            start_time = time.time()
+
             succeeded, info = agent.plan(alpha=alpha, agents_dict=agents_dict, **kwargs)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
@@ -223,6 +219,11 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     alg_info['n_agents_conf'].append(info['n_agents_conf'])
                 alg_info['a_star_calls_counter'] += 1
 
+            # STATS + LIMITS
+            runtime += time.time() - start_time
+            if limit_is_crossed(runtime, alg_info, **kwargs):
+                break
+
         if len(max_time_list) > 0 and max(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
             alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
@@ -230,10 +231,15 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # EXCHANGE
         for agent in agents:
+            start_time = time.time()
+
             agent.exchange(agents=agents)
 
-        # STATS
-        runtime += time.time() - start_time
+            # STATS + LIMITS
+            runtime += time.time() - start_time
+            if limit_is_crossed(runtime, alg_info, **kwargs):
+                break
+
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
         # check_plan(agents, plan, alg_name, alg_info, start_time, iteration)

@@ -7,7 +7,7 @@ from algs.test_mapf_alg import test_mapf_alg_from_pic
 
 from algs.metrics import get_alg_info_dict, c_v_check_for_agent, c_e_check_for_agent
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan
-from algs.metrics import crossed_time_limit
+from algs.metrics import limit_is_crossed
 from algs.alg_a_star import a_star
 
 
@@ -91,8 +91,6 @@ class MGMAgent:
 
 def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
-    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
-    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
@@ -127,37 +125,53 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     alg_info['a_star_calls_counter_dist'] += 1
 
     for iteration in range(1000000):
-        start_time = time.time()
+        # start_time = time.time()
         max_time_list = []
         max_n_closed_list = []
         kwargs['max_n_closed_list'] = max_n_closed_list
 
         # LIMITS
-        if runtime > max_time * 60:
-            break
-        if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
+        if limit_is_crossed(runtime, alg_info, **kwargs):
             break
 
         # EXCHANGE PATHS + UPDATE GAIN
         for agent in agents:
+            start_time = time.time()
+
             agent.exchange_paths(agents=agents)
+
+            # STATS + LIMITS
+            runtime += time.time() - start_time
+            if limit_is_crossed(runtime, alg_info, **kwargs):
+                break
 
         # EXCHANGE GAINS
         for agent in agents:
+            start_time = time.time()
+
             agent.exchange_gains(agents=agents)
+
+            # STATS + LIMITS
+            runtime += time.time() - start_time
+            if limit_is_crossed(runtime, alg_info, **kwargs):
+                break
 
         # DECISION
         for agent in agents:
+            start_time = time.time()
+
             plan_info = agent.take_decision(agents_dict, alg_info, **kwargs)
             max_time_list.append(plan_info['runtime'])
+
+            # STATS + LIMITS
+            runtime += time.time() - start_time
+            if limit_is_crossed(runtime, alg_info, **kwargs):
+                break
 
         if len(max_time_list) > 0 and max(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
             alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
             alg_info['a_star_calls_counter_dist'] += 1
-
-        # STATS
-        runtime += time.time() - start_time
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}

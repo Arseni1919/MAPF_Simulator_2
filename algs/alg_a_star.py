@@ -68,21 +68,6 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
         if node_current.t >= max_final_time:
             new_t = max_final_time + 1
 
-    # NO NEED FOR wasted waiting
-    # if 'a_star_mode' in kwargs and kwargs['a_star_mode'] == 'fast':
-    #     if successor_xy_name == node_current.xy_name:
-    #         no_constraints = True
-    #         for nei_xy_name in node_current.neighbours:
-    #             if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
-    #                 no_constraints = False
-    #                 break
-    #
-    #             if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
-    #                 no_constraints = False
-    #                 break
-    #         if no_constraints:
-    #             return None, 'future_constr'
-
     new_ID = f'{successor_xy_name}_{new_t}'
     if new_ID in open_nodes.dict:
         return open_nodes.dict[new_ID], 'open_nodes'
@@ -350,3 +335,19 @@ if __name__ == '__main__':
 #
 #     next_node = open_nodes.pop()
 #     return next_node
+
+
+# NO NEED FOR wasted waiting
+# if 'a_star_mode' in kwargs and kwargs['a_star_mode'] == 'fast':
+#     if successor_xy_name == node_current.xy_name:
+#         no_constraints = True
+#         for nei_xy_name in node_current.neighbours:
+#             if v_constr_dict and new_t in v_constr_dict[nei_xy_name]:
+#                 no_constraints = False
+#                 break
+#
+#             if no_constraints and e_constr_dict and (node_current.x, node_current.y, new_t) in e_constr_dict[nei_xy_name]:
+#                 no_constraints = False
+#                 break
+#         if no_constraints:
+#             return None, 'future_constr'

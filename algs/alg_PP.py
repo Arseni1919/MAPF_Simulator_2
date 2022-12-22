@@ -7,7 +7,7 @@ from algs.test_mapf_alg import test_mapf_alg_from_pic
 
 # from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan, get_alg_info_dict
-from algs.metrics import crossed_time_limit
+from algs.metrics import limit_is_crossed
 from algs.alg_a_star import a_star
 from algs.alg_depth_first_a_star import df_a_star
 
@@ -52,8 +52,6 @@ def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func, **kwargs
 
 def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
-    a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
-    max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
@@ -67,10 +65,8 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # ITERATIONS
     for iteration in range(1000000):
-        # LIMITS
-        if runtime > max_time * 60:
-            break
-        if alg_info['a_star_calls_counter'] >= a_star_calls_limit:
+
+        if limit_is_crossed(runtime, alg_info, **kwargs):
             break
 
         # PICK A RANDOM ORDE
@@ -85,9 +81,9 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             alg_info['a_star_calls_counter'] += 1
             alg_info['a_star_runtimes'].append(a_s_info['runtime'])
             alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
-            # STATS
+            # STATS + LIMITS
             runtime += a_s_info['runtime']
-            if new_path:
+            if new_path and not limit_is_crossed(runtime, alg_info, **kwargs):
                 agent.path = new_path
             else:
                 to_continue = True
