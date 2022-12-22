@@ -121,7 +121,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         max_time_list.append(plan_info['runtime'])
     runtime += time.time() - start_time
     alg_info['dist_runtime'] += max(max_time_list)
-    alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
+    alg_info['a_star_n_closed_dist'] += max(kwargs['max_n_closed_list'])
     alg_info['a_star_calls_counter_dist'] += 1
 
     for iteration in range(1000000):
