@@ -8,16 +8,16 @@ def limit_is_crossed(runtime, alg_info, **kwargs):
     limit_type = kwargs['limit_type']
     max_time = kwargs['max_time'] if 'max_time' in kwargs else 60
     a_star_calls_limit = kwargs['a_star_calls_limit'] if 'a_star_calls_limit' in kwargs else 1e100
-    a_star_n_closed_limit = kwargs['a_star_n_closed_limit'] if 'a_star_n_closed_limit' in kwargs else 1e100
+    a_star_closed_nodes_limit = kwargs['a_star_closed_nodes_limit'] if 'a_star_closed_nodes_limit' in kwargs else 1e100
 
     # PRINT
-    print(f'\n{runtime =}')
-    print(f'{alg_info["dist_runtime"] = }')
-    print(f'{alg_info["a_star_calls_counter"] = }')
-    print(f'{alg_info["a_star_calls_counter_dist"] = }')
-    a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
-    print(f'{a_star_n_closed_counter = }')
-    print(f'{alg_info["a_star_n_closed_dist"] = }')
+    # a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
+    # print(f'\n{runtime =}'
+    #       f'\n{alg_info["dist_runtime"] = }'
+    #       f'\n{alg_info["a_star_calls_counter"] = }'
+    #       f'\n{alg_info["a_star_calls_counter_dist"] = }'
+    #       f'\n{a_star_n_closed_counter = }'
+    #       f'\n{alg_info["a_star_n_closed_dist"] = }')
 
     if limit_type == 'norm_time':
         return runtime > max_time * 60
@@ -29,9 +29,9 @@ def limit_is_crossed(runtime, alg_info, **kwargs):
         return alg_info['a_star_calls_counter_dist'] >= a_star_calls_limit
     elif limit_type == 'norm_a_star_closed':
         a_star_n_closed_counter = sum(alg_info['a_star_n_closed'])
-        return a_star_n_closed_counter >= a_star_n_closed_limit
+        return a_star_n_closed_counter >= a_star_closed_nodes_limit
     elif limit_type == 'dist_a_star_closed':
-        return alg_info['a_star_n_closed_dist'] >= a_star_n_closed_limit
+        return alg_info['a_star_n_closed_dist'] >= a_star_closed_nodes_limit
     else:
         raise RuntimeError('no valid limit_type')
 
