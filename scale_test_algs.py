@@ -95,9 +95,9 @@ def set_seed(random_seed, seed):
 
 def get_map_nodes():
     # img_dir = 'random-32-32-10.map'  # 32-32
-    img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
 
@@ -260,12 +260,13 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
+    n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
     # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
-    n_agents_list = [150, 200, 250, 300, 350, 400]
+    # n_agents_list = [150, 200, 250, 300, 350, 400]
     # n_agents_list = [300, 350, 400, 450, 500]
     # n_agents_list = [250, 300, 350, 400, 450, 500, 550]
 
@@ -279,11 +280,12 @@ def main():
     # random_seed = False
     seed = 116
 
-    time_per_alg_limit = 1  # According to PBS paper!
+    # ------------------------------ LIMITS ------------------------------ #
+    # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.5
     # time_per_alg_limit = 3
     # time_per_alg_limit = 10
-    # time_per_alg_limit = 50
+    time_per_alg_limit = 50
 
     # a_star_calls_limit = 100
     # a_star_calls_limit = 500
@@ -291,10 +293,11 @@ def main():
     a_star_calls_limit = 1e100
 
     # a_star_closed_nodes_limit = 1e100
-    # a_star_closed_nodes_limit = 8e5
-    a_star_closed_nodes_limit = 1e6
+    a_star_closed_nodes_limit = 1e7
+    # a_star_closed_nodes_limit = 1e6
 
     a_star_iter_limit = 1e100
+    # ---------------------------- END LIMITS --------------------------- #
 
     plotter = Plotter()
 
