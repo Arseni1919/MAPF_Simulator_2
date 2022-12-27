@@ -32,7 +32,7 @@ def show_results(file_dir, plotter):
 
 
 def main():
-    file_dir = f'../logs_for_graphs/results_2022-11-21_13-40.json'
+    file_dir = f'../logs_for_graphs/results_2022-12-25_12-03.json'
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
 

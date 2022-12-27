@@ -8,7 +8,7 @@ from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import get_alg_info_dict, c_v_check_for_agent, c_e_check_for_agent
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan
 from algs.metrics import limit_is_crossed
-from algs.alg_a_star import a_star
+from algs.alg_a_star_short import a_star_short
 
 
 class MGMAgent:
@@ -44,7 +44,8 @@ class MGMAgent:
                                          nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
                                          v_constr_dict=v_constr_dict,
                                          e_constr_dict=e_constr_dict,
-                                         perm_constr_dict=perm_constr_dict)
+                                         perm_constr_dict=perm_constr_dict,
+                                         nodes_path=self.path)
         if new_path is not None:
             self.path = new_path
         if self.path is None:
@@ -204,11 +205,13 @@ def main():
             random_seed=random_seed,
             seed=seed,
             final_plot=True,
+            a_star_func=a_star_short,
             a_star_iter_limit=A_STAR_ITER_LIMIT,
             a_star_calls_limit=A_STAR_CALLS_LIMIT,
             max_time=MAX_TIME,
             plot_per=PLOT_PER,
-            limit_type='smart'
+            limit_type='norm_time',
+            alg_name='MGM',
         )
 
         if not random_seed:
@@ -226,7 +229,7 @@ def main():
 if __name__ == '__main__':
     random_seed = True
     # random_seed = False
-    seed = 277
+    seed = 474
     n_agents = 150
     A_STAR_ITER_LIMIT = 5e7
     A_STAR_CALLS_LIMIT = 1000

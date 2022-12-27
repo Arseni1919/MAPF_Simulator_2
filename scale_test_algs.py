@@ -14,7 +14,8 @@ from algs.alg_PBS import run_pbs
 from algs.alg_MGM import run_mgm
 from algs.alg_PP import run_pp
 from algs.alg_a_star import a_star
-from algs.alg_depth_first_a_star import df_a_star
+from algs.alg_a_star_short import a_star_short
+# from algs.alg_depth_first_a_star import df_a_star
 from globals import *
 
 
@@ -94,10 +95,11 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes():
+    # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-32-32-10.map'  # 32-32
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
 
@@ -233,13 +235,17 @@ def main():
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
         # 'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star, 'limit_type': 'norm_time'}),
-        'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star, 'limit_type': 'norm_a_star_closed'}),
+        # 'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_a_star_closed'}),
+        'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
+        # 'PP-short': (run_pp, {'a_star_func': a_star_short, 'limit_type': 'norm_time'}),
         # 'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
         # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
         # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
         # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'norm_a_star_closed'}),
-        'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_a_star_closed'}),
+        # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_a_star_closed'}),
+        'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
+        'MGM-short_d': (run_mgm, {'a_star_func': a_star_short, 'limit_type': 'dist_time'}),
         # 'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
@@ -250,7 +256,9 @@ def main():
         # 'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'norm_time', 'a_star_func': a_star}),
         # 'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'dist_time', 'a_star_func': a_star}),
         # 'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'norm_a_star_closed', 'a_star_func': a_star}),
-        'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'dist_a_star_closed', 'a_star_func': a_star}),
+        # 'DS-min_2_d': (run_ds_mapf, {'a_star_func': a_star, 'decision_type': 'min_prev_2', 'limit_type': 'dist_a_star_closed'}),
+        # 'DS-min_2_d': (run_ds_mapf, {'a_star_func': a_star, 'decision_type': 'min_prev_2', 'limit_type': 'dist_time'}),
+        # 'DS-short_d': (run_ds_mapf, {'a_star_func': a_star_short, 'decision_type': 'min_prev_2', 'limit_type': 'dist_time'}),
         # 'DS-index_2_d': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }
 
@@ -260,12 +268,12 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
-    n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
-    # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
+    n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
     # n_agents_list = [300, 350, 400, 450, 500]
     # n_agents_list = [250, 300, 350, 400, 450, 500, 550]
@@ -281,11 +289,11 @@ def main():
     seed = 116
 
     # ------------------------------ LIMITS ------------------------------ #
-    # time_per_alg_limit = 1  # According to PBS paper!
+    time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.5
     # time_per_alg_limit = 3
     # time_per_alg_limit = 10
-    time_per_alg_limit = 50
+    # time_per_alg_limit = 50
 
     # a_star_calls_limit = 100
     # a_star_calls_limit = 500
@@ -301,8 +309,8 @@ def main():
 
     plotter = Plotter()
 
-    to_save_results = True
-    # to_save_results = False
+    # to_save_results = True
+    to_save_results = False
     file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.json'
 
     # profiler = None

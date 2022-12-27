@@ -48,6 +48,10 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
              perm_constr_dict, max_final_time, **kwargs):
     new_t = node_current.t + 1
 
+    if 'short_a_star_list' in kwargs and len(kwargs['short_a_star_list']) > 0:
+        if successor_xy_name not in kwargs['short_a_star_list']:
+            return None, ''
+
     if v_constr_dict:
         if new_t in v_constr_dict[successor_xy_name]:
             return None, ''
@@ -165,7 +169,7 @@ def a_star(start, goal, nodes, h_func,
             plotter.plot_lists(open_list=open_nodes.get_nodes_list(),
                                closed_list=closed_nodes.get_nodes_list(),
                                start=start, goal=goal, nodes=nodes, a_star_run=True)
-        print(f'\r(a_star) iter: {iteration}, open: {len(open_nodes.heap_list)}', end='')
+        print(f'\r(a_star) iter: {iteration}, closed: {len(closed_nodes.heap_list)}', end='')
 
     path = None
     if node_current.xy_name == goal.xy_name:
@@ -265,7 +269,6 @@ def try_a_map_from_pic():
     result, info = a_star(start=node_start, goal=node_goal, nodes=nodes, h_func=h_func,
                           v_constr_dict=v_constr_dict, perm_constr_dict=perm_constr_dict,
                           plotter=plotter, middle_plot=True, nodes_dict=nodes_dict,
-                          a_star_mode='fast'
                           )
     profiler.disable()
     if result:
