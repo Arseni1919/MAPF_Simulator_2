@@ -12,6 +12,7 @@ from funcs_plotter.plotter import Plotter
 from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
 from algs.alg_MGM import run_mgm
+from algs.alg_MGM_classic import run_mgm_classic
 from algs.alg_PP import run_pp
 from algs.alg_a_star import a_star
 from algs.alg_a_star_short import a_star_short
@@ -232,11 +233,19 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
 
     algs_to_test_dict = {
+
+
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
+        'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
+        'DSA_d': (run_ds_mapf, {'a_star_func': a_star, 'limit_type': 'dist_time', 'decision_type': 'simple', 'alpha': 0.5}),
+        'SDS_d': (run_ds_mapf, {'a_star_func': a_star, 'limit_type': 'dist_time', 'decision_type': 'min_prev_2'}),
+        'MGM_d': (run_mgm_classic, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
+        'MGDS_confs_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'sum_of_confs'}),
+        'MGDS_rank_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'rank'}),
+
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
         # 'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star, 'limit_type': 'norm_time'}),
         # 'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_a_star_closed'}),
-        'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
         # 'PP-short': (run_pp, {'a_star_func': a_star_short, 'limit_type': 'norm_time'}),
         # 'PP_a2': (run_pp, {'a_star_mode': 'simple', 'a_star_func': df_a_star}),
         # 'PP_f': (run_pp, {'a_star_mode': 'fast'}),
@@ -244,8 +253,6 @@ def main():
         # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
         # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'norm_a_star_closed'}),
         # 'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_a_star_closed'}),
-        'MGM_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
-        'MGM-short_d': (run_mgm, {'a_star_func': a_star_short, 'limit_type': 'dist_time'}),
         # 'MGM_d_a2': (run_mgm, {'a_star_func': df_a_star}),
         # 'DS-0.2': (run_ds_mapf, {'alpha': 0.2, 'decision_type': 'simple'}),
         # 'DS-0.5': (run_ds_mapf, {'alpha': 0.5, 'decision_type': 'simple'}),
@@ -257,7 +264,6 @@ def main():
         # 'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'dist_time', 'a_star_func': a_star}),
         # 'DS-min_2_d': (run_ds_mapf, {'decision_type': 'min_prev_2', 'limit_type': 'norm_a_star_closed', 'a_star_func': a_star}),
         # 'DS-min_2_d': (run_ds_mapf, {'a_star_func': a_star, 'decision_type': 'min_prev_2', 'limit_type': 'dist_a_star_closed'}),
-        # 'DS-min_2_d': (run_ds_mapf, {'a_star_func': a_star, 'decision_type': 'min_prev_2', 'limit_type': 'dist_time'}),
         # 'DS-short_d': (run_ds_mapf, {'a_star_func': a_star_short, 'decision_type': 'min_prev_2', 'limit_type': 'dist_time'}),
         # 'DS-index_2_d': (run_ds_mapf, {'decision_type': 'index_2', 'limit_type': 'simple'}),
     }

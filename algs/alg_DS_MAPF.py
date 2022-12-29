@@ -10,7 +10,7 @@ import numpy as np
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict
+    limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
 
 
 class DSAgent:
@@ -145,7 +145,7 @@ class DSAgent:
 
         if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
             # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
-            return False, {'elapsed': None, 'a_s_info': None}
+            return False, {'elapsed': None, 'a_s_info': None}, True
 
         agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
         to_change = self.decision_bool(alpha, decision_type, agents_in_confs, agents_dict)
@@ -164,10 +164,10 @@ class DSAgent:
             if new_path is not None:
                 self.path = new_path
             return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info,
-                          'n_agents_conf': len(agents_in_confs)}
+                          'n_agents_conf': len(agents_in_confs)}, False
 
         # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
-        return False, {'elapsed': None, 'a_s_info': None}
+        return False, {'elapsed': None, 'a_s_info': None}, False
 
 
 def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
@@ -200,6 +200,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         # start_time = time.time()
         max_time_list = []
         max_n_closed_list = []
+        no_confs_list = []
 
         # LIMITS
         if limit_is_crossed(runtime, alg_info, **kwargs):
@@ -209,7 +210,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         for agent in agents:
             start_time = time.time()
 
-            succeeded, info = agent.plan(alpha=alpha, agents_dict=agents_dict, **kwargs)
+            succeeded, info, no_confs = agent.plan(alpha=alpha, agents_dict=agents_dict, **kwargs)
+            no_confs_list.append(no_confs)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
                 max_n_closed_list.append(info['a_s_info']['n_closed'])
@@ -242,19 +244,19 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        # check_plan(agents, plan, alg_name, alg_info, start_time, iteration)
-        there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
-        # there_is_col, c_v, c_e = check_for_collisions(plan)
-        if not there_is_col:
-            if final_plot:
-                print(f'#########################################################')
-                print(f'#########################################################')
-                print(f'#########################################################')
-                plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
-            alg_info['success_rate'] = 1
-            alg_info['sol_quality'] = cost
-            alg_info['runtime'] = runtime
-            return plan, alg_info
+        iteration_print(agents, plan, alg_name, alg_info, runtime, iteration)
+        if all(no_confs_list):
+            there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
+            if not there_is_col:
+                if final_plot:
+                    print(f'#########################################################')
+                    print(f'#########################################################')
+                    print(f'#########################################################')
+                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
+                alg_info['success_rate'] = 1
+                alg_info['sol_quality'] = cost
+                alg_info['runtime'] = runtime
+                return plan, alg_info
 
     # partial order
     pass
@@ -278,7 +280,9 @@ def main():
             a_star_iter_limit=5e7,
             max_time=5,
             plot_per=PLOT_PER,
-            limit_type='smart',
+            limit_type='norm_time',
+            alg_name='DS',
+            a_star_func=a_star,
             decision_type=DECISION_TYPE
         )
 
@@ -298,7 +302,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 277
-    n_agents = 50
+    n_agents = 150
     PLOT_PER = 10
     to_use_profiler = True
     # to_use_profiler = False

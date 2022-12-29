@@ -28,18 +28,12 @@ class MGMAgent:
         self.agents_in_confs = []
         self.alpha = 0.9
 
-    def exchange_paths(self, agents, **kwargs):
+    def exchange_paths(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
         self.agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
-        gain_type = kwargs['gain_type']
-        if gain_type == 'sum_of_confs':
-            self.gain = len(c_v_list) + len(c_e_list)
-        elif gain_type == 'rank':
-            self.gain = len(self.agents_in_confs)
-        else:
-            raise RuntimeError('unknown gain_type!')
+        self.gain = len(self.agents_in_confs)
 
     def plan(self, alg_info, initial=False, **kwargs):
         start_time = time.time()
@@ -58,6 +52,7 @@ class MGMAgent:
         if self.path is None:
             raise RuntimeError('self.path is None')
         runtime = time.time() - start_time
+
         # stats
         alg_info['a_star_calls_counter'] += 1
         alg_info['a_star_runtimes'].append(runtime)
@@ -73,18 +68,15 @@ class MGMAgent:
     def decision_bool(self, agents_dict):
         if len(self.agents_in_confs) == 0:
             return False, True
-        equal_agents_indecies = []
-        other_nei_gains = {
-            agent_name: gain for agent_name, gain in self.other_gains.items() if agent_name in self.agents_in_confs
-        }
-        for agent_name, gain in other_nei_gains.items():
-            if self.gain < gain:
-                return random.random() > self.alpha, False
-            if self.gain == gain:
-                equal_agents_indecies.append(agents_dict[agent_name].index)
-
-        if len(equal_agents_indecies) > 0 and min(equal_agents_indecies) < self.index:
-            return random.random() > self.alpha, False
+        equal_gain_agents_indecies = []
+        other_gains = {agent_name: gain for agent_name, gain in self.other_gains.items()}
+        for agent_name, other_gain in other_gains.items():
+            if self.gain < other_gain:
+                return False, False
+            if self.gain == other_gain:
+                equal_gain_agents_indecies.append(agents_dict[agent_name].index)
+        if len(equal_gain_agents_indecies) > 0 and min(equal_gain_agents_indecies) < self.index:
+            return False, False
         return True, False
 
     def take_decision(self, agents_dict, alg_info, **kwargs):
@@ -98,7 +90,7 @@ class MGMAgent:
         #     print(f'\n ---------- (MGM) NO NEED FOR A* {self.name} ---------- \n')
 
 
-def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
+def run_mgm_classic(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
@@ -148,7 +140,7 @@ def run_mgm(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         for agent in agents:
             start_time = time.time()
 
-            agent.exchange_paths(agents=agents, **kwargs)
+            agent.exchange_paths(agents=agents)
 
             # STATS + LIMITS
             runtime += time.time() - start_time
@@ -212,7 +204,7 @@ def main():
     for i in range(3):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(
-            algorithm=run_mgm,
+            algorithm=run_mgm_classic,
             n_agents=n_agents,
             random_seed=random_seed,
             seed=seed,
@@ -224,7 +216,6 @@ def main():
             plot_per=PLOT_PER,
             limit_type='norm_time',
             alg_name='MGM',
-            gain_type='rank'
         )
 
         if not random_seed:
@@ -243,7 +234,7 @@ if __name__ == '__main__':
     random_seed = True
     # random_seed = False
     seed = 474
-    n_agents = 150
+    n_agents = 100
     A_STAR_ITER_LIMIT = 5e7
     A_STAR_CALLS_LIMIT = 1000
     MAX_TIME = 5

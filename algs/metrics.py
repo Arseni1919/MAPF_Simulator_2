@@ -36,11 +36,6 @@ def limit_is_crossed(runtime, alg_info, **kwargs):
         raise RuntimeError('no valid limit_type')
 
 
-def crossed_time_limit(start_time, max_time_minutes):
-    elapsed = time.time() - start_time
-    return elapsed > max_time_minutes * 60
-
-
 def get_alg_info_dict(**kwargs):
     alg_info = {'success_rate': 0,
                 'sol_quality': 0,
@@ -158,7 +153,7 @@ def check_for_collisions(results):
     return True, [], []
 
 
-def check_plan(agents, plan, alg_name, alg_info, runtime, iteration):
+def iteration_print(agents, plan, alg_name, alg_info, runtime, iteration):
     plan_lngths = [len(path) for path in plan.values()]
     if 0 in plan_lngths:
         raise RuntimeError('0 in plan_lngths')
@@ -167,7 +162,11 @@ def check_plan(agents, plan, alg_name, alg_info, runtime, iteration):
           f'[{alg_name}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {runtime:0.2f}s][iter {iteration}][A* dist calls: ]\n'
           f'cost: {cost}\n'
           f'---\n')
+    return cost
 
+
+def check_plan(agents, plan, alg_name, alg_info, runtime, iteration):
+    cost = iteration_print(agents, plan, alg_name, alg_info, runtime, iteration)
     there_is_col, c_v, c_e = check_for_collisions(plan)
     return there_is_col, c_v, c_e, cost
 
