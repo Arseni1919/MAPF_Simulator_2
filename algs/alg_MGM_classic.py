@@ -227,7 +227,7 @@ def main():
     if to_use_profiler:
         profiler.disable()
         stats = pstats.Stats(profiler).sort_stats('cumtime')
-        stats.dump_stats('../stats/results_mgm.pstat')
+        stats.dump_stats('../stats/results_mgm_classic.pstat')
 
 
 if __name__ == '__main__':

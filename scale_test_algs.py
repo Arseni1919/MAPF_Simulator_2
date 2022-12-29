@@ -236,12 +236,12 @@ def main():
 
 
         # 'PBS_a1': (run_pbs, {'a_star_func': a_star}),
-        'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
+        # 'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_time'}),
         'DSA_d': (run_ds_mapf, {'a_star_func': a_star, 'limit_type': 'dist_time', 'decision_type': 'simple', 'alpha': 0.5}),
         'SDS_d': (run_ds_mapf, {'a_star_func': a_star, 'limit_type': 'dist_time', 'decision_type': 'min_prev_2'}),
-        'MGM_d': (run_mgm_classic, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
-        'MGDS_confs_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'sum_of_confs'}),
-        'MGDS_rank_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'rank'}),
+        # 'MGM_d': (run_mgm_classic, {'a_star_func': a_star, 'limit_type': 'dist_time'}),
+        # 'MGDS_confs_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'sum_of_confs'}),
+        # 'MGDS_rank_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'rank'}),
 
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
         # 'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star, 'limit_type': 'norm_time'}),
@@ -274,12 +274,12 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
-    # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
-    n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
+    # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
     # n_agents_list = [300, 350, 400, 450, 500]
     # n_agents_list = [250, 300, 350, 400, 450, 500, 550]

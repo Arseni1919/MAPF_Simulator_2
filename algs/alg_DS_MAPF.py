@@ -36,7 +36,8 @@ class DSAgent:
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
 
-    def decision_bool(self, alpha, decision_type, agents_in_confs, agents_dict):
+    def decision_bool(self, decision_type, agents_in_confs, agents_dict, **kwargs):
+        alpha = kwargs['alpha'] if 'alpha' in kwargs else 0.5
 
         if len(self.path) == 0:
             return True
@@ -137,7 +138,7 @@ class DSAgent:
                 iter_limit = min(iter_limit, alt_iter_limit)
         return iter_limit
 
-    def plan(self, alpha, decision_type, agents_dict=None, **kwargs):
+    def plan(self, decision_type, agents_dict=None, **kwargs):
         start_time = time.time()
 
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
@@ -148,7 +149,7 @@ class DSAgent:
             return False, {'elapsed': None, 'a_s_info': None}, True
 
         agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
-        to_change = self.decision_bool(alpha, decision_type, agents_in_confs, agents_dict)
+        to_change = self.decision_bool(decision_type, agents_in_confs, agents_dict, **kwargs)
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
@@ -179,7 +180,6 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
     limit_type = kwargs['limit_type'] if 'limit_type' in kwargs else 'simple'
-    alpha = kwargs['alpha'] if 'alpha' in kwargs else None
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'DS'
 
     # Creating agents
@@ -210,7 +210,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         for agent in agents:
             start_time = time.time()
 
-            succeeded, info, no_confs = agent.plan(alpha=alpha, agents_dict=agents_dict, **kwargs)
+            succeeded, info, no_confs = agent.plan(agents_dict=agents_dict, **kwargs)
             no_confs_list.append(no_confs)
             if info['elapsed']:
                 max_time_list.append(info['elapsed'])
