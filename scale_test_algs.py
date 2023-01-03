@@ -321,8 +321,8 @@ def main():
 
     plotter = Plotter()
 
-    # to_save_results = True
-    to_save_results = False
+    to_save_results = True
+    # to_save_results = False
     file_dir = f'logs_for_graphs/results_{datetime.now().strftime("%Y-%m-%d_%H-%M")}.json'
 
     # profiler = None
