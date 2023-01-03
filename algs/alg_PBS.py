@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    limit_is_crossed, get_alg_info_dict, check_plan
+    limit_is_crossed, get_alg_info_dict, check_plan, iteration_print
 from algs.topological_sorting import topological_sorting
 
 
@@ -195,9 +195,6 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else 'PBS'
 
     alg_info = get_alg_info_dict()
-    # a_star_calls_counter = 0
-    # a_star_runtimes = []
-    # a_star_n_closed = []
     pbs_node_index = 0
     agents, agents_dict = create_agents(start_nodes, goal_nodes)
     root = PBSNode(agents, agents_dict, pbs_node_index)
@@ -211,24 +208,26 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         alg_info['a_star_n_closed'].extend(up_info['a_star_n_closed'])
         if not success:
             return None, {'success_rate': 0}
+
     # STATS
-    runtime += time.time() - start_time
-    start_time = time.time()
+    alg_info['runtime'] += time.time() - start_time
     root.calc_cost()
     stack = [root]
     iteration = 0
-    while len(stack) > 0 and not limit_is_crossed(runtime, alg_info, **kwargs):
+    while len(stack) > 0 and not limit_is_crossed(alg_info['runtime'], alg_info, **kwargs):
+        start_time = time.time()
         iteration += 1
         NEXT_pbs_node = stack.pop()
         there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, runtime,
                                                   iteration)
         # there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
-        print(f'\r---\n'
-              f'[{kwargs["alg_name"]}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {runtime:0.2f}s][iter {iteration}]\n'
-              f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
-              f'partial order: {NEXT_pbs_node.partial_order}\n'
-              f'cost: {NEXT_pbs_node.cost}\n'
-              f'---\n')
+        iteration_print(agents, NEXT_pbs_node.plan, alg_name, alg_info, alg_info["runtime"], iteration)
+        # print(f'\r---\n'
+        #       f'[{kwargs["alg_name"]}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {alg_info["runtime"]:0.2f}s][iter {iteration}]\n'
+        #       f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'
+        #       f'partial order: {NEXT_pbs_node.partial_order}\n'
+        #       f'cost: {NEXT_pbs_node.cost}\n'
+        #       f'---\n')
 
         if not there_is_col:
             if final_plot:
@@ -240,8 +239,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
-            runtime += time.time() - start_time
-            alg_info['runtime'] = runtime
+            alg_info['runtime'] += time.time() - start_time
             return NEXT_pbs_node.plan, alg_info
 
         conf, conf_type = choose_conf(c_v, c_e)
@@ -263,6 +261,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 stack.append(NEW_pbs_node)
                 NEW_pbs_node.parent = NEXT_pbs_node
                 stack.sort(key=lambda x: x.cost, reverse=True)
+        alg_info['runtime'] += time.time() - start_time
 
     return None, {'success_rate': 0}
 

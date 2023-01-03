@@ -97,10 +97,10 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes():
-    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'orz900d.map'  # 656-1491
 
@@ -278,7 +278,8 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
-    n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
@@ -292,6 +293,7 @@ def main():
     # runs_per_n_agents = 20
     # runs_per_n_agents = 10
     runs_per_n_agents = 5
+    # runs_per_n_agents = 2
     # runs_per_n_agents = 3
 
     random_seed = True
@@ -299,8 +301,8 @@ def main():
     seed = 116
 
     # ------------------------------ LIMITS ------------------------------ #
-    time_per_alg_limit = 1  # According to PBS paper!
-    # time_per_alg_limit = 0.5
+    # time_per_alg_limit = 1  # According to PBS paper!
+    time_per_alg_limit = 0.5
     # time_per_alg_limit = 3
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
@@ -310,8 +312,8 @@ def main():
     # a_star_calls_limit = 1500
     a_star_calls_limit = 1e100
 
-    # a_star_closed_nodes_limit = 1e100
-    a_star_closed_nodes_limit = 1e7
+    a_star_closed_nodes_limit = 1e100
+    # a_star_closed_nodes_limit = 1e7
     # a_star_closed_nodes_limit = 1e6
 
     a_star_iter_limit = 1e100
