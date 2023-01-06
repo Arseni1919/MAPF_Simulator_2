@@ -229,7 +229,10 @@ class Plotter:
                 if len(sr_list) > 0:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
-            ax.plot(sr_x, sr_y, '-o', label=f'{alg_name}', alpha=0.75)
+            if 'color' in alg_info:
+                ax.plot(sr_x, sr_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+            else:
+                ax.plot(sr_x, sr_y, '-o', label=f'{alg_name}', alpha=0.75)
 
         ax.set_title('success_rate')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
@@ -253,7 +256,11 @@ class Plotter:
                 if len(sq_list) > 0:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))
-            ax.plot(sq_x, sq_y, '-o', label=f'{alg_name}', alpha=0.75)
+            if 'color' in alg_info:
+                ax.plot(sq_x, sq_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+            else:
+                ax.plot(sq_x, sq_y, '-o', label=f'{alg_name}', alpha=0.75)
+
 
         ax.set_title('sol_quality')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
@@ -271,7 +278,10 @@ class Plotter:
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75)
+            if 'color' in alg_info:
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+            else:
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75)
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -282,11 +292,14 @@ class Plotter:
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                ax.plot(it_x, it_y, '--^', label=f'{alg_name} (dist)')
+                if 'color' in alg_info:
+                    ax.plot(it_x, it_y, '--^', label=f'{alg_name} (dist)', alpha=0.35, color=alg_info['color'])
+                else:
+                    ax.plot(it_x, it_y, '--^', label=f'{alg_name} (dist)', alpha=0.35)
                 if len(it_x) > 0:
                     ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
-        ax.set_title('runtime (cactus)')
+        ax.set_title('runtime (cactus - log scale)')
         ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
         ax.set_xlabel('Solved Instances')
@@ -305,7 +318,10 @@ class Plotter:
             ac_y.sort()
             ac_x = list(range(len(ac_y)))
             max_instances = max(max_instances, len(ac_x))
-            ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.75)
+            if 'color' in alg_info:
+                ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+            else:
+                ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.75)
             if len(ac_x) > 0:
                 ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
                         bbox=dict(facecolor='yellow', alpha=0.75))
@@ -316,11 +332,14 @@ class Plotter:
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
-                ax.plot(acd_x, acd_y, '--^', label=f'{alg_name} (dist)')
+                if 'color' in alg_info:
+                    ax.plot(acd_x, acd_y, '--^', label=f'{alg_name} (dist)', alpha=0.35, color=alg_info['color'])
+                else:
+                    ax.plot(acd_x, acd_y, '--^', label=f'{alg_name} (dist)', alpha=0.35)
                 if len(acd_x) > 0:
                     ax.text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
-        ax.set_title('A* Calls (cactus)')
+        ax.set_title('A* Calls (cactus - log scale)')
         ax.set_xlim([0, max_instances + 2])
         ax.set_xlabel('Solved Instances')
         ax.set_yscale('log')
@@ -329,16 +348,19 @@ class Plotter:
     @staticmethod
     def plot_a_star_calls_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list,
                                   is_json=False):
-        # showfliers = False
-        showfliers = True
+        showfliers = False
+        # showfliers = True
         big_table = []
+        algs_names = []
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
-            a_star_calls = []
-            for n_agents in n_agents_list:
-                if is_json:
-                    n_agents = str(n_agents)
-                a_star_calls.extend(statistics_dict[alg_name][n_agents]['a_star_calls_per_agent'])
-            big_table.append(a_star_calls)
+            if alg_info['dist']:
+                algs_names.append(alg_name)
+                a_star_calls = []
+                for n_agents in n_agents_list:
+                    if is_json:
+                        n_agents = str(n_agents)
+                    a_star_calls.extend(statistics_dict[alg_name][n_agents]['a_star_calls_per_agent'])
+                big_table.append(a_star_calls)
         ax.boxplot(big_table,
                    # notch=True,  # notch shape
                    vert=True,  # vertical box alignment
@@ -349,9 +371,10 @@ class Plotter:
         # ax.set_title('a_star_runtimes (boxplot)')
         # ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks()
-        ax.set_xticklabels(algs_to_test_dict.keys(), rotation=15)
-        ax.set_ylabel(f'A * calls average per agent')
-        ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
+        ax.set_xticklabels(algs_names, rotation=15)
+        # ax.set_ylabel(f'A * calls average per agent')
+        # ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
+        ax.set_xlabel(f'A * calls average per agent')
         # ax.legend()
 
     @staticmethod
@@ -364,7 +387,11 @@ class Plotter:
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75)
+            if 'color' in alg_info:
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.35, color=alg_info['color'])
+            else:
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.35)
+
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -373,22 +400,25 @@ class Plotter:
                 l_y.sort()
                 l_x = list(range(len(l_y)))
                 max_instances = max(max_instances, len(l_x))
-                ax.plot(l_x, l_y, '--^', label=f'{alg_name} (dist)')
+                if 'color' in alg_info:
+                    ax.plot(l_x, l_y, '--^', label=f'{alg_name} (dist)', alpha=0.35, color=alg_info['color'])
+                else:
+                    ax.plot(l_x, l_y, '--^', label=f'{alg_name} (dist)', alpha=0.35)
                 if len(l_x) > 0:
                     ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
         # ax.set_title('n_closed (cactus)')
         ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
-        ax.set_ylabel('n_closed')
-        ax.set_xlabel('Solved Instances')
+        # ax.set_ylabel('n_closed')
+        ax.set_xlabel('N expanded nodes (cactus - log scale)')
         ax.set_yscale('log')
         ax.legend()
 
     @staticmethod
     def plot_n_messages_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
-        # showfliers = False
-        showfliers = True
+        showfliers = False
+        # showfliers = True
         big_table = []
         algs_names = []
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
@@ -411,8 +441,9 @@ class Plotter:
         # ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks()
         ax.set_xticklabels(algs_names, rotation=15)
-        ax.set_ylabel(f'N messages average per agent')
-        ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
+        # ax.set_ylabel(f'N messages average per agent')
+        # ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
+        ax.set_xlabel(f'N messages average per agent')
         # ax.legend()
 
     @staticmethod
@@ -430,7 +461,10 @@ class Plotter:
                         l_x.append(n_agents)
 
             if len(l_y) > 0:
-                ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75)
+                if 'color' in alg_info:
+                    ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                else:
+                    ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75)
 
         ax.set_ylabel('n_agents_conf')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
@@ -440,21 +474,21 @@ class Plotter:
 
     @staticmethod
     def plot_conf_per_iter(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json, **kwargs):
-        min_x, max_x = 0, 0
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             if alg_info['dist'] and 'n_agents' in kwargs:
                 l_y = statistics_dict[alg_name][kwargs['n_agents']]['confs_per_iter']
                 l_x = list(range(len(l_y)))
-                min_x = min(min_x, min(l_x))
-                max_x = max(max_x, max(l_x))
 
                 if len(l_y) > 0:
-                    ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75)
+                    if 'color' in alg_info:
+                        ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                    else:
+                        ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75)
 
-        ax.set_ylabel('Conflicts per Iteration')
-        ax.set_xlim([min_x - 1, max_x + 1])
-        ax.set_xticks(n_agents_list)
-        ax.set_xlabel('Iterations')
+        # ax.set_ylabel('Conflicts per Iteration')
+        # ax.set_xlim([min_x - 1, max_x + 1])
+        # ax.set_xticks(n_agents_list)
+        ax.set_xlabel('Conflicts per Iteration')
         ax.legend()
 
     def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png='',

@@ -39,7 +39,8 @@ class MGMAgent:
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
         self.agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
-        self.gain = len(self.agents_in_confs)
+        # self.gain = len(self.agents_in_confs)
+        self.gain = len(c_v_list) + len(c_e_list)
         self.stats_confs_per_iter.append(len(c_v_list) + len(c_e_list))
 
     def plan(self, alg_info, initial=False, **kwargs):
@@ -133,7 +134,7 @@ def run_mgm_classic(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs
         max_time_list.append(plan_info['runtime'])
     runtime += time.time() - start_time
     alg_info['dist_runtime'] += max(max_time_list)
-    alg_info['a_star_n_closed_dist'] += max(kwargs['max_n_closed_list'])
+    alg_info['a_star_n_closed_dist'] = max([curr_a.stats_n_closed for curr_a in agents])
     alg_info['a_star_calls_counter_dist'] += 1
 
     for iteration in range(1000000):
@@ -204,7 +205,7 @@ def run_mgm_classic(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs
                 alg_info['runtime'] = runtime
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
-                alg_info['stats_confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 1)
+                alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
                 return plan, alg_info
 
     return plan, alg_info

@@ -33,7 +33,7 @@ def show_results(file_dir, plotter):
 
 
 def main():
-    file_dir = f'../logs_for_graphs/results_2023-01-05_17-35.json'
+    file_dir = f'../logs_for_graphs/2023-01-06--20-44_ALGS-3_RUNS-20_MAP-random-64-64-10.json'
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
 

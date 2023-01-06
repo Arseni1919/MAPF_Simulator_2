@@ -269,7 +269,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['runtime'] = runtime
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
-                alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 1)
+                alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
                 return plan, alg_info
 
     # partial order
