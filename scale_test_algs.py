@@ -11,7 +11,7 @@ from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_plotter.plotter import Plotter
 from algs.alg_DS_MAPF import run_ds_mapf
 from algs.alg_PBS import run_pbs
-from algs.alg_MGM import run_mgm
+from algs.alg_MGDS import run_mgds
 from algs.alg_MGM_classic import run_mgm_classic
 from algs.alg_PP import run_pp
 from algs.alg_a_star import a_star
@@ -50,6 +50,9 @@ def create_to_save_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **k
                 'a_star_n_closed_dist': [],
                 'n_closed_per_run': [],
                 'n_agents_conf': [],
+                'a_star_calls_per_agent': [],
+                'n_messages_per_agent': [],
+                'confs_per_iter': [],
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -89,6 +92,14 @@ def update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_in
         if 'n_agents_conf' in alg_info:
             stats_dict[alg_name][n_agents]['n_agents_conf'].extend(alg_info['n_agents_conf'])
 
+        if 'a_star_calls_per_agent' in alg_info:
+            stats_dict[alg_name][n_agents]['a_star_calls_per_agent'].extend(alg_info['a_star_calls_per_agent'])
+
+        if 'n_messages_per_agent' in alg_info:
+            stats_dict[alg_name][n_agents]['n_messages_per_agent'].extend(alg_info['n_messages_per_agent'])
+
+        if 'confs_per_iter' in alg_info:
+            stats_dict[alg_name][n_agents]['confs_per_iter'] = alg_info['confs_per_iter']
 
 def set_seed(random_seed, seed):
     if random_seed:
@@ -225,7 +236,7 @@ def big_test(
                 print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {alg_info["success_rate"]}\n')
                 update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
                 if i_run % 1 == 0:
-                    plotter.plot_big_test(stats_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir)
+                    plotter.plot_big_test(stats_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir, n_agents=n_agents)
 
         if to_save_results:
             save_and_show_results(to_save_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list,
@@ -239,16 +250,49 @@ def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
         # 'PBS': (run_pbs, {'a_star_func': a_star, 'limit_type': 'norm_time', 'dist': False}),
-        'PP': (run_pp, {'a_star_func': a_star, 'limit_type': 'norm_time', 'dist': False}),
+        # 'PP': (run_pp, {'a_star_func': a_star,
+        #                 'limit_type': 'norm_a_star_closed',
+        #                 'dist': False}),
         # 'DSA': (run_ds_mapf, {
         #     'a_star_func': a_star, 'limit_type': 'dist_time', 'decision_type': 'simple', 'alpha': 0.5, 'dist': True}),
-        'SDS': (run_ds_mapf,
-                {
-                    'a_star_func': a_star, 'limit_type': 'dist_time', 'decision_type': 'min_prev_2', 'dist': True
-                }),
-        # 'MGM': (run_mgm_classic, {'a_star_func': a_star, 'limit_type': 'dist_time', 'dist': True}),
-        'MGDS': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'rank', 'dist': True}),
-
+        # 'SDS': (run_ds_mapf,
+        #         {
+        #             'a_star_func': a_star,
+        #             'limit_type': 'dist_a_star_closed',
+        #             'decision_type': 'min_prev_2',
+        #             'dist': True
+        #         }),
+        'MGM': (run_mgm_classic, {'a_star_func': a_star, 'limit_type': 'dist_time', 'dist': True}),
+        'MGDS-0.95': (run_mgds, {'a_star_func': a_star,
+                                 'limit_type': 'dist_a_star_closed',
+                                 'gain_type': 'rank',
+                                 'alpha': 0.95,
+                                 'dist': True}),
+        'MGDS-0.9': (run_mgds, {'a_star_func': a_star,
+                                'limit_type': 'dist_a_star_closed',
+                                'gain_type': 'rank',
+                                'alpha': 0.9,
+                                'dist': True}),
+        'MGDS-0.7': (run_mgds, {'a_star_func': a_star,
+                                'limit_type': 'dist_a_star_closed',
+                                'gain_type': 'rank',
+                                'alpha': 0.7,
+                                'dist': True}),
+        'MGDS-0.5': (run_mgds, {'a_star_func': a_star,
+                                'limit_type': 'dist_a_star_closed',
+                                'gain_type': 'rank',
+                                'alpha': 0.5,
+                                'dist': True}),
+        'MGDS-0.3': (run_mgds, {'a_star_func': a_star,
+                                'limit_type': 'dist_a_star_closed',
+                                'gain_type': 'rank',
+                                'alpha': 0.3,
+                                'dist': True}),
+        'MGDS-0.1': (run_mgds, {'a_star_func': a_star,
+                                'limit_type': 'dist_a_star_closed',
+                                'gain_type': 'rank',
+                                'alpha': 0.1,
+                                'dist': True}),
         # 'MGDS_confs_d': (run_mgm, {'a_star_func': a_star, 'limit_type': 'dist_time', 'gain_type': 'sum_of_confs'}),
         # 'PBS_a2': (run_pbs, {'a_star_func': df_a_star}),
         # 'PP': (run_pp, {'a_star_mode': 'simple', 'a_star_func': a_star, 'limit_type': 'norm_time'}),
@@ -281,7 +325,7 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 20, 30, 40]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
-    n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
+    n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
@@ -292,10 +336,11 @@ def main():
     # n_agents_list = [300, 350, 400, 450, 500]
     # n_agents_list = [250, 300, 350, 400, 450, 500, 550]
 
-    # runs_per_n_agents = 50  # !!!!!!!!!!!!!!!!!
-    runs_per_n_agents = 25
+    # runs_per_n_agents = 50
+    # runs_per_n_agents = 25
+    # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
-    # runs_per_n_agents = 5
+    runs_per_n_agents = 5
     # runs_per_n_agents = 2
     # runs_per_n_agents = 3
 
@@ -304,9 +349,9 @@ def main():
     seed = 116
 
     # ------------------------------ LIMITS ------------------------------ #
-    time_per_alg_limit = 1  # According to PBS paper!
+    # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
-    # time_per_alg_limit = 3
+    time_per_alg_limit = 3
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
@@ -315,7 +360,7 @@ def main():
     # a_star_calls_limit = 1500
     a_star_calls_limit = 1e100
 
-    a_star_closed_nodes_limit = 1e100
+    # a_star_closed_nodes_limit = 1e100
     # a_star_closed_nodes_limit = 1e7
     # a_star_closed_nodes_limit = 1e6
     a_star_closed_nodes_limit = 5e5
@@ -325,8 +370,8 @@ def main():
 
     plotter = Plotter()
 
-    to_save_results = True
-    # to_save_results = False
+    # to_save_results = True
+    to_save_results = False
     file_dir = f'logs_for_graphs/{datetime.now().strftime("%Y-%m-%d--%H-%M")}_ALGS-{len(algs_to_test_dict)}_RUNS-{runs_per_n_agents}_MAP-{get_map_nodes(True)}.json'
 
     # profiler = None

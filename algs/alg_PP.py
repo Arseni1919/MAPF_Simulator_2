@@ -21,6 +21,9 @@ class PPAgent:
         self.goal_node = goal_node
         self.goal_xy = self.goal_node.xy_name
         self.path = []
+        self.stats_n_closed = 0
+        self.stats_n_calls = 0
+        self.stats_runtime = 0
 
 
 def create_agents(start_nodes, goal_nodes):
@@ -47,6 +50,8 @@ def update_path(update_agent, higher_agents, nodes, nodes_dict, h_func, **kwargs
                                      v_constr_dict=v_constr_dict,
                                      e_constr_dict=e_constr_dict,
                                      perm_constr_dict=perm_constr_dict, **kwargs)
+    # stats
+    update_agent.stats_n_calls += 1
     return new_path, a_s_info
 
 
@@ -106,6 +111,7 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
             alg_info['runtime'] = runtime
+            alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
             return plan, alg_info
 
     return plan, alg_info

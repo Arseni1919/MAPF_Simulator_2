@@ -25,6 +25,9 @@ class PBSAgent:
         self.start_xy = self.start_node.xy_name
         self.goal_node = goal_node
         self.goal_xy = self.goal_node.xy_name
+        self.stats_n_closed = 0
+        self.stats_n_calls = 0
+        self.stats_runtime = 0
 
 
 class PBSNode:
@@ -115,11 +118,10 @@ def update_path(pbs_node, update_agent, nodes, nodes_dict, h_func, iter_limit, *
                                      perm_constr_dict=perm_constr_dict,
                                      plotter=None, middle_plot=False, iter_limit=iter_limit)
 
-    # if new_path is not None:
-    #     c_v_list_after = c_v_check_for_agent(update_agent.name, new_path, sub_results)
-    #     c_e_list_after = c_e_check_for_agent(update_agent.name, new_path, sub_results)
-    #     if len(c_v_list_after) > 0 or len(c_e_list_after) > 0:
-    #         raise RuntimeError('a_star failed')
+    # stats
+    update_agent.stats_n_calls += 1
+    update_agent.stats_runtime += a_s_info['runtime']
+    update_agent.stats_n_closed += a_s_info['n_closed']
 
     return new_path, a_s_info
 
@@ -240,6 +242,7 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             alg_info['success_rate'] = 1
             alg_info['sol_quality'] = cost
             alg_info['runtime'] += time.time() - start_time
+            alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
             return NEXT_pbs_node.plan, alg_info
 
         conf, conf_type = choose_conf(c_v, c_e)

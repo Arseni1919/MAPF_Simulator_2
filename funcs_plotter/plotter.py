@@ -327,19 +327,18 @@ class Plotter:
         ax.legend()
 
     @staticmethod
-    def plot_a_star_runtimes_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list,
-                                     is_json=False):
-        showfliers = False
-        # showfliers = True
+    def plot_a_star_calls_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list,
+                                  is_json=False):
+        # showfliers = False
+        showfliers = True
         big_table = []
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
-            a_star_runtimes = []
+            a_star_calls = []
             for n_agents in n_agents_list:
                 if is_json:
                     n_agents = str(n_agents)
-                a_star_runtimes.extend(statistics_dict[alg_name][n_agents]['a_star_runtimes'])
-            # ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})', alpha=0.5)  # linewidth=0.5, edgecolor="white"
-            big_table.append(a_star_runtimes)
+                a_star_calls.extend(statistics_dict[alg_name][n_agents]['a_star_calls_per_agent'])
+            big_table.append(a_star_calls)
         ax.boxplot(big_table,
                    # notch=True,  # notch shape
                    vert=True,  # vertical box alignment
@@ -351,7 +350,7 @@ class Plotter:
         # ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks()
         ax.set_xticklabels(algs_to_test_dict.keys(), rotation=15)
-        ax.set_ylabel(f'a_star_runtimes')
+        ax.set_ylabel(f'A * calls average per agent')
         ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
         # ax.legend()
 
@@ -387,18 +386,20 @@ class Plotter:
         ax.legend()
 
     @staticmethod
-    def plot_a_star_n_closed_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
-        showfliers = False
-        # showfliers = True
+    def plot_n_messages_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
+        # showfliers = False
+        showfliers = True
         big_table = []
+        algs_names = []
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
-            a_star_runtimes = []
-            for n_agents in n_agents_list:
-                if is_json:
-                    n_agents = str(n_agents)
-                a_star_runtimes.extend(statistics_dict[alg_name][n_agents]['a_star_n_closed'])
-            # ax.hist(a_star_runtimes, bins=20, label=f'{alg_name} ({len(a_star_runtimes)})', alpha=0.5)  # linewidth=0.5, edgecolor="white"
-            big_table.append(a_star_runtimes)
+            if alg_info['dist']:
+                algs_names.append(alg_name)
+                n_messages = []
+                for n_agents in n_agents_list:
+                    if is_json:
+                        n_agents = str(n_agents)
+                    n_messages.extend(statistics_dict[alg_name][n_agents]['n_messages_per_agent'])
+                big_table.append(n_messages)
         ax.boxplot(big_table,
                    # notch=True,  # notch shape
                    vert=True,  # vertical box alignment
@@ -409,8 +410,8 @@ class Plotter:
         # ax.set_title('a_star_runtimes (boxplot)')
         # ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks()
-        ax.set_xticklabels(algs_to_test_dict.keys(), rotation=15)
-        ax.set_ylabel(f'a_star_n_closed')
+        ax.set_xticklabels(algs_names, rotation=15)
+        ax.set_ylabel(f'N messages average per agent')
         ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
         # ax.legend()
 
@@ -437,8 +438,27 @@ class Plotter:
         ax.set_xlabel('N agents')
         ax.legend()
 
+    @staticmethod
+    def plot_conf_per_iter(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json, **kwargs):
+        min_x, max_x = 0, 0
+        for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
+            if alg_info['dist'] and 'n_agents' in kwargs:
+                l_y = statistics_dict[alg_name][kwargs['n_agents']]['confs_per_iter']
+                l_x = list(range(len(l_y)))
+                min_x = min(min_x, min(l_x))
+                max_x = max(max_x, max(l_x))
+
+                if len(l_y) > 0:
+                    ax.plot(l_x, l_y, '-o', label=f'{alg_name}', alpha=0.75)
+
+        ax.set_ylabel('Conflicts per Iteration')
+        ax.set_xlim([min_x - 1, max_x + 1])
+        ax.set_xticks(n_agents_list)
+        ax.set_xlabel('Iterations')
+        ax.legend()
+
     def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png='',
-                      is_json=False):
+                      is_json=False, **kwargs):
         print('big plot starts')
         self.cla_axes()
         self.plot_success_rate(
@@ -453,17 +473,20 @@ class Plotter:
         self.plot_a_star_calls_counters(
             self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
-        self.plot_a_star_runtimes_boxplot(
+        self.plot_a_star_calls_boxplot(
             self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
-        self.plot_a_star_n_closed_boxplot(
+        self.plot_n_messages_boxplot(
             self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
         self.plot_n_closed_cactus(
             self.ax[1, 2], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
-        self.plot_n_agents_conf(
-            self.ax[1, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
+        # self.plot_n_agents_conf(
+        #     self.ax[1, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
+
+        self.plot_conf_per_iter(
+            self.ax[1, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json, **kwargs)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)

@@ -184,8 +184,8 @@ def a_star(start, goal, nodes, h_func,
                            closed_list=closed_nodes.get_nodes_list(),
                            start=start, goal=goal, path=path, nodes=nodes, a_star_run=True)
     # print('\rFinished A*.', end='')
-    if path is None:
-        print()
+    # if path is None:
+    #     print()
     return path, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.heap_list), 'n_closed': len(closed_nodes.heap_list), 'future_constr': future_constr}
 
 

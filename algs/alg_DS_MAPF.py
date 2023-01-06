@@ -32,9 +32,15 @@ class DSAgent:
         self.conf_paths = {}
         self.map_dim = map_dim
         self.limit_type = limit_type
+        self.stats_n_closed = 0
+        self.stats_n_calls = 0
+        self.stats_runtime = 0
+        self.stats_n_messages = 0
+        self.stats_confs_per_iter = []
 
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
+        self.stats_n_messages += len(agents)
 
     def decision_bool(self, decision_type, agents_in_confs, agents_dict, **kwargs):
         alpha = kwargs['alpha'] if 'alpha' in kwargs else 0.5
@@ -143,6 +149,7 @@ class DSAgent:
 
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
+        self.stats_confs_per_iter.append(len(c_v_list) + len(c_e_list))
 
         if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
             # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
@@ -162,6 +169,10 @@ class DSAgent:
                                              perm_constr_dict=perm_constr_dict,
                                              plotter=self.plotter, middle_plot=self.middle_plot,
                                              iter_limit=iter_limit)
+            # stats
+            self.stats_n_calls += 1
+            self.stats_n_closed += a_s_info['n_closed']
+            self.stats_runtime += time.time() - start_time
             if new_path is not None:
                 self.path = new_path
             return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info,
@@ -228,7 +239,7 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         if len(max_time_list) > 0 and max(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
-            alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
+            alg_info['a_star_n_closed_dist'] = max([curr_a.stats_n_closed for curr_a in agents])
             alg_info['a_star_calls_counter_dist'] += 1
 
         # EXCHANGE
@@ -256,6 +267,9 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['runtime'] = runtime
+                alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
+                alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
+                alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 1)
                 return plan, alg_info
 
     # partial order

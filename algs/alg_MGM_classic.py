@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import cProfile
 import pstats
 from algs.test_mapf_alg import test_mapf_alg_from_pic
-
+import numpy as np
 from algs.metrics import get_alg_info_dict, c_v_check_for_agent, c_e_check_for_agent
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan, iteration_print
 from algs.metrics import limit_is_crossed
@@ -27,13 +27,20 @@ class MGMAgent:
         self.other_gains = {}
         self.agents_in_confs = []
         self.alpha = 0.9
+        self.stats_n_closed = 0
+        self.stats_n_calls = 0
+        self.stats_runtime = 0
+        self.stats_n_messages = 0
+        self.stats_confs_per_iter = []
 
     def exchange_paths(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
+        self.stats_n_messages += len(agents)
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
         self.agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
         self.gain = len(self.agents_in_confs)
+        self.stats_confs_per_iter.append(len(c_v_list) + len(c_e_list))
 
     def plan(self, alg_info, initial=False, **kwargs):
         start_time = time.time()
@@ -54,6 +61,9 @@ class MGMAgent:
         runtime = time.time() - start_time
 
         # stats
+        self.stats_n_calls += 1
+        self.stats_runtime += runtime
+        self.stats_n_closed += a_s_info['n_closed']
         alg_info['a_star_calls_counter'] += 1
         alg_info['a_star_runtimes'].append(runtime)
         alg_info['a_star_n_closed'].append(a_s_info['n_closed'])
@@ -64,6 +74,7 @@ class MGMAgent:
 
     def exchange_gains(self, agents):
         self.other_gains = {agent.name: agent.gain for agent in agents if agent.name != self.name}
+        self.stats_n_messages += len(agents)
 
     def decision_bool(self, agents_dict):
         if len(self.agents_in_confs) == 0:
@@ -173,7 +184,7 @@ def run_mgm_classic(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs
 
         if len(max_time_list) > 0 and max(max_time_list) > 0:
             alg_info['dist_runtime'] += max(max_time_list)
-            alg_info['a_star_n_closed_dist'] += max(max_n_closed_list)
+            alg_info['a_star_n_closed_dist'] = max([curr_a.stats_n_closed for curr_a in agents])
             alg_info['a_star_calls_counter_dist'] += 1
 
         # CHECK PLAN
@@ -191,6 +202,9 @@ def run_mgm_classic(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['runtime'] = runtime
+                alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
+                alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
+                alg_info['stats_confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 1)
                 return plan, alg_info
 
     return plan, alg_info
