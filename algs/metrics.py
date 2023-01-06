@@ -79,7 +79,7 @@ def build_constraints(nodes, other_paths):
     return v_constr_dict, e_constr_dict, perm_constr_dict
 
 
-def c_v_check_for_agent(agent_1: str, path_1, results):
+def c_v_check_for_agent(agent_1: str, path_1, results, immediate=False):
     """
     c_v_for_agent_list: (agents name 1, agents name 2, x, y, t)
     """
@@ -97,18 +97,22 @@ def c_v_check_for_agent(agent_1: str, path_1, results):
                 node_2 = path_2[min(t, len(path_2) - 1)]
                 if (node_1.x, node_1.y) == (node_2.x, node_2.y):
                     c_v_for_agent_list.append((agent_1, agent_2, node_1.x, node_1.y, t))
+                    if immediate:
+                        return c_v_for_agent_list
     return c_v_for_agent_list
 
 
-def vertex_col_check(results):
+def vertex_col_check(results, immediate=False):
     vertex_col_list = []
     for agent_1, path_1 in results.items():
-        c_v_for_agent_list = c_v_check_for_agent(agent_1, path_1, results)
+        c_v_for_agent_list = c_v_check_for_agent(agent_1, path_1, results, immediate=immediate)
         vertex_col_list.extend(c_v_for_agent_list)
+        if immediate:
+            return vertex_col_list
     return vertex_col_list
 
 
-def c_e_check_for_agent(agent_1: str, path_1, results):
+def c_e_check_for_agent(agent_1: str, path_1, results, immediate=False):
     """
     c_e_check_for_agent: (agents name 1, agents name 2, x, y, x, y, t)
     """
@@ -127,27 +131,31 @@ def c_e_check_for_agent(agent_1: str, path_1, results):
                     node_2 = path_2[t]
                     if (prev_node_1.x, prev_node_1.y, node_1.x, node_1.y) == (node_2.x, node_2.y, prev_node_2.x, prev_node_2.y):
                         c_e_for_agent_list.append((agent_1, agent_2, prev_node_1.x, prev_node_1.y, node_1.x, node_1.y, t))
+                        if immediate:
+                            return c_e_for_agent_list
                     prev_node_1 = node_1
                     prev_node_2 = node_2
     return c_e_for_agent_list
 
 
-def edge_col_check(results):
+def edge_col_check(results, immediate=False):
     edge_col_list = []
     for agent_1, path_1 in results.items():
-        c_e_for_agent_list = c_e_check_for_agent(agent_1, path_1, results)
+        c_e_for_agent_list = c_e_check_for_agent(agent_1, path_1, results, immediate=immediate)
         edge_col_list.extend(c_e_for_agent_list)
+        if immediate:
+            return edge_col_list
     return edge_col_list
 
 
-def check_for_collisions(results):
+def check_for_collisions(results, immediate=False):
     """
     results: {'agents str': [Nodes heap_list]}
     """
     print('\nStart check_for_collisions...')
     if results:
-        vertex_col_list = vertex_col_check(results)
-        edge_col_list = edge_col_check(results)
+        vertex_col_list = vertex_col_check(results, immediate=immediate)
+        edge_col_list = edge_col_check(results, immediate=immediate)
         there_is_col = len(vertex_col_list) > 0 or len(edge_col_list) > 0
         return there_is_col, vertex_col_list, edge_col_list
     return True, [], []
@@ -165,9 +173,10 @@ def iteration_print(agents, plan, alg_name, alg_info, runtime, iteration):
     return cost
 
 
-def check_plan(agents, plan, alg_name, alg_info, runtime, iteration):
+def check_plan(agents, plan, alg_name, alg_info, runtime, iteration, immediate=False):
     cost = iteration_print(agents, plan, alg_name, alg_info, runtime, iteration)
-    there_is_col, c_v, c_e = check_for_collisions(plan)
+    # cost = sum([len(path) for path in plan.values()])
+    there_is_col, c_v, c_e = check_for_collisions(plan, immediate=False)
     return there_is_col, c_v, c_e, cost
 
 

@@ -290,6 +290,7 @@ class Plotter:
         ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
         ax.set_xlabel('Solved Instances')
+        ax.set_yscale('log')
         ax.legend()
 
     @staticmethod
@@ -322,6 +323,7 @@ class Plotter:
         ax.set_title('A* Calls (cactus)')
         ax.set_xlim([0, max_instances + 2])
         ax.set_xlabel('Solved Instances')
+        ax.set_yscale('log')
         ax.legend()
 
     @staticmethod
@@ -381,6 +383,7 @@ class Plotter:
         # ax.set_xticks(rt_x)
         ax.set_ylabel('n_closed')
         ax.set_xlabel('Solved Instances')
+        ax.set_yscale('log')
         ax.legend()
 
     @staticmethod

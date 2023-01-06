@@ -218,10 +218,10 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         start_time = time.time()
         iteration += 1
         NEXT_pbs_node = stack.pop()
-        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, runtime,
-                                                  iteration)
+        there_is_col, c_v, c_e, cost = check_plan(agents, NEXT_pbs_node.plan, alg_name, alg_info, alg_info["runtime"],
+                                                  iteration, immediate=False)
         # there_is_col, c_v, c_e = check_for_collisions(NEXT_pbs_node.plan)
-        iteration_print(agents, NEXT_pbs_node.plan, alg_name, alg_info, alg_info["runtime"], iteration)
+        # iteration_print(agents, NEXT_pbs_node.plan, alg_name, alg_info, alg_info["runtime"], iteration)
         # print(f'\r---\n'
         #       f'[{kwargs["alg_name"]}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {alg_info["runtime"]:0.2f}s][iter {iteration}]\n'
         #       f'PBS Node {NEXT_pbs_node.index}, stack: {len(stack)}\n'

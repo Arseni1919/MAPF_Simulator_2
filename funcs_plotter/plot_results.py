@@ -26,13 +26,14 @@ def show_results(file_dir, plotter):
     runs_per_n_agents = json_object['runs_per_n_agents']
     n_agents_list = json_object['n_agents_list']
     img_png = json_object['img_dir']
-    algs_to_test_names = json_object['algs_to_test_names']
-    plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_names, n_agents_list, img_png, is_json=True)
+    # algs_to_test_names = json_object['algs_to_test_names']
+    algs_to_test_dict = json_object['algs_to_test_dict']
+    plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, is_json=True)
     plt.show()
 
 
 def main():
-    file_dir = f'../logs_for_graphs/results_2022-12-25_12-03.json'
+    file_dir = f'../logs_for_graphs/results_2023-01-05_17-35.json'
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
 
