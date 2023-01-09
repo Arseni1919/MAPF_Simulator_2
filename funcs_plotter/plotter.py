@@ -343,7 +343,7 @@ class Plotter:
         ax.set_xlim([0, max_instances + 2])
         ax.set_xlabel('Solved Instances')
         ax.set_yscale('log')
-        ax.legend()
+        ax.legend(framealpha=0)
 
     @staticmethod
     def plot_a_star_calls_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list,
