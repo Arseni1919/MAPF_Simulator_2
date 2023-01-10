@@ -2,7 +2,9 @@
 
 ## Algorithms
 - PBS
-- DS-MAPF
+- PP
+- SDS
+- MGDS
 
 ## Experiments
 
@@ -19,7 +21,7 @@
 - Quality and runtime graphs are only of those cases who succeeded to solve an instance
 
 
-![](pics/results_lak108d.png)
+![Figure_2.png](pics%2FFigure_2.png)
 
 ## Credits
 

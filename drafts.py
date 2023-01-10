@@ -86,3 +86,4 @@ if __name__ == '__main__':
     ax.set_title("Press enter to accept selected points.")
 
     plt.show()
+
