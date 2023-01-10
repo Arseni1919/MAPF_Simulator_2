@@ -33,10 +33,13 @@ def show_results(file_dir, plotter):
 
 
 def main():
+
+    """ 20 RUNS PER N AGENTS: """
     # file_dir = f'../logs_for_graphs/2023-01-06--18-28_ALGS-3_RUNS-20_MAP-empty-48-48.json'
     # file_dir = f'../logs_for_graphs/2023-01-06--20-44_ALGS-3_RUNS-20_MAP-random-64-64-10.json'
-    # file_dir = f'../logs_for_graphs/2023-01-06--10-47_ALGS-3_RUNS-20_MAP-warehouse-10-20-10-2-1.json'
-    file_dir = f'../logs_for_graphs/2023-01-07--21-03_ALGS-3_RUNS-20_MAP-lt_gallowstemplar_n.json'
+    file_dir = f'../logs_for_graphs/2023-01-09--08-23_ALGS-3_RUNS-20_MAP-warehouse-10-20-10-2-1.json'
+    # file_dir = f'../logs_for_graphs/2023-01-07--21-03_ALGS-3_RUNS-20_MAP-lt_gallowstemplar_n.json'
+
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
 
