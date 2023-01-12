@@ -394,8 +394,8 @@ def main():
 
     plotter = Plotter()
 
-    to_save_results = True
-    # to_save_results = False
+    # to_save_results = True
+    to_save_results = False
     file_dir = f'logs_for_graphs/{datetime.now().strftime("%Y-%m-%d--%H-%M")}_ALGS-{len(algs_to_test_dict)}_RUNS-{runs_per_n_agents}_MAP-{get_map_nodes(True)}.json'
 
     # profiler = None

@@ -279,9 +279,9 @@ class Plotter:
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
             if 'color' in alg_info:
-                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
             else:
-                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.75)
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.55)
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
@@ -319,9 +319,9 @@ class Plotter:
             ac_x = list(range(len(ac_y)))
             max_instances = max(max_instances, len(ac_x))
             if 'color' in alg_info:
-                ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
             else:
-                ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.75)
+                ax.plot(ac_x, ac_y, '-o', label=f'{alg_name}', alpha=0.55)
             if len(ac_x) > 0:
                 ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
                         bbox=dict(facecolor='yellow', alpha=0.75))
@@ -388,9 +388,9 @@ class Plotter:
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
             if 'color' in alg_info:
-                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.35, color=alg_info['color'])
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
             else:
-                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.35)
+                ax.plot(rt_x, rt_y, '-o', label=f'{alg_name}', alpha=0.55)
 
             if len(rt_x) > 0:
                 ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
