@@ -112,8 +112,8 @@ def set_seed(random_seed, seed):
 
 def get_map_nodes(only_name=False):
     # img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # img_dir = 'random-32-32-10.map'  # 32-32
@@ -251,12 +251,12 @@ def big_test(
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
-        # 'PBS': (run_pbs, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'norm_time',
-        #     'dist': False,
-        #     'color': 'tab:purple',
-        # }),
+        'PBS': (run_pbs, {
+            'a_star_func': a_star,
+            'limit_type': 'norm_a_star_closed',
+            'dist': False,
+            'color': 'tab:purple',
+        }),
         'PP': (run_pp, {
             'a_star_func': a_star,
             'limit_type': 'norm_a_star_closed',
@@ -362,9 +362,9 @@ def main():
 
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25
-    runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
+    # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
-    # runs_per_n_agents = 5
+    runs_per_n_agents = 5
     # runs_per_n_agents = 2
     # runs_per_n_agents = 3
 
@@ -394,8 +394,8 @@ def main():
 
     plotter = Plotter()
 
-    # to_save_results = True
-    to_save_results = False
+    to_save_results = True
+    # to_save_results = False
     file_dir = f'logs_for_graphs/{datetime.now().strftime("%Y-%m-%d--%H-%M")}_ALGS-{len(algs_to_test_dict)}_RUNS-{runs_per_n_agents}_MAP-{get_map_nodes(True)}.json'
 
     # profiler = None

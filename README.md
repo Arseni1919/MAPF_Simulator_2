@@ -25,6 +25,8 @@
 - [matplotlib | Creating multiple subplots using plt.subplots](https://matplotlib.org/3.5.0/gallery/subplots_axes_and_figures/subplots_demo.html)
 - [matplotlib | matplotlib.animation](https://matplotlib.org/stable/api/animation_api.html#id2)
 - [matplotlib | matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html)
+- [matplotlib | markers](https://matplotlib.org/stable/api/markers_api.html)
+- [matplotlib | lines](https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D.set_linestyle)
 - [geeksforgeeks | json.load](https://www.geeksforgeeks.org/json-load-in-python/?ref=lbp)
 - [scipy | scipy.sparse.csgraph.floyd_warshall (from all to all dist)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.floyd_warshall.html)
 - [sof | q](https://stackoverflow.com/questions/55109716/c-argument-looks-like-a-single-numeric-rgb-or-rgba-sequence)
