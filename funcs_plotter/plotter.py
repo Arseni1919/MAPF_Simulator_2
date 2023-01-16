@@ -9,11 +9,45 @@ def get_line_or_marker(index, kind):
         index = index % len(lines)
         return lines[index]
     elif kind == 'm':
-        markers = ['^', 'v', '*', 'X', 'd', '.', 'o']
+        markers = ['^', '1', '2', 'X', 'd', 'v', 'o']
         index = index % len(markers)
         return markers[index]
     else:
         raise RuntimeError('no such kind')
+
+
+def plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
+    line = get_line_or_marker(index, 'l')
+    linewidth = 2
+    alpha = 0.75
+    if 'color' in alg_info:
+        ax.plot(l_x, l_y, line, label=f'{alg_name}', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+    else:
+        ax.plot(l_x, l_y, line, label=f'{alg_name}', alpha=alpha, linewidth=linewidth)
+    if len(l_x) > 0:
+        ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
+
+def plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
+    marker = f"-{get_line_or_marker(index, 'm')}"
+    linewidth = 1
+    alpha = 0.35
+    if 'color' in alg_info:
+        ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+    else:
+        ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, linewidth=linewidth)
+    if len(l_x) > 0:
+        ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
+
+def set_legend(ax, framealpha=None):
+    pass
+    legend_properties = {'weight': 'bold', 'size': 11}
+    # legend_properties = {}
+    if framealpha is not None:
+        ax.legend(prop=legend_properties, framealpha=framealpha)
+    else:
+        ax.legend(prop=legend_properties)
 
 
 def get_list_n_run(statistics_dict, alg_name, n_agents, list_type, runs_per_n_agents, is_json=False):
@@ -235,7 +269,7 @@ class Plotter:
         index = -1
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             index += 1
-            line = get_line_or_marker(index, 'l')
+            marker = f"-{get_line_or_marker(index, 'm')}"
             # success_rate
             sr_x = []
             sr_y = []
@@ -246,9 +280,9 @@ class Plotter:
                     sr_x.append(n_agents)
                     sr_y.append(sum(sr_list) / len(sr_list))
             if 'color' in alg_info:
-                ax.plot(sr_x, sr_y, line, label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                ax.plot(sr_x, sr_y, marker, label=f'{alg_name}', alpha=0.9, color=alg_info['color'])
             else:
-                ax.plot(sr_x, sr_y, line, label=f'{alg_name}', alpha=0.75)
+                ax.plot(sr_x, sr_y, marker, label=f'{alg_name}', alpha=0.9)
 
         ax.set_title('success_rate')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
@@ -257,14 +291,15 @@ class Plotter:
         ax.set_ylim([0, 1.5])
         ax.set_xticks(n_agents_list)
         ax.set_xlabel('N agents')
-        ax.legend()
+        set_legend(ax)
 
     @staticmethod
     def plot_sol_quality(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json=False):
         index = -1
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             index += 1
-            line = get_line_or_marker(index, 'l')
+            # line = get_line_or_marker(index, 'l')
+            marker = f"-{get_line_or_marker(index, 'm')}"
             # sol_quality
             sq_x = []
             sq_y = []
@@ -275,16 +310,17 @@ class Plotter:
                     sq_x.append(n_agents)
                     sq_y.append(np.mean(sq_list))
             if 'color' in alg_info:
-                ax.plot(sq_x, sq_y, line, label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                ax.plot(sq_x, sq_y, marker, label=f'{alg_name}', alpha=0.8, color=alg_info['color'])
             else:
-                ax.plot(sq_x, sq_y, line, label=f'{alg_name}', alpha=0.75)
+                ax.plot(sq_x, sq_y, marker, label=f'{alg_name}', alpha=0.8)
 
 
         ax.set_title('sol_quality')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         ax.set_xticks(n_agents_list)
         ax.set_xlabel('N agents')
-        ax.legend()
+        ax.set_ylabel('sol_quality')
+        set_legend(ax)
 
     @staticmethod
     def plot_runtime_cactus(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json=False):
@@ -292,19 +328,11 @@ class Plotter:
         index = -1
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             index += 1
-            line = get_line_or_marker(index, 'l')
-            marker = f"-{get_line_or_marker(index, 'm')}"
-            # runtime
             rt_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'runtime', runs_per_n_agents, is_json)
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            if 'color' in alg_info:
-                ax.plot(rt_x, rt_y, line, label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
-            else:
-                ax.plot(rt_x, rt_y, line, label=f'{alg_name}', alpha=0.55)
-            if len(rt_x) > 0:
-                ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+            plot_cactus_big_lines(ax, index, rt_x, rt_y, alg_name, alg_info)
 
             # dist_runtime
             if alg_info['dist']:
@@ -313,19 +341,14 @@ class Plotter:
                 it_y.sort()
                 it_x = list(range(len(it_y)))
                 max_instances = max(max_instances, len(it_x))
-                if 'color' in alg_info:
-                    ax.plot(it_x, it_y, marker, label=f'{alg_name} (dist)', alpha=0.35, color=alg_info['color'])
-                else:
-                    ax.plot(it_x, it_y, marker, label=f'{alg_name} (dist)', alpha=0.35)
-                if len(it_x) > 0:
-                    ax.text(it_x[-1], it_y[-1], f'{it_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+                plot_cactus_dist_lines(ax, index, it_x, it_y, alg_name, alg_info)
 
         ax.set_title('runtime (cactus - log scale)')
         ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
         ax.set_xlabel('Solved Instances')
         ax.set_yscale('log')
-        ax.legend()
+        set_legend(ax)
 
     @staticmethod
     def plot_a_star_calls_counters(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list,
@@ -334,21 +357,13 @@ class Plotter:
         index = -1
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             index += 1
-            line = get_line_or_marker(index, 'l')
-            marker = f"-{get_line_or_marker(index, 'm')}"
             # A* calls
             ac_y = get_list_runtime(statistics_dict, alg_name, n_agents_list, 'a_star_calls_counter', runs_per_n_agents,
                                     is_json)
             ac_y.sort()
             ac_x = list(range(len(ac_y)))
             max_instances = max(max_instances, len(ac_x))
-            if 'color' in alg_info:
-                ax.plot(ac_x, ac_y, line, label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
-            else:
-                ax.plot(ac_x, ac_y, line, label=f'{alg_name}', alpha=0.55)
-            if len(ac_x) > 0:
-                ax.text(ac_x[-1], ac_y[-1], f'{ac_x[-1] + 1}',
-                        bbox=dict(facecolor='yellow', alpha=0.75))
+            plot_cactus_big_lines(ax, index, ac_x, ac_y, alg_name, alg_info)
 
             if alg_info['dist']:
                 # get_list_a_star(statistics_dict, alg_name, n_agents_list, list_type, is_json=False)
@@ -356,18 +371,14 @@ class Plotter:
                 acd_y.sort()
                 acd_x = list(range(len(acd_y)))
                 max_instances = max(max_instances, len(acd_x))
-                if 'color' in alg_info:
-                    ax.plot(acd_x, acd_y, marker, label=f'{alg_name} (dist)', alpha=0.35, color=alg_info['color'])
-                else:
-                    ax.plot(acd_x, acd_y, marker, label=f'{alg_name} (dist)', alpha=0.35)
-                if len(acd_x) > 0:
-                    ax.text(acd_x[-1], acd_y[-1], f'{acd_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+                plot_cactus_dist_lines(ax, index, acd_x, acd_y, alg_name, alg_info)
 
         ax.set_title('A* Calls (cactus - log scale)')
         ax.set_xlim([0, max_instances + 2])
         ax.set_xlabel('Solved Instances')
         ax.set_yscale('log')
-        ax.legend(framealpha=0)
+        ax.set_ylim([0, 1000])
+        set_legend(ax, framealpha=0)
 
     @staticmethod
     def plot_a_star_calls_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list,
@@ -407,32 +418,19 @@ class Plotter:
         index = -1
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             index += 1
-            line = get_line_or_marker(index, 'l')
-            marker = f"-{get_line_or_marker(index, 'm')}"
             # runtime
             rt_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'n_closed_per_run', is_json)
             rt_y.sort()
             rt_x = list(range(len(rt_y)))
             max_instances = max(max_instances, len(rt_x))
-            if 'color' in alg_info:
-                ax.plot(rt_x, rt_y, line, label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
-            else:
-                ax.plot(rt_x, rt_y, line, label=f'{alg_name}', alpha=0.55)
-
-            if len(rt_x) > 0:
-                ax.text(rt_x[-1], rt_y[-1], f'{rt_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+            plot_cactus_big_lines(ax, index, rt_x, rt_y, alg_name, alg_info)
 
             if alg_info['dist']:
                 l_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'a_star_n_closed_dist', is_json)
                 l_y.sort()
                 l_x = list(range(len(l_y)))
                 max_instances = max(max_instances, len(l_x))
-                if 'color' in alg_info:
-                    ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=0.35, color=alg_info['color'])
-                else:
-                    ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=0.35)
-                if len(l_x) > 0:
-                    ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+                plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info)
 
         # ax.set_title('n_closed (cactus)')
         ax.set_xlim([0, max_instances + 2])
@@ -440,7 +438,7 @@ class Plotter:
         # ax.set_ylabel('n_closed')
         ax.set_xlabel('N expanded nodes (cactus - log scale)')
         ax.set_yscale('log')
-        ax.legend()
+        set_legend(ax)
 
     @staticmethod
     def plot_n_messages_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
@@ -497,7 +495,7 @@ class Plotter:
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         ax.set_xticks(n_agents_list)
         ax.set_xlabel('N agents')
-        ax.legend()
+        set_legend(ax)
 
     @staticmethod
     def plot_conf_per_iter(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json, **kwargs):
@@ -519,7 +517,7 @@ class Plotter:
         # ax.set_xlim([min_x - 1, max_x + 1])
         # ax.set_xticks(n_agents_list)
         ax.set_xlabel('Conflicts per Iteration')
-        ax.legend()
+        set_legend(ax)
 
     def plot_big_test(self, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png='',
                       is_json=False, **kwargs):

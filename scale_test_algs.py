@@ -111,8 +111,8 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes(only_name=False):
-    # img_dir = 'empty-48-48.map'  # 48-48
-    img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
@@ -257,12 +257,14 @@ def main():
             'dist': False,
             'color': 'tab:purple',
         }),
+
         'PP': (run_pp, {
             'a_star_func': a_star,
             'limit_type': 'norm_a_star_closed',
             'dist': False,
             'color': 'tab:blue',
         }),
+
         # 'DSA': (run_ds_mapf, {
         #     'a_star_func': a_star,
         #     'limit_type': 'dist_a_star_closed',
@@ -271,6 +273,7 @@ def main():
         #     'dist': True,
         #     'color': 'tab:brown',
         # }),
+
         'SDS': (run_ds_mapf, {
             'a_star_func': a_star,
             'limit_type': 'dist_a_star_closed',
@@ -278,12 +281,14 @@ def main():
             'dist': True,
             'color': 'tab:orange',
         }),
+
         # 'MGM': (run_mgm_classic, {
         #     'a_star_func': a_star,
         #     'limit_type': 'dist_time',
         #     'dist': True,
         #     'color': 'tab:olive',
         # }),
+
         'MGDS': (run_mgds, {'a_star_func': a_star,
                             'limit_type': 'dist_a_star_closed',
                             'gain_type': 'rank',
@@ -365,7 +370,7 @@ def main():
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
     runs_per_n_agents = 5
-    # runs_per_n_agents = 2
+    # runs_per_n_agents = 1
     # runs_per_n_agents = 3
 
     random_seed = True

@@ -216,6 +216,8 @@ def run_pbs(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     root.calc_cost()
     stack = [root]
     iteration = 0
+    if len(start_nodes) >= 100:
+        return None, {'success_rate': 0}
     while len(stack) > 0 and not limit_is_crossed(alg_info['runtime'], alg_info, **kwargs):
         start_time = time.time()
         iteration += 1
