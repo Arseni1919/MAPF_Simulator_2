@@ -40,10 +40,12 @@ def main():
     # file_dir = f'../logs_for_graphs/2023-01-09--08-23_ALGS-3_RUNS-20_MAP-warehouse-10-20-10-2-1.json'
     # file_dir = f'../logs_for_graphs/2023-01-07--21-03_ALGS-3_RUNS-20_MAP-lt_gallowstemplar_n.json'
 
-    file_dir = f'../logs_for_graphs/2023-01-15--17-06_ALGS-4_RUNS-5_MAP-random-64-64-10.json'
-    # file_dir = f'../logs_for_graphs/2023-01-15--18-05_ALGS-4_RUNS-5_MAP-empty-48-48.json'
+    # file_dir = f'../logs_for_graphs/2023-01-15--18-05_ALGS-4_RUNS-5_MAP-empty-48-48.json'  # pbs
+    file_dir = f'../logs_for_graphs/2023-01-15--17-06_ALGS-4_RUNS-5_MAP-random-64-64-10.json'  # pbs
 
-    # file_dir = '../logs_for_graphs/results_2023-01-04_11-00.json'
+    # file_dir = '../logs_for_graphs/2023-01-17--13-51_ALGS-3_RUNS-5_MAP-random-64-64-10.json'  # mgm
+    # file_dir = '../logs_for_graphs/2023-01-17--16-19_ALGS-3_RUNS-5_MAP-empty-48-48.json'  # dsa
+
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
 

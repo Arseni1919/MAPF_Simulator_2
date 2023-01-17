@@ -265,6 +265,14 @@ def main():
             'color': 'tab:blue',
         }),
 
+        'SDS': (run_ds_mapf, {
+            'a_star_func': a_star,
+            'limit_type': 'dist_a_star_closed',
+            'decision_type': 'min_prev_2',
+            'dist': True,
+            'color': 'tab:orange',
+        }),
+
         # 'DSA': (run_ds_mapf, {
         #     'a_star_func': a_star,
         #     'limit_type': 'dist_a_star_closed',
@@ -274,27 +282,19 @@ def main():
         #     'color': 'tab:brown',
         # }),
 
-        'SDS': (run_ds_mapf, {
-            'a_star_func': a_star,
-            'limit_type': 'dist_a_star_closed',
-            'decision_type': 'min_prev_2',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
-
-        # 'MGM': (run_mgm_classic, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'tab:olive',
-        # }),
-
         'MGDS': (run_mgds, {'a_star_func': a_star,
                             'limit_type': 'dist_a_star_closed',
                             'gain_type': 'rank',
                             'alpha': 0.9,
                             'dist': True,
                             'color': 'tab:green'}),
+
+        # 'MGM': (run_mgm_classic, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'tab:olive',
+        # }),
 
         # 'MGDS-0.95': (run_mgds, {'a_star_func': a_star,
         #                          'limit_type': 'dist_a_star_closed',
@@ -358,6 +358,7 @@ def main():
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
+    # n_agents_list = [50, 100, 150, 200, 250, 300]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
     # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
@@ -368,8 +369,8 @@ def main():
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 10
-    runs_per_n_agents = 5
+    runs_per_n_agents = 10
+    # runs_per_n_agents = 5
     # runs_per_n_agents = 1
     # runs_per_n_agents = 3
 
