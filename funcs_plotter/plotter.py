@@ -39,7 +39,7 @@ def plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
 def plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
     marker = f"-{get_line_or_marker(index, 'm')}"
     linewidth = 1
-    alpha = 0.55
+    alpha = 0.43
     if 'color' in alg_info:
         ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
     else:
@@ -357,7 +357,7 @@ class Plotter:
         ax.set_xlabel('Solved Instances', labelpad=-1)
         is_log = set_log(ax)
         ax.set_title(f'y: runtime (cactus{" - log scale" if is_log else ""})', fontweight="bold")
-        # ax.set_ylim([1, 3000])
+        ax.set_ylim([1, 3000])
         set_legend(ax)
 
     @staticmethod
@@ -548,11 +548,11 @@ class Plotter:
         self.plot_a_star_calls_counters(
             self.ax[0, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
-        self.plot_a_star_calls_boxplot(
-            self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
-
-        self.plot_n_messages_boxplot(
-            self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
+        # self.plot_a_star_calls_boxplot(
+        #     self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
+        #
+        # self.plot_n_messages_boxplot(
+        #     self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
         self.plot_n_closed_cactus(
             self.ax[1, 2], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)

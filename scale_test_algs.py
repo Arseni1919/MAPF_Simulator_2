@@ -111,8 +111,8 @@ def set_seed(random_seed, seed):
 
 
 def get_map_nodes(only_name=False):
-    img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
