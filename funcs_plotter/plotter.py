@@ -3,6 +3,10 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 
 
+def set_plot_title(ax, title):
+    ax.set_title(f'{title}', fontweight="bold")
+
+
 def set_log(ax):
     log = True
     # log = False
@@ -24,6 +28,11 @@ def get_line_or_marker(index, kind):
         raise RuntimeError('no such kind')
 
 
+def plot_text_in_cactus(ax, l_x, l_y):
+    if len(l_x) > 0:
+        ax.text(l_x[-1]-5, l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+
+
 def plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
     line = get_line_or_marker(index, 'l')
     linewidth = 2
@@ -32,8 +41,7 @@ def plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
         ax.plot(l_x, l_y, line, label=f'{alg_name}', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
     else:
         ax.plot(l_x, l_y, line, label=f'{alg_name}', alpha=alpha, linewidth=linewidth)
-    if len(l_x) > 0:
-        ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+    plot_text_in_cactus(ax, l_x, l_y)
 
 
 def plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
@@ -44,8 +52,7 @@ def plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
         ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
     else:
         ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, linewidth=linewidth)
-    if len(l_x) > 0:
-        ax.text(l_x[-1], l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+    plot_text_in_cactus(ax, l_x, l_y)
 
 
 def set_legend(ax, framealpha=None):
@@ -293,7 +300,7 @@ class Plotter:
             else:
                 ax.plot(sr_x, sr_y, marker, label=f'{alg_name}', alpha=0.9)
 
-        ax.set_title('y: Success Rate', fontweight="bold")
+        set_plot_title(ax, 'Success Rate')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
         # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
@@ -323,8 +330,7 @@ class Plotter:
             else:
                 ax.plot(sq_x, sq_y, marker, label=f'{alg_name}', alpha=0.8)
 
-
-        ax.set_title('y: Solution Quality', fontweight="bold")
+        set_plot_title(ax, 'Solution Quality')
         ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
         ax.set_xticks(n_agents_list)
         ax.set_xlabel('N agents')
@@ -355,8 +361,9 @@ class Plotter:
         ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
         ax.set_xlabel('Solved Instances', labelpad=-1)
+        ax.set_ylabel('s econds', labelpad=-1)
         is_log = set_log(ax)
-        ax.set_title(f'y: runtime (cactus{" - log scale" if is_log else ""})', fontweight="bold")
+        set_plot_title(ax, f'runtime (cactus{" - log scale" if is_log else ""})')
         ax.set_ylim([1, 3000])
         set_legend(ax)
 
@@ -387,7 +394,7 @@ class Plotter:
         ax.set_xlabel('Solved Instances')
         is_log = set_log(ax)
         ax.set_ylim([1, 1000])
-        ax.set_title(f'y: A* Calls (cactus{" - log scale" if is_log else ""})', fontweight="bold")
+        set_plot_title(ax, f'A* Calls (cactus{" - log scale" if is_log else ""})')
         set_legend(ax, framealpha=0)
 
     @staticmethod
@@ -449,7 +456,7 @@ class Plotter:
         # ax.set_xlabel('y: N expanded nodes (cactus - log scale)')
         is_log = set_log(ax)
         ax.set_ylim([1e2, 3e7])
-        ax.set_title(f'y: N expanded nodes (cactus{" - log scale" if is_log else ""})', fontweight="bold")
+        set_plot_title(ax, f'N expanded nodes (cactus{" - log scale" if is_log else ""})')
         set_legend(ax)
 
     @staticmethod
