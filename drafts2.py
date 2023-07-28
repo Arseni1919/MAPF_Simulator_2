@@ -6,4 +6,4 @@ class Node:
 node = Node()
 l = [node, node, node, node]
 
-print(l[:3])
+print(max([299]))

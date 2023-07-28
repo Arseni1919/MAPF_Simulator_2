@@ -9,7 +9,7 @@ from algs.metrics import get_alg_info_dict, c_v_check_for_agent, c_e_check_for_a
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan, iteration_print
 from algs.metrics import limit_is_crossed
 # from algs.alg_a_star_short import a_star_short
-from algs.alg_a_star import a_star
+from algs.alg_space_time_a_star import a_star
 
 
 class MGMAgent:

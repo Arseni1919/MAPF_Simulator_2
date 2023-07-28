@@ -7,7 +7,7 @@ import pstats
 
 import numpy as np
 
-from algs.alg_a_star import a_star
+from algs.alg_space_time_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
     limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print

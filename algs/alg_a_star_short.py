@@ -1,4 +1,4 @@
-from algs.alg_a_star import a_star
+from algs.alg_space_time_a_star import a_star
 import random
 import time
 import numpy as np

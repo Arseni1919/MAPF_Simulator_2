@@ -7,7 +7,7 @@ import pstats
 
 from functions import *
 
-from algs.alg_a_star import a_star
+from algs.alg_space_time_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
     limit_is_crossed, get_agents_in_conf, check_plan, just_check_plans, get_alg_info_dict, iteration_print
@@ -63,7 +63,7 @@ class KSDSAgent:
         if not perm_constr_dict:
             perm_constr_dict = {node.xy_name: [] for node in self.nodes}
 
-        print(f'\n ---------- ({kwargs["alg_name"]}) [k_step_iteration: {kwargs["k_step_iteration"]}] A* {self.name} ---------- \n')
+        print(f'\n ---------- ({kwargs["alg_name"]}) [k_step_iter: {kwargs["k_step_iteration"]}][small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
         a_star_func = kwargs['a_star_func']
         new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node,
                                          nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
@@ -91,7 +91,7 @@ class KSDSAgent:
         c_v_list = c_v_check_for_agent(self.name, self.path[:k], nei_k_steps_paths_dict)
         c_e_list = c_e_check_for_agent(self.name, self.path[:k], nei_k_steps_paths_dict)
         if len(c_v_list) == 0 and len(c_e_list) == 0:
-            return
+            return False, {}
         # probabilities to use: p_ch, p_h, p_l
         p_ch = self.set_p_ch(**kwargs)
         if random.random() < p_ch:
@@ -187,42 +187,109 @@ def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, m
 
 
 def check_if_limit_is_crossed(func_info, alg_info, **kwargs):
-    runtime = 0
-    # TODO: update alg_info with func_info
-    # return limit_is_crossed(runtime, alg_info, **kwargs)
-    return False
+
+    # runtime - the sequential time in seconds - number
+    if 'runtime' in func_info:
+        alg_info['runtime'] += func_info['runtime']
+    # alg_info['dist_runtime'] - distributed time in seconds - number
+    if 'dist_runtime' in func_info:
+        alg_info['dist_runtime'] += func_info['dist_runtime']
+
+    # alg_info['a_star_calls_counter'] - number
+    if 'a_star_calls_counter' in func_info:
+        alg_info['a_star_calls_counter'] += func_info['a_star_calls_counter']
+    # alg_info['a_star_calls_counter_dist'] - number
+    if 'a_star_calls_counter_dist' in func_info:
+        alg_info['a_star_calls_counter_dist'] += func_info['a_star_calls_counter_dist']
+
+    # alg_info['a_star_n_closed'] - list
+    if 'a_star_n_closed' in func_info:
+        alg_info['a_star_n_closed'].append(func_info['a_star_n_closed'])
+    # alg_info['a_star_n_closed_dist'] - number
+    if 'a_star_n_closed_dist' in func_info:
+        alg_info['a_star_n_closed_dist'] += func_info['a_star_n_closed_dist']
+
+    return limit_is_crossed(alg_info['runtime'], alg_info, **kwargs)
 
 
 def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
-    func_info = {}
+    runtime, runtime_dist = 0, []
+    a_star_calls_counter, a_star_calls_counter_dist = 0, []
+    a_star_n_closed, a_star_n_closed_dist = 0, []
     for agent in agents:
+
         # create initial plan
-        agent.calc_a_star_plan(**kwargs)
+        start_time = time.time()
+        # info: {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
+        succeeded, info = agent.calc_a_star_plan(**kwargs)
+        # stats
+        runtime += time.time() - start_time
+        runtime_dist.append(time.time() - start_time)
+        a_star_calls_counter += 1
+        a_star_n_closed += info['a_s_info']['n_closed']
+        a_star_n_closed_dist.append(info['a_s_info']['n_closed'])
+
         # find_nei
         agent.update_nei(agents, **kwargs)
 
+    func_info = {
+        'runtime': runtime,
+        'dist_runtime': max(runtime_dist),
+        'a_star_calls_counter': a_star_calls_counter,
+        'a_star_calls_counter_dist': 1,
+        'a_star_n_closed': a_star_n_closed,
+        'a_star_n_closed_dist': max(a_star_n_closed_dist)
+    }
     return func_info
 
 
 def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
     k = kwargs['k']
-    func_info = {}
+    runtime, runtime_dist = 0, []
 
     # exchange paths
     for agent in agents:
+        start_time = time.time()
         agent.exchange_paths()
+        # stats
+        runtime += time.time() - start_time
+        runtime_dist.append(time.time() - start_time)
 
     # check for collisions
     plans = {agent.name: agent.path[:k] for agent in agents}
     there_are_collisions, c_v, c_e, cost = just_check_plans(plans)
+
+    func_info = {
+        'runtime': runtime,
+        'dist_runtime': max(runtime_dist)
+    }
     return there_are_collisions, c_v, c_e, cost, func_info
 
 
 def all_replan(agents: List[KSDSAgent], **kwargs):
-    func_info = {}
-    for agent in agents:
-        agent.replan(**kwargs)
+    runtime, runtime_dist = 0, [0]
+    a_star_calls_counter, a_star_calls_counter_dist = 0, []
+    a_star_n_closed, a_star_n_closed_dist = 0, [0]
 
+    for agent in agents:
+        start_time = time.time()
+        succeeded, info = agent.replan(**kwargs)
+        # stats
+        runtime += time.time() - start_time
+        runtime_dist.append(time.time() - start_time)
+        if len(info) > 0:
+            a_star_calls_counter += 1
+            a_star_n_closed += info['a_s_info']['n_closed']
+            a_star_n_closed_dist.append(info['a_s_info']['n_closed'])
+
+    func_info = {
+        'runtime': runtime,
+        'dist_runtime': max(runtime_dist),
+        'a_star_calls_counter': a_star_calls_counter,
+        'a_star_calls_counter_dist': 1,
+        'a_star_n_closed': a_star_n_closed,
+        'a_star_n_closed_dist': max(a_star_n_closed_dist)
+    }
     return func_info
 
 
@@ -264,6 +331,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # Distributed Part
     for k_step_iteration in range(1000000):
         kwargs['k_step_iteration'] = k_step_iteration
+        kwargs['small_iteration'] = 0
 
         func_info = all_plan_and_find_nei(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
@@ -271,6 +339,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         there_are_collisions = True
         while there_are_collisions:
+            kwargs['small_iteration'] += 1
 
             there_are_collisions, c_v, c_e, cost, func_info = all_exchange_k_step_paths(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
@@ -319,7 +388,7 @@ def main():
     # random_seed = True
     random_seed = False
     seed = 277
-    n_agents = 150
+    n_agents = 70
     PLOT_PER = 1
 
     to_use_profiler = True
@@ -342,18 +411,19 @@ def main():
         result, info = test_mapf_alg_from_pic(
             algorithm=run_k_sds,
             img_dir=img_dir,
+            alg_name='k-SDS',
+            k=k,
+            decision_type=DECISION_TYPE,
+            a_star_func=a_star,
             n_agents=n_agents,
             random_seed=random_seed,
             seed=seed,
             final_plot=True,
             a_star_iter_limit=5e7,
-            max_time=5,
-            plot_per=PLOT_PER,
-            alg_name='k-SDS',
             limit_type='norm_time',
-            a_star_func=a_star,
-            decision_type=DECISION_TYPE,
-            k=k
+            max_time=5,
+            a_star_closed_nodes_limit=1e6,
+            plot_per=PLOT_PER,
         )
 
         if not random_seed:
