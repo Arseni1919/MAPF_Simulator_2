@@ -9,7 +9,7 @@ from funcs_graph.nodes_from_pic import build_graph_nodes, get_dims_from_pic
 from funcs_graph.map_dimensions import map_dimensions_dict
 # from algs.test_mapf_alg import test_mapf_alg_from_pic
 from funcs_plotter.plotter import Plotter
-from algs.alg_DS_MAPF import run_ds_mapf
+from algs.alg_SDS import run_sds
 from algs.alg_PBS import run_pbs
 from algs.alg_MGDS import run_mgds
 from algs.alg_MGM_classic import run_mgm_classic
@@ -265,7 +265,7 @@ def main():
             'color': 'tab:blue',
         }),
 
-        'SDS': (run_ds_mapf, {
+        'SDS': (run_sds, {
             'a_star_func': a_star,
             'limit_type': 'dist_a_star_closed',
             'decision_type': 'min_prev_2',

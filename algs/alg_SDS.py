@@ -13,7 +13,7 @@ from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constra
     limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
 
 
-class DSAgent:
+class SDSAgent:
     def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func,
                  plotter, middle_plot,
                  iter_limit=1e100, map_dim=None, limit_type='simple'):
@@ -182,7 +182,7 @@ class DSAgent:
         return False, {'elapsed': None, 'a_s_info': None}, False
 
 
-def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
+def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
@@ -198,8 +198,8 @@ def run_ds_mapf(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     agents_dict = {}
     n_agent = 0
     for start_node, goal_node in zip(start_nodes, goal_nodes):
-        agent = DSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
-                        map_dim, limit_type)
+        agent = SDSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
+                         map_dim, limit_type)
         agents.append(agent)
         agents_dict[agent.name] = agent
         n_agent += 1
@@ -285,7 +285,7 @@ def main():
     for i in range(3):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(
-            algorithm=run_ds_mapf,
+            algorithm=run_sds,
             initial_ordering=[],
             n_agents=n_agents,
             random_seed=random_seed,
@@ -295,7 +295,7 @@ def main():
             max_time=5,
             plot_per=PLOT_PER,
             limit_type='norm_time',
-            alg_name='DS',
+            alg_name='SDS',
             a_star_func=a_star,
             decision_type=DECISION_TYPE
         )

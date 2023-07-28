@@ -4,7 +4,7 @@ from datetime import datetime
 import matplotlib.pyplot as plt
 
 from funcs_plotter.plotter import Plotter
-from algs.alg_DS_MAPF import run_ds_mapf
+from algs.alg_SDS import run_sds
 from algs.alg_PBS import run_pbs
 
 
