@@ -70,6 +70,7 @@ def build_constraints(nodes, other_paths):
         if len(path) > 0:
             final_node = path[-1]
             perm_constr_dict[final_node.xy_name].append(final_node.t)
+            perm_constr_dict[final_node.xy_name] = [max(perm_constr_dict[final_node.xy_name])]
 
             prev_node = path[0]
             for node in path:
@@ -180,6 +181,12 @@ def check_plan(agents, plan, alg_name, alg_info, runtime, iteration, immediate=F
     cost = iteration_print(agents, plan, alg_name, alg_info, runtime, iteration)
     # cost = sum([len(path) for path in plan.values()])
     there_is_col, c_v, c_e = check_for_collisions(plan, immediate=False)
+    return there_is_col, c_v, c_e, cost
+
+
+def just_check_plans(plans):
+    cost = sum([len(path) for path in plans.values()])
+    there_is_col, c_v, c_e = check_for_collisions(plans, immediate=False)
     return there_is_col, c_v, c_e, cost
 
 

@@ -1,16 +1,16 @@
-import logging
 import random
-import time
-import matplotlib.pyplot as plt
+from typing import List
+
 import cProfile
 import pstats
 
-import numpy as np
+
+from functions import *
 
 from algs.alg_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
+    limit_is_crossed, get_agents_in_conf, check_plan, just_check_plans, get_alg_info_dict, iteration_print
 
 
 class KSDSAgent:
@@ -20,6 +20,7 @@ class KSDSAgent:
         self.index = index
         self.name = f'agent_{index}'
         self.start_node = start_node
+        self.curr_node = start_node
         self.goal_node = goal_node
         self.nodes = nodes
         self.nodes_dict = nodes_dict
@@ -28,91 +29,146 @@ class KSDSAgent:
         self.middle_plot = middle_plot
         self.iter_limit = iter_limit
         self.path = []
-        self.other_paths = {}
-        self.conf_paths = {}
+        self.full_path = []
         self.map_dim = map_dim
+
         self.stats_n_closed = 0
         self.stats_n_calls = 0
         self.stats_runtime = 0
         self.stats_n_messages = 0
         self.stats_confs_per_iter = []
+        # nei
+        self.nei_list = []
+        self.nei_dict = {}
+        self.nei_paths_dict = {}
 
-    def exchange(self, agents):
-        self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
-        self.stats_n_messages += len(agents)
+    def update_nei(self, agents, **kwargs):
+        k = kwargs['k']
+        self.nei_list, self.nei_dict, self.nei_paths_dict = [], {}, {}
+        nei_dist_const = 2 * k + 1
+        for agent in agents:
+            if agent.name != self.name:
+                curr_distance = manhattan_distance_nodes(self.curr_node, agent.curr_node)
+                if curr_distance <= nei_dist_const:
+                    self.nei_list.append(agent)
+                    self.nei_dict[agent.name] = agent
+                    self.nei_paths_dict[agent.name] = None
 
-    def decision_bool(self, agents_in_confs, agents_dict, decision_type='max_prev', **kwargs):
+    def calc_a_star_plan(self, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, **kwargs):
+        start_time = time.time()
+        if not v_constr_dict:
+            v_constr_dict = {node.xy_name: [] for node in self.nodes}
+        if not e_constr_dict:
+            e_constr_dict = {node.xy_name: [] for node in self.nodes}
+        if not perm_constr_dict:
+            perm_constr_dict = {node.xy_name: [] for node in self.nodes}
+
+        print(f'\n ---------- ({kwargs["alg_name"]}) [k_step_iteration: {kwargs["k_step_iteration"]}] A* {self.name} ---------- \n')
+        a_star_func = kwargs['a_star_func']
+        new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node,
+                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
+                                         v_constr_dict=v_constr_dict,
+                                         e_constr_dict=e_constr_dict,
+                                         perm_constr_dict=perm_constr_dict,
+                                         plotter=self.plotter, middle_plot=self.middle_plot,
+                                         iter_limit=self.iter_limit)
+        if new_path is not None:
+            self.path = new_path
+            succeeded = True
+        else:
+            # self.path = [self.curr_node]
+            succeeded = False
+        return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
+
+    def exchange_paths(self):
+        for nei in self.nei_list:
+            # nei.nei_paths_dict[agent.name] = agent.path[:k]
+            nei.nei_paths_dict[self.name] = self.path
+
+    def replan(self, **kwargs):
+        k = kwargs['k']
+        nei_k_steps_paths_dict = {agent_name: path[:k] for agent_name, path in self.nei_paths_dict.items()}
+        c_v_list = c_v_check_for_agent(self.name, self.path[:k], nei_k_steps_paths_dict)
+        c_e_list = c_e_check_for_agent(self.name, self.path[:k], nei_k_steps_paths_dict)
+        if len(c_v_list) == 0 and len(c_e_list) == 0:
+            return
+        # probabilities to use: p_ch, p_h, p_l
+        p_ch = self.set_p_ch(**kwargs)
+        if random.random() < p_ch:
+            p_h, p_l, h_names, l_names = self.set_p_h_and_p_l(**kwargs)
+            paths_to_consider_dict = {}
+            for h_name in h_names:
+                if random.random() < p_h:
+                    paths_to_consider_dict[h_name] = nei_k_steps_paths_dict[h_name]
+            for l_name in l_names:
+                if random.random() < p_l:
+                    paths_to_consider_dict[l_name] = nei_k_steps_paths_dict[l_name]
+            v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, paths_to_consider_dict)
+            succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, **kwargs)
+            return succeeded, info
+        return False, {}
+
+    def set_p_h_and_p_l(self, **kwargs):
+        p_h, p_l = 0.9, 0.1
+        h_names, l_names = [], []
+        for agent_name, path in self.nei_paths_dict.items():
+            if len(self.path) > len(path):
+                l_names.append(agent_name)
+            elif len(self.path) < len(path):
+                h_names.append(agent_name)
+            elif self.index > self.nei_dict[agent_name].index:
+                l_names.append(agent_name)
+            else:
+                h_names.append(agent_name)
+        return p_h, p_l, h_names, l_names
+
+    def set_p_ch(self, decision_type='max_prev', **kwargs):
         alpha = kwargs['alpha'] if 'alpha' in kwargs else 0.5
 
         if len(self.path) == 0:
-            return True
-
-        if len(agents_in_confs) == 0:
-            raise RuntimeError('len(agents_in_confs) == 0')
+            return 1
 
         if decision_type == 'simple':
-            if random.random() < alpha:
-                return True
+            return alpha
 
         elif decision_type == 'max_prev':
             # A MORE SMART VERSION
-            path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
-            max_n = max(path_lngths)
-            min_n = min(path_lngths)
-            # priority on smaller paths
-            if len(self.path) > max_n and random.random() < 0.1:
-                return True
-            elif len(self.path) < min_n and random.random() < 0.9:
-                return True
-            else:
-                path_lngths.append(len(self.path))
-                path_lngths.sort()
-                my_order = path_lngths.index(len(self.path))
-                my_alpha = 0.9 - 0.8 * (my_order / len(path_lngths))
-                if random.random() < my_alpha:
-                    return True
-            return False
+            path_lngths = []
+            for agent_name, path in self.nei_paths_dict.items():
+                path_lngths.append(len(path))
+            path_lngths.append(len(self.path))
+            path_lngths.sort()
+            my_order = path_lngths.index(len(self.path))
+            my_alpha = 0.9 - 0.8 * (my_order / (len(path_lngths) - 1))
+            return my_alpha
 
         else:
             raise RuntimeError('no such decision_type')
 
-        return False
+    def update_full_path(self, **kwargs):
+        k = kwargs['k']
+        goal_name = self.goal_node.xy_name
 
-    def plan(self, agents_dict=None, decision_type='max_prev', **kwargs):
-        start_time = time.time()
+        while len(self.path) < k:
+            self.path.append(self.path[-1])
 
-        c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
-        c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
-        self.stats_confs_per_iter.append(len(c_v_list) + len(c_e_list))
+        self.full_path.extend(self.path[:k])
+        self.curr_node = self.full_path[-1]
+        self.path = None
+        return self.curr_node.xy_name == goal_name
 
-        if len(self.path) > 0 and len(c_v_list) == 0 and len(c_e_list) == 0:
-            # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
-            return False, {'elapsed': None, 'a_s_info': None}, True
-
-        agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
-        to_change = self.decision_bool(agents_in_confs, agents_dict, decision_type, **kwargs)
-        if to_change:
-            v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
-            print(f'\n ---------- ({kwargs["alg_name"]}) A* {self.name} ---------- \n')
-            a_star_func = kwargs['a_star_func']
-            new_path, a_s_info = a_star_func(start=self.start_node, goal=self.goal_node,
-                                             nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
-                                             v_constr_dict=v_constr_dict,
-                                             e_constr_dict=e_constr_dict,
-                                             perm_constr_dict=perm_constr_dict,
-                                             plotter=self.plotter, middle_plot=self.middle_plot,
-                                             iter_limit=self.iter_limit)
-            # stats
-            self.stats_n_calls += 1
-            self.stats_n_closed += a_s_info['n_closed']
-            self.stats_runtime += time.time() - start_time
-            if new_path is not None:
-                self.path = new_path
-            return True, {'elapsed': time.time() - start_time, 'a_s_info': a_s_info,
-                          'n_agents_conf': len(agents_in_confs)}, False
-
-        # print(f'\n ---------- (DS {decision_type}) NO NEED FOR A* {self.name} ---------- \n')
-        return False, {'elapsed': None, 'a_s_info': None}, False
+    def cut_back_full_path(self):
+        # if self.name == 'agent_2':
+        #     print()
+        len_full_path = len(self.full_path)
+        if len_full_path > 1:
+            if self.full_path[-1].xy_name == self.goal_node.xy_name:
+                for backwards_node in self.full_path[:-1][::-1]:
+                    if backwards_node.xy_name == self.goal_node.xy_name:
+                        len_full_path -= 1
+                    else:
+                        break
+        self.full_path = self.full_path[:len_full_path]
 
 
 def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim):
@@ -133,19 +189,71 @@ def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, m
 def check_if_limit_is_crossed(func_info, alg_info, **kwargs):
     runtime = 0
     # TODO: update alg_info with func_info
-    return limit_is_crossed(runtime, alg_info, **kwargs)
+    # return limit_is_crossed(runtime, alg_info, **kwargs)
+    return False
+
+
+def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
+    func_info = {}
+    for agent in agents:
+        # create initial plan
+        agent.calc_a_star_plan(**kwargs)
+        # find_nei
+        agent.update_nei(agents, **kwargs)
+
+    return func_info
+
+
+def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
+    k = kwargs['k']
+    func_info = {}
+
+    # exchange paths
+    for agent in agents:
+        agent.exchange_paths()
+
+    # check for collisions
+    plans = {agent.name: agent.path[:k] for agent in agents}
+    there_are_collisions, c_v, c_e, cost = just_check_plans(plans)
+    return there_are_collisions, c_v, c_e, cost, func_info
+
+
+def all_replan(agents: List[KSDSAgent], **kwargs):
+    func_info = {}
+    for agent in agents:
+        agent.replan(**kwargs)
+
+    return func_info
+
+
+def all_move_k_steps(agents: List[KSDSAgent], **kwargs):
+    all_paths_are_finished_list = []
+    for agent in agents:
+        agent_is_finished = agent.update_full_path(**kwargs)
+        all_paths_are_finished_list.append(agent_is_finished)
+
+    all_paths_are_finished = all(all_paths_are_finished_list)
+    func_info = {}
+    return all_paths_are_finished, func_info
+
+
+def all_cut_full_paths(agents: List[KSDSAgent], **kwargs):
+    for agent in agents:
+        agent.cut_back_full_path()
 
 
 def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
+    if 'k' not in kwargs:
+        kwargs['k'] = 10
+    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 1000
+    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
-    alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
-    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 1000
 
     # Creating agents
     agents, agents_dict = create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim)
@@ -155,65 +263,74 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # Distributed Part
     for k_step_iteration in range(1000000):
+        kwargs['k_step_iteration'] = k_step_iteration
 
-        func_info = all_plan_and_find_nei()  # agents
+        func_info = all_plan_and_find_nei(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
             return None, {'agents': agents, 'success_rate': 0}
 
         there_are_collisions = True
         while there_are_collisions:
 
-            there_are_collisions, func_info = all_exchange_k_step_paths()  # agents
+            there_are_collisions, c_v, c_e, cost, func_info = all_exchange_k_step_paths(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
             if not there_are_collisions:
                 break
-            func_info = all_replan()  # agents
+            func_info = all_replan(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
-        all_paths_are_finished, func_info = all_move_k_steps()  # agents
+        all_paths_are_finished, func_info = all_move_k_steps(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
             return None, {'agents': agents, 'success_rate': 0}
 
-        plans = {agent.name: agent.path for agent in agents}
-        iteration_print(agents, plans, alg_name, alg_info, runtime, k_step_iteration)
+        full_plans = {agent.name: agent.full_path for agent in agents}
+        iteration_print(agents, full_plans, alg_name, alg_info, runtime, k_step_iteration)
         if all_paths_are_finished:
-            there_is_col, c_v, c_e, cost = check_plan(agents, plans, alg_name, alg_info, runtime, k_step_iteration)
-            if not there_is_col:
+            there_is_col_0, c_v_0, c_e_0, cost_0 = just_check_plans(full_plans)
+            all_cut_full_paths(agents, **kwargs)
+            cut_full_plans = {agent.name: agent.full_path for agent in agents}
+            there_is_col, c_v, c_e, cost = just_check_plans(cut_full_plans)
+            if there_is_col:
+                raise RuntimeError('uff')
+            else:
                 if final_plot:
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
-                    plotter.plot_mapf_paths(paths_dict=plans, nodes=nodes, plot_per=plot_per)
+                    plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, plot_per=plot_per)
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['runtime'] = runtime
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
                 alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
-            return plans, alg_info
+            return cut_full_plans, alg_info
+
         if k_step_iteration > k_step_iteration_limit:
-            return None, {'agents': agents, 'success_rate': 0}
-        return None, {'agents': agents, 'success_rate': 0}
+            break
+
+    return None, {'agents': agents, 'success_rate': 0}
 
 
 def main():
-    random_seed = True
-    # random_seed = False
+    # random_seed = True
+    random_seed = False
     seed = 277
-    n_agents = 50
-    PLOT_PER = 10
+    n_agents = 150
+    PLOT_PER = 1
 
     to_use_profiler = True
     # to_use_profiler = False
 
+    k = 7
     # DECISION_TYPE = 'simple'
     DECISION_TYPE = 'max_prev'
 
-    # img_dir = 'empty-48-48.map'  # 48-48
-    img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
@@ -235,7 +352,8 @@ def main():
             alg_name='k-SDS',
             limit_type='norm_time',
             a_star_func=a_star,
-            decision_type=DECISION_TYPE
+            decision_type=DECISION_TYPE,
+            k=k
         )
 
         if not random_seed:
