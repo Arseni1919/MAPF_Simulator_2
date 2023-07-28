@@ -289,7 +289,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         full_plans = {agent.name: agent.full_path for agent in agents}
         iteration_print(agents, full_plans, alg_name, alg_info, runtime, k_step_iteration)
         if all_paths_are_finished:
-            there_is_col_0, c_v_0, c_e_0, cost_0 = just_check_plans(full_plans)
+            # there_is_col_0, c_v_0, c_e_0, cost_0 = just_check_plans(full_plans)
             all_cut_full_paths(agents, **kwargs)
             cut_full_plans = {agent.name: agent.full_path for agent in agents}
             there_is_col, c_v, c_e, cost = just_check_plans(cut_full_plans)
@@ -329,8 +329,8 @@ def main():
     # DECISION_TYPE = 'simple'
     DECISION_TYPE = 'max_prev'
 
-    img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
