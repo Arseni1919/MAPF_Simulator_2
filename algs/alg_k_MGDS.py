@@ -86,6 +86,12 @@ class KMGDSAgent:
             succeeded = False
         return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
 
+    def init_plan(self, **kwargs):
+        if len(self.path) == 0:
+            succeeded, info = self.calc_a_star_plan(**kwargs)
+            return True, info
+        return False, {}
+
     def exchange_paths(self):
         for nei in self.nei_list:
             # nei.nei_paths_dict[agent.name] = agent.path[:k]
@@ -134,7 +140,8 @@ class KMGDSAgent:
         return nei_k_steps_paths_dict
 
     def get_paths_to_consider_dict(self, **kwargs):
-        p_h, p_l = 0.9, 0.1
+        # p_h, p_l = 0.9, 0.1
+        p_h, p_l = kwargs['p_h'], kwargs['p_l']
         paths_to_consider_dict = {}
         nei_k_steps_paths_dict = self.get_nei_k_steps_paths_dict(**kwargs)
         for agent_name, path in self.nei_paths_dict.items():
@@ -174,12 +181,10 @@ class KMGDSAgent:
 
         self.full_path.extend(self.path[:k])
         self.curr_node = self.full_path[-1]
-        self.path = None
+        self.path = self.path[k-1:]
         return self.curr_node.xy_name == goal_name
 
     def cut_back_full_path(self):
-        # if self.name == 'agent_2':
-        #     print()
         len_full_path = len(self.full_path)
         if len_full_path > 1:
             if self.full_path[-1].xy_name == self.goal_node.xy_name:
@@ -239,13 +244,15 @@ def all_plan_and_find_nei(agents: List[KMGDSAgent], **kwargs):
         # create initial plan
         start_time = time.time()
         # info: {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
-        succeeded, info = agent.calc_a_star_plan(**kwargs)
+        # succeeded, info = agent.calc_a_star_plan(**kwargs)
+        succeeded, info = agent.init_plan(**kwargs)
         # stats
         runtime += time.time() - start_time
         runtime_dist.append(time.time() - start_time)
-        a_star_calls_counter += 1
-        a_star_n_closed += info['a_s_info']['n_closed']
-        a_star_n_closed_dist.append(info['a_s_info']['n_closed'])
+        if succeeded:
+            a_star_calls_counter += 1
+            a_star_n_closed += info['a_s_info']['n_closed']
+            a_star_n_closed_dist.append(info['a_s_info']['n_closed'])
 
         # find_nei
         agent.update_nei(agents, **kwargs)
@@ -256,7 +263,7 @@ def all_plan_and_find_nei(agents: List[KMGDSAgent], **kwargs):
         'a_star_calls_counter': a_star_calls_counter,
         'a_star_calls_counter_dist': 1,
         'a_star_n_closed': a_star_n_closed,
-        'a_star_n_closed_dist': max(a_star_n_closed_dist)
+        'a_star_n_closed_dist': max(a_star_n_closed_dist) if a_star_n_closed > 0 else 0
     }
     return func_info
 
@@ -430,19 +437,17 @@ def main():
     # random_seed = True
     random_seed = False
     seed = 277
-    n_agents = 70
+    n_agents = 100
     PLOT_PER = 1
 
     to_use_profiler = True
     # to_use_profiler = False
 
     k = 7
-    # DECISION_TYPE = 'simple'
-    DECISION_TYPE = 'max_prev'
 
     # img_dir = 'empty-48-48.map'  # 48-48
-    img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     profiler = cProfile.Profile()
@@ -455,7 +460,6 @@ def main():
             img_dir=img_dir,
             alg_name='k-MGDS',
             k=k,
-            decision_type=DECISION_TYPE,
             a_star_func=a_star,
             n_agents=n_agents,
             random_seed=random_seed,

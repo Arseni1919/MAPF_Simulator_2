@@ -4,9 +4,10 @@ DONE:
 - prepare limit checks in k-SDS
 - create k-MGDS
 - prepare limit checks in k-MGDS
+- improve new algorithms regarding small iterations (expansion of k for every 10 small iterations)
 
 TODO:
-- improve new algorithms regarding small iterations
+- insert message metric
 - do big experiments with other algorithms
 - implement more algorithms from literature
 - make big experiments with the algorithms from literature

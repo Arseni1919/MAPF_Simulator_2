@@ -43,19 +43,6 @@ class KSDSAgent:
         self.nei_paths_dict = {}
         self.conf_agents_names = []
 
-    def update_nei(self, agents, **kwargs):
-        k = kwargs['k']
-        self.conf_agents_names = []
-        self.nei_list, self.nei_dict, self.nei_paths_dict = [], {}, {}
-        nei_dist_const = 2 * k + 1
-        for agent in agents:
-            if agent.name != self.name:
-                curr_distance = manhattan_distance_nodes(self.curr_node, agent.curr_node)
-                if curr_distance <= nei_dist_const:
-                    self.nei_list.append(agent)
-                    self.nei_dict[agent.name] = agent
-                    self.nei_paths_dict[agent.name] = None
-
     def calc_a_star_plan(self, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, **kwargs):
         start_time = time.time()
         if not v_constr_dict:
@@ -81,6 +68,25 @@ class KSDSAgent:
             # self.path = [self.curr_node]
             succeeded = False
         return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
+
+    def update_nei(self, agents, **kwargs):
+        k = kwargs['k']
+        self.conf_agents_names = []
+        self.nei_list, self.nei_dict, self.nei_paths_dict = [], {}, {}
+        nei_dist_const = 2 * k + 1
+        for agent in agents:
+            if agent.name != self.name:
+                curr_distance = manhattan_distance_nodes(self.curr_node, agent.curr_node)
+                if curr_distance <= nei_dist_const:
+                    self.nei_list.append(agent)
+                    self.nei_dict[agent.name] = agent
+                    self.nei_paths_dict[agent.name] = None
+
+    def init_plan(self, **kwargs):
+        if len(self.path) == 0:
+            succeeded, info = self.calc_a_star_plan(**kwargs)
+            return True, info
+        return False, {}
 
     def exchange_paths(self):
         for nei in self.nei_list:
@@ -111,7 +117,8 @@ class KSDSAgent:
         return nei_k_steps_paths_dict
 
     def get_paths_to_consider_dict(self, **kwargs):
-        p_h, p_l = 0.9, 0.1
+        # p_h, p_l = 0.9, 0.1
+        p_h, p_l = kwargs['p_h'], kwargs['p_l']
         paths_to_consider_dict = {}
         nei_k_steps_paths_dict = self.get_nei_k_steps_paths_dict(**kwargs)
         for agent_name, path in self.nei_paths_dict.items():
@@ -141,20 +148,6 @@ class KSDSAgent:
             succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, **kwargs)
             return succeeded, info
         return False, {}
-
-    def set_p_h_and_p_l(self, **kwargs):
-        p_h, p_l = 0.9, 0.1
-        h_names, l_names = [], []
-        for agent_name, path in self.nei_paths_dict.items():
-            if len(self.path) > len(path):
-                l_names.append(agent_name)
-            elif len(self.path) < len(path):
-                h_names.append(agent_name)
-            elif self.index > self.nei_dict[agent_name].index:
-                l_names.append(agent_name)
-            else:
-                h_names.append(agent_name)
-        return p_h, p_l, h_names, l_names
 
     def set_p_ch(self, decision_type='max_prev', **kwargs):
         alpha = kwargs['alpha'] if 'alpha' in kwargs else 0.5
@@ -188,7 +181,7 @@ class KSDSAgent:
 
         self.full_path.extend(self.path[:k])
         self.curr_node = self.full_path[-1]
-        self.path = None
+        self.path = self.path[k-1:]
         return self.curr_node.xy_name == goal_name
 
     def cut_back_full_path(self):
@@ -255,13 +248,15 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
         # create initial plan
         start_time = time.time()
         # info: {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
-        succeeded, info = agent.calc_a_star_plan(**kwargs)
+        # succeeded, info = agent.calc_a_star_plan(**kwargs)
+        succeeded, info = agent.init_plan(**kwargs)
         # stats
         runtime += time.time() - start_time
         runtime_dist.append(time.time() - start_time)
-        a_star_calls_counter += 1
-        a_star_n_closed += info['a_s_info']['n_closed']
-        a_star_n_closed_dist.append(info['a_s_info']['n_closed'])
+        if succeeded:
+            a_star_calls_counter += 1
+            a_star_n_closed += info['a_s_info']['n_closed']
+            a_star_n_closed_dist.append(info['a_s_info']['n_closed'])
 
         # find_nei
         agent.update_nei(agents, **kwargs)
@@ -272,7 +267,7 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
         'a_star_calls_counter': a_star_calls_counter,
         'a_star_calls_counter_dist': 1,
         'a_star_n_closed': a_star_n_closed,
-        'a_star_n_closed_dist': max(a_star_n_closed_dist)
+        'a_star_n_closed_dist': max(a_star_n_closed_dist) if a_star_n_closed > 0 else 0
     }
     return func_info
 
@@ -346,7 +341,7 @@ def all_cut_full_paths(agents: List[KSDSAgent], **kwargs):
 def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
     if 'k' not in kwargs:
-        kwargs['k'] = 10
+        raise RuntimeError("'k' not in kwargs")
     k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 1000
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
@@ -422,13 +417,13 @@ def main():
     # random_seed = True
     random_seed = False
     seed = 277
-    n_agents = 200
+    n_agents = 100
     PLOT_PER = 1
 
     to_use_profiler = True
     # to_use_profiler = False
 
-    k = 7
+    k = 20
     # DECISION_TYPE = 'simple'
     DECISION_TYPE = 'max_prev'
 
