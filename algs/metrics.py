@@ -17,7 +17,8 @@ def limit_is_crossed(runtime, alg_info, **kwargs):
         return crossed
     elif limit_type == 'dist_time':
         crossed = alg_info['dist_runtime'] > max_time * 60
-        print(f"\n[LIMIT]: dist_runtime: {alg_info['dist_runtime']} > limit: {max_time * 60}")
+        if crossed:
+            print(f"\n[LIMIT]: dist_runtime: {alg_info['dist_runtime']} > limit: {max_time * 60}")
         return crossed
     elif limit_type == 'norm_a_star_calls':
         crossed = alg_info['a_star_calls_counter'] >= a_star_calls_limit
