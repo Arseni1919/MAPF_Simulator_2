@@ -10,7 +10,10 @@ from functions import *
 from algs.alg_space_time_a_star import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
-    limit_is_crossed, get_agents_in_conf, check_plan, just_check_plans, get_alg_info_dict, iteration_print
+    limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
+from algs.metrics import just_check_k_step_plans, just_check_plans
+from algs.metrics import check_single_agent_k_step_c_v, check_single_agent_k_step_c_e
+from algs.metrics import build_k_step_perm_constr_dict
 
 
 class KSDSAgent:
@@ -29,6 +32,7 @@ class KSDSAgent:
         self.middle_plot = middle_plot
         self.iter_limit = iter_limit
         self.path = []
+        self.h = 0
         self.full_path = []
         self.map_dim = map_dim
 
@@ -41,9 +45,10 @@ class KSDSAgent:
         self.nei_list = []
         self.nei_dict = {}
         self.nei_paths_dict = {}
+        self.nei_h_dict = {}
         self.conf_agents_names = []
 
-    def calc_a_star_plan(self, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, **kwargs):
+    def calc_a_star_plan(self, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, k_time=None, **kwargs):
         start_time = time.time()
         if not v_constr_dict:
             v_constr_dict = {node.xy_name: [] for node in self.nodes}
@@ -51,18 +56,25 @@ class KSDSAgent:
             e_constr_dict = {node.xy_name: [] for node in self.nodes}
         if not perm_constr_dict:
             perm_constr_dict = {node.xy_name: [] for node in self.nodes}
-
-        print(f'\n ---------- ({kwargs["alg_name"]}) [k_step_iter: {kwargs["k_step_iteration"]}][small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
+        print(f'\n ---------- ({kwargs["alg_name"]}) '
+              f'[number_of_finished: {kwargs["number_of_finished"]}]'
+              f'[k_step_iter: {kwargs["k_step_iteration"]}]'
+              f'[small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
         a_star_func = kwargs['a_star_func']
-        new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node,
-                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
-                                         v_constr_dict=v_constr_dict,
-                                         e_constr_dict=e_constr_dict,
-                                         perm_constr_dict=perm_constr_dict,
-                                         plotter=self.plotter, middle_plot=self.middle_plot,
-                                         iter_limit=self.iter_limit)
+        if k_time:
+            new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node, nodes=self.nodes,
+                                             nodes_dict=self.nodes_dict, h_func=self.h_func,
+                                             v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict,
+                                             perm_constr_dict=perm_constr_dict,
+                                             plotter=self.plotter, middle_plot=self.middle_plot,
+                                             iter_limit=self.iter_limit, k_time=k_time)
+        else:
+            new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node, nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
+                                             v_constr_dict=v_constr_dict, e_constr_dict=e_constr_dict, perm_constr_dict=perm_constr_dict,
+                                             plotter=self.plotter, middle_plot=self.middle_plot, iter_limit=self.iter_limit)
         if new_path is not None:
             self.path = new_path
+            self.h = self.path[-1].h
             succeeded = True
         else:
             # self.path = [self.curr_node]
@@ -72,7 +84,7 @@ class KSDSAgent:
     def update_nei(self, agents, **kwargs):
         k = kwargs['k']
         self.conf_agents_names = []
-        self.nei_list, self.nei_dict, self.nei_paths_dict = [], {}, {}
+        self.nei_list, self.nei_dict, self.nei_paths_dict, self.nei_h_dict = [], {}, {}, {}
         nei_dist_const = 2 * k + 1
         for agent in agents:
             if agent.name != self.name:
@@ -80,72 +92,84 @@ class KSDSAgent:
                 if curr_distance <= nei_dist_const:
                     self.nei_list.append(agent)
                     self.nei_dict[agent.name] = agent
+                    self.nei_h_dict[agent.name] = None
                     self.nei_paths_dict[agent.name] = None
 
     def init_plan(self, **kwargs):
-        if len(self.path) == 0:
-            succeeded, info = self.calc_a_star_plan(**kwargs)
+        k = kwargs['k']
+        if len(self.path) == 0 or self.path[-1].xy_name != self.goal_node.xy_name:
+            succeeded, info = self.calc_a_star_plan(k_time=k, **kwargs)
             return True, info
         return False, {}
+        # if len(self.path) == 0:
+        #     succeeded, info = self.calc_a_star_plan(k_time=k, **kwargs)
+        #     return True, info
+        # return False, {}
 
     def exchange_paths(self):
         for nei in self.nei_list:
             # nei.nei_paths_dict[agent.name] = agent.path[:k]
             nei.nei_paths_dict[self.name] = self.path
+            nei.nei_h_dict[self.name] = self.h
 
     def update_conf_agents_names(self, **kwargs):
         k = kwargs['k']
         self.conf_agents_names = []
-        init_nei_k_steps_paths_dict = {agent_name: path[:k] for agent_name, path in self.nei_paths_dict.items()}
-        conf_list = c_v_check_for_agent(self.name, self.path[:k], init_nei_k_steps_paths_dict)
-        c_e_list = c_e_check_for_agent(self.name, self.path[:k], init_nei_k_steps_paths_dict)
+        # self.nei_paths_dict
+        conf_list = check_single_agent_k_step_c_v(self.name, self.path, self.nei_paths_dict, k, immediate=False)
+        c_e_list = check_single_agent_k_step_c_e(self.name, self.path, self.nei_paths_dict, k, immediate=False)
         conf_list.extend(c_e_list)
         conf_agents_names = []
         for conf in conf_list:
             conf_agents_names.append(conf[1])
         self.conf_agents_names = list(set(conf_agents_names))
 
-    def get_nei_k_steps_paths_dict(self, **kwargs):
-        k = kwargs['k']
-        nei_k_steps_paths_dict = {}
-        # use self.conf_agents_names and kwargs['small_iteration']
-        for agent_name, path in self.nei_paths_dict.items():
-            if agent_name in self.conf_agents_names:
-                nei_k_steps_paths_dict[agent_name] = path[:k + k * round(kwargs['small_iteration'] / 10)]
-                continue
-            nei_k_steps_paths_dict[agent_name] = path[:k]
-        return nei_k_steps_paths_dict
+    # def get_nei_k_steps_paths_dict(self, **kwargs):
+    #     k = kwargs['k']
+    #     nei_k_steps_paths_dict = {}
+    #     # use self.conf_agents_names and kwargs['small_iteration']
+    #     for agent_name, path in self.nei_paths_dict.items():
+    #         # if agent_name in self.conf_agents_names:
+    #         #     nei_k_steps_paths_dict[agent_name] = path[:k + k * round(kwargs['small_iteration'] / 10)]
+    #         #     continue
+    #         nei_k_steps_paths_dict[agent_name] = path[:k]
+    #     return nei_k_steps_paths_dict
 
     def get_paths_to_consider_dict(self, **kwargs):
         # p_h, p_l = 0.9, 0.1
         p_h, p_l = kwargs['p_h'], kwargs['p_l']
         paths_to_consider_dict = {}
-        nei_k_steps_paths_dict = self.get_nei_k_steps_paths_dict(**kwargs)
+        # nei_k_steps_paths_dict = self.get_nei_k_steps_paths_dict(**kwargs)
         for agent_name, path in self.nei_paths_dict.items():
-            if len(self.path) > len(path):
+            if len(self.path) + self.h > len(path) + self.nei_h_dict[agent_name]:
                 if random.random() < p_l:
-                    paths_to_consider_dict[agent_name] = nei_k_steps_paths_dict[agent_name]
-            elif len(self.path) < len(path):
+                    paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
+            elif len(self.path) + self.h < len(path) + self.nei_h_dict[agent_name]:
                 if random.random() < p_h:
-                    paths_to_consider_dict[agent_name] = nei_k_steps_paths_dict[agent_name]
+                    paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
             elif self.index > self.nei_dict[agent_name].index:
                 if random.random() < p_l:
-                    paths_to_consider_dict[agent_name] = nei_k_steps_paths_dict[agent_name]
+                    paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
             else:
                 if random.random() < p_h:
-                    paths_to_consider_dict[agent_name] = nei_k_steps_paths_dict[agent_name]
-        return paths_to_consider_dict
+                    paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
+        names_to_consider_list = list(paths_to_consider_dict.keys())
+        return paths_to_consider_dict, names_to_consider_list
 
     def replan(self, **kwargs):
+        k = kwargs['k']
         self.update_conf_agents_names(**kwargs)
         if len(self.conf_agents_names) == 0:
             return False, {}
         # probabilities to use: p_ch, p_h, p_l
         p_ch = self.set_p_ch(**kwargs)
         if random.random() < p_ch:
-            paths_to_consider_dict = self.get_paths_to_consider_dict(**kwargs)
-            v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, paths_to_consider_dict)
-            succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, **kwargs)
+            paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
+            v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
+            # v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
+            full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
+            perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, k)
+            succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=k, **kwargs)
             return succeeded, info
         return False, {}
 
@@ -285,14 +309,14 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
         runtime_dist.append(time.time() - start_time)
 
     # check for collisions
-    plans = {agent.name: agent.path[:k] for agent in agents}
-    there_are_collisions, c_v, c_e, cost = just_check_plans(plans)
+    plans = {agent.name: agent.path for agent in agents}
+    there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, k, immediate=True)
 
     func_info = {
         'runtime': runtime,
         'dist_runtime': max(runtime_dist)
     }
-    return there_are_collisions, c_v, c_e, cost, func_info
+    return there_are_collisions, c_v, c_e, func_info
 
 
 def all_replan(agents: List[KSDSAgent], **kwargs):
@@ -328,9 +352,10 @@ def all_move_k_steps(agents: List[KSDSAgent], **kwargs):
         agent_is_finished = agent.update_full_path(**kwargs)
         all_paths_are_finished_list.append(agent_is_finished)
 
+    number_of_finished = sum(all_paths_are_finished_list)
     all_paths_are_finished = all(all_paths_are_finished_list)
     func_info = {}
-    return all_paths_are_finished, func_info
+    return all_paths_are_finished, number_of_finished, func_info
 
 
 def all_cut_full_paths(agents: List[KSDSAgent], **kwargs):
@@ -350,6 +375,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
+    number_of_finished = 0
 
     # Creating agents
     agents, agents_dict = create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim)
@@ -361,6 +387,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     for k_step_iteration in range(1000000):
         kwargs['k_step_iteration'] = k_step_iteration
         kwargs['small_iteration'] = 0
+        kwargs['number_of_finished'] = number_of_finished
 
         func_info = all_plan_and_find_nei(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
@@ -370,7 +397,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         while there_are_collisions:
             kwargs['small_iteration'] += 1
 
-            there_are_collisions, c_v, c_e, cost, func_info = all_exchange_k_step_paths(agents, **kwargs)  # agents
+            there_are_collisions, c_v, c_e, func_info = all_exchange_k_step_paths(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
@@ -380,7 +407,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
-        all_paths_are_finished, func_info = all_move_k_steps(agents, **kwargs)  # agents
+        all_paths_are_finished, number_of_finished, func_info = all_move_k_steps(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
             return None, {'agents': agents, 'success_rate': 0}
 
@@ -417,19 +444,19 @@ def main():
     # random_seed = True
     random_seed = False
     seed = 277
-    n_agents = 100
+    n_agents = 500
     PLOT_PER = 1
 
     to_use_profiler = True
     # to_use_profiler = False
 
-    k = 20
+    k = 3
     # DECISION_TYPE = 'simple'
     DECISION_TYPE = 'max_prev'
 
-    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     profiler = cProfile.Profile()
@@ -442,6 +469,8 @@ def main():
             img_dir=img_dir,
             alg_name='k-SDS',
             k=k,
+            p_h=0.9,
+            p_l=0.1,
             decision_type=DECISION_TYPE,
             a_star_func=a_star,
             n_agents=n_agents,

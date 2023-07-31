@@ -17,7 +17,7 @@ from algs.alg_MGDS import run_mgds
 from algs.alg_MGM_classic import run_mgm_classic
 from algs.alg_PP import run_pp
 from algs.alg_space_time_a_star import a_star
-from algs.alg_a_star_short import a_star_short
+# from algs.alg_a_star_short import a_star_short
 # from algs.alg_depth_first_a_star import df_a_star
 from globals import *
 

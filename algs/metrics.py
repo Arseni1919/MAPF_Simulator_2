@@ -199,6 +199,88 @@ def just_check_plans(plans):
     return there_is_col, c_v, c_e, cost
 
 
+def check_single_agent_k_step_c_v(agent_1, path_1, plans, k, immediate=False):
+    c_v_list = []
+    if len(path_1) == 0:
+        return c_v_list
+    for agent_2, path_2 in plans.items():
+        if len(path_2) == 0:
+            continue
+        if agent_1 != agent_2:
+            for t in range(k):
+                node_1 = path_1[min(t, len(path_1) - 1)]
+                node_2 = path_2[min(t, len(path_2) - 1)]
+                if (node_1.x, node_1.y) == (node_2.x, node_2.y):
+                    c_v_list.append((agent_1, agent_2, node_1.x, node_1.y, t))
+                    if immediate:
+                        return c_v_list
+    return c_v_list
+
+
+def check_k_step_c_v(plans, k, immediate=False):
+    c_v_list = []
+    for agent_1, path_1 in plans.items():
+        single_agent_c_v_list = check_single_agent_k_step_c_v(agent_1, path_1, plans, k, immediate)
+        c_v_list.extend(single_agent_c_v_list)
+        if len(c_v_list) > 0 and immediate:
+            return c_v_list
+    return c_v_list
+
+
+def check_single_agent_k_step_c_e(agent_1, path_1, plans, k, immediate=False):
+    c_e_list = []
+    if len(path_1) <= 1:
+        return c_e_list
+    for agent_2, path_2 in plans.items():
+        if len(path_1) <= 1:
+            return c_e_list
+        if agent_1 != agent_2:
+            prev_node_1 = path_1[0]
+            prev_node_2 = path_2[0]
+            for t in range(1, min(k, len(path_1), len(path_2))):
+                node_1 = path_1[t]
+                node_2 = path_2[t]
+                if (prev_node_1.x, prev_node_1.y, node_1.x, node_1.y) == (
+                        node_2.x, node_2.y, prev_node_2.x, prev_node_2.y):
+                    c_e_list.append(
+                        (agent_1, agent_2, prev_node_1.x, prev_node_1.y, node_1.x, node_1.y, t))
+                    if immediate:
+                        return c_e_list
+                prev_node_1 = node_1
+                prev_node_2 = node_2
+    return c_e_list
+
+
+def check_k_step_c_e(plans, k, immediate=False):
+    c_e_list = []
+    for agent_1, path_1 in plans.items():
+        single_agent_c_e_list = check_single_agent_k_step_c_e(agent_1, path_1, plans, k, immediate)
+        c_e_list.extend(single_agent_c_e_list)
+        if len(c_e_list) > 0 and immediate:
+            return c_e_list
+    return c_e_list
+
+
+def just_check_k_step_plans(plans, k, immediate=False):
+    # k_step_plans = {agent_name: path[:k] for agent_name, path in plans.items()}
+    # there_is_col, c_v, c_e = check_for_collisions(k_step_plans, immediate=False)
+    c_v_list = check_k_step_c_v(plans, k, immediate)
+    c_e_list = check_k_step_c_e(plans, k, immediate)
+    there_is_col = len(c_v_list) > 0 or len(c_e_list) > 0
+    return there_is_col, c_v_list, c_e_list
+
+
+def build_k_step_perm_constr_dict(nodes, other_paths, k):
+    perm_constr_dict = {node.xy_name: [] for node in nodes}
+    for agent_name, path in other_paths.items():
+        if 0 < len(path) < k:
+            final_node = path[-1]
+            perm_constr_dict[final_node.xy_name].append(final_node.t)
+            perm_constr_dict[final_node.xy_name] = [max(perm_constr_dict[final_node.xy_name])]
+
+    return perm_constr_dict
+
+
 def main():
     pass
 

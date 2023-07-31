@@ -114,7 +114,8 @@ def a_star(start, goal, nodes, h_func,
             return None, {'runtime': time.time() - start_time, 'n_open': len(open_nodes.heap_list), 'n_closed': len(closed_nodes.heap_list)}
         node_current = open_nodes.pop()
 
-        if node_current.xy_name == goal.xy_name:
+        time_check = node_current.t > kwargs['k_time'] if 'k_time' in kwargs else False
+        if node_current.xy_name == goal.xy_name or time_check:  # TODO: check the time constraint also
             # break
             # if there is a future constraint of a goal
             if len(v_constr_dict[node_current.xy_name]) > 0:
@@ -172,7 +173,8 @@ def a_star(start, goal, nodes, h_func,
         print(f'\r(a_star) iter: {iteration}, closed: {len(closed_nodes.heap_list)}', end='')
 
     path = None
-    if node_current.xy_name == goal.xy_name:
+    time_check = node_current.t > kwargs['k_time'] if 'k_time' in kwargs else False
+    if node_current.xy_name == goal.xy_name or time_check:
         path = []
         while node_current is not None:
             path.append(node_current)
