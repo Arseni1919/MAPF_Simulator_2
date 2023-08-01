@@ -67,9 +67,11 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     # node_goal = nodes[-1]
     # ------------------------- #
     n_agents = kwargs['n_agents']
-    sample_nodes = random.sample(nodes, 2 * n_agents)
-    start_nodes = sample_nodes[:n_agents]
-    goal_nodes = sample_nodes[n_agents:]
+    # sample_nodes = random.sample(nodes, 2 * n_agents)
+    # start_nodes = sample_nodes[:n_agents]
+    # goal_nodes = sample_nodes[n_agents:]
+    start_nodes = random.sample(nodes, n_agents)
+    goal_nodes = random.sample(nodes, n_agents)
     # ------------------------- #
     # ------------------------- #
     plotter = Plotter(map_dim=map_dim)

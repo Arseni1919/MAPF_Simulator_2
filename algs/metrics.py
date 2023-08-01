@@ -58,6 +58,7 @@ def get_alg_info_dict(**kwargs):
                 'n_agents_conf': [],
                 'a_star_calls_per_agent': [],
                 'n_messages_per_agent': [],
+                'n_messages_per_iter': [],
                 'confs_per_iter': []}
     alg_info.update(kwargs)
     return alg_info

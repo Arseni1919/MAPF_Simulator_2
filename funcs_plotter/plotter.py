@@ -235,7 +235,7 @@ class Plotter:
         plt.pause(0.01)
         # plt.show()
 
-    def plot_mapf_paths(self, paths_dict, nodes=None, plot_per=10):
+    def plot_mapf_paths(self, paths_dict, nodes=None, plot_per=10, plot_rate=0.01):
         plt.close()
         self.fig, self.ax = plt.subplots()
         longest_path = max([len(path) for path in paths_dict.values()])
@@ -260,6 +260,7 @@ class Plotter:
                         field[node.x, node.y] = 3
                     self.ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
                     self.ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
+                    self.ax.text(t_path[-1].y-0.4, t_path[-1].x-0.4, agent_name[6:])
                     i += 1
 
                 for agent_name, path in paths_dict.items():
@@ -267,9 +268,9 @@ class Plotter:
                     field[path[-1].x, path[-1].y] = 5
 
                 self.ax.imshow(field, origin='lower')
-                self.ax.set_title('MAPF Paths')
+                self.ax.set_title(f'MAPF Paths (time: {t})')
                 # plt.pause(1)
-                plt.pause(0.01)
+                plt.pause(plot_rate)
 
     def cla_axes(self):
         if self.ax.ndim == 1:
@@ -361,10 +362,11 @@ class Plotter:
         ax.set_xlim([0, max_instances + 2])
         # ax.set_xticks(rt_x)
         ax.set_xlabel('Solved Instances', labelpad=-1)
-        ax.set_ylabel('s econds', labelpad=-1)
+        ax.set_ylabel('seconds', labelpad=-1)
         is_log = set_log(ax)
         set_plot_title(ax, f'runtime (cactus{" - log scale" if is_log else ""})')
-        ax.set_ylim([1, 3000])
+        # ax.set_ylim([1, 3000])
+        ax.set_ylim([0, 3000])
         set_legend(ax)
 
     @staticmethod
@@ -461,34 +463,31 @@ class Plotter:
 
     @staticmethod
     def plot_n_messages_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
+        # stats_dict[alg_name][n_agents]['n_messages_per_agent'].extend(alg_info['n_messages_per_agent'])
         showfliers = False
         # showfliers = True
         big_table = []
-        algs_names = []
         for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
             if alg_info['dist']:
-                algs_names.append(alg_name)
-                n_messages = []
+                x_list = []
+                y_list = []
                 for n_agents in n_agents_list:
                     if is_json:
                         n_agents = str(n_agents)
-                    n_messages.extend(statistics_dict[alg_name][n_agents]['n_messages_per_agent'])
-                big_table.append(n_messages)
-        ax.boxplot(big_table,
-                   # notch=True,  # notch shape
-                   vert=True,  # vertical box alignment
-                   patch_artist=True,  # fill with color
-                   # labels=algs_to_test_list,  # linewidth=0.5, edgecolor="white"
-                   showfliers=showfliers)
+                    x_list.append(n_agents)
+                    y_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_messages_per_agent']))
 
-        # ax.set_title('a_star_runtimes (boxplot)')
-        # ax.set_xlim([0, max_instances + 2])
-        # ax.set_xticks()
-        ax.set_xticklabels(algs_names, rotation=15)
-        # ax.set_ylabel(f'N messages average per agent')
-        # ax.set_xlabel(f'{"with" if showfliers else "no"} outliers')
-        ax.set_xlabel(f'N messages average per agent')
-        # ax.legend()
+                if len(y_list) > 0:
+                    if 'color' in alg_info:
+                        ax.plot(x_list, y_list, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                    else:
+                        ax.plot(x_list, y_list, '-o', label=f'{alg_name}', alpha=0.75)
+
+        ax.set_ylabel('n_messages_per_agent')
+        ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+        ax.set_xticks(n_agents_list)
+        ax.set_xlabel('N agents')
+        set_legend(ax)
 
     @staticmethod
     def plot_n_agents_conf(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
@@ -558,8 +557,8 @@ class Plotter:
         # self.plot_a_star_calls_boxplot(
         #     self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
         #
-        # self.plot_n_messages_boxplot(
-        #     self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
+        self.plot_n_messages_boxplot(
+            self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
         self.plot_n_closed_cactus(
             self.ax[1, 2], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)

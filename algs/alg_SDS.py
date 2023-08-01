@@ -7,7 +7,7 @@ import pstats
 
 import numpy as np
 
-from algs.alg_space_time_a_star import a_star
+from algs.alg_a_star_space_time import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
     limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
@@ -40,7 +40,7 @@ class SDSAgent:
 
     def exchange(self, agents):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
-        self.stats_n_messages += len(agents)
+        self.stats_n_messages += len(agents) - 1
 
     def decision_bool(self, decision_type, agents_in_confs, agents_dict, **kwargs):
         alpha = kwargs['alpha'] if 'alpha' in kwargs else 0.5
@@ -279,6 +279,26 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
+    n_agents = 70
+    img_dir = 'my_map_10_10_room.map'  # 10-10
+    # img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+
+    random_seed = True
+    # random_seed = False
+    seed = 277
+    PLOT_PER = 10
+    to_use_profiler = True
+    # to_use_profiler = False
+    # DECISION_TYPE = 'simple'
+    # DECISION_TYPE = 'min_prev_1'
+    DECISION_TYPE = 'min_prev_2'
+    # DECISION_TYPE = 'max_prev_1'
+    # DECISION_TYPE = 'index_1'
+    # DECISION_TYPE = 'index_2'
+
     profiler = cProfile.Profile()
     if to_use_profiler:
         profiler.enable()
@@ -286,6 +306,7 @@ def main():
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(
             algorithm=run_sds,
+            img_dir=img_dir,
             initial_ordering=[],
             n_agents=n_agents,
             random_seed=random_seed,
@@ -313,20 +334,6 @@ def main():
 
 
 if __name__ == '__main__':
-    random_seed = True
-    # random_seed = False
-    seed = 277
-    n_agents = 150
-    PLOT_PER = 10
-    to_use_profiler = True
-    # to_use_profiler = False
-    # DECISION_TYPE = 'simple'
-    # DECISION_TYPE = 'min_prev_1'
-    DECISION_TYPE = 'min_prev_2'
-    # DECISION_TYPE = 'max_prev_1'
-    # DECISION_TYPE = 'index_1'
-    # DECISION_TYPE = 'index_2'
-
     main()
 
 # sub_results = {k: v for k, v in self.other_paths.items() if len(v) > 0}

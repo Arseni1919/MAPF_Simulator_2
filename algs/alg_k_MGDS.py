@@ -6,7 +6,7 @@ import pstats
 
 from functions import *
 
-from algs.alg_space_time_a_star import a_star
+from algs.alg_a_star_space_time import a_star
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
     limit_is_crossed, get_agents_in_conf, check_plan, just_check_plans, get_alg_info_dict, iteration_print
@@ -96,6 +96,7 @@ class KMGDSAgent:
         for nei in self.nei_list:
             # nei.nei_paths_dict[agent.name] = agent.path[:k]
             nei.nei_paths_dict[self.name] = self.path
+            self.stats_n_messages += 1
 
     def exchange_gains(self, **kwargs):
         k = kwargs['k']
@@ -115,6 +116,7 @@ class KMGDSAgent:
         # send the gain to nei
         for nei in self.nei_list:
             nei.nei_gains_dict[self.name] = self.gain
+            self.stats_n_messages += 1
 
     def replan(self, **kwargs):
         if self.gain == 0:

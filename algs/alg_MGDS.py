@@ -9,7 +9,7 @@ from algs.metrics import get_alg_info_dict, c_v_check_for_agent, c_e_check_for_a
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan, iteration_print
 from algs.metrics import limit_is_crossed
 # from algs.alg_a_star_short import a_star_short
-from algs.alg_space_time_a_star import a_star
+from algs.alg_a_star_space_time import a_star
 
 
 class MGDSAgent:
@@ -35,7 +35,7 @@ class MGDSAgent:
 
     def exchange_paths(self, agents, **kwargs):
         self.other_paths = {agent.name: agent.path for agent in agents if agent.name != self.name}
-        self.stats_n_messages += len(agents)
+        self.stats_n_messages += len(agents) - 1
         c_v_list = c_v_check_for_agent(self.name, self.path, self.other_paths)
         c_e_list = c_e_check_for_agent(self.name, self.path, self.other_paths)
         self.agents_in_confs = get_agents_in_conf(c_v_list, c_e_list)
@@ -79,7 +79,7 @@ class MGDSAgent:
 
     def exchange_gains(self, agents):
         self.other_gains = {agent.name: agent.gain for agent in agents if agent.name != self.name}
-        self.stats_n_messages += len(self.agents_in_confs)
+        self.stats_n_messages += len(self.agents_in_confs) - 1
 
     def decision_bool(self, agents_dict):
         if len(self.agents_in_confs) == 0:

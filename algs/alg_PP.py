@@ -8,7 +8,7 @@ from algs.test_mapf_alg import test_mapf_alg_from_pic
 # from algs.metrics import check_for_collisions, c_v_check_for_agent, c_e_check_for_agent
 from algs.metrics import build_constraints, get_agents_in_conf, check_plan, get_alg_info_dict
 from algs.metrics import limit_is_crossed
-from algs.alg_space_time_a_star import a_star
+from algs.alg_a_star_space_time import a_star
 from algs.alg_depth_first_a_star import df_a_star
 
 
@@ -118,6 +118,21 @@ def run_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
+    n_agents = 50
+    img_dir = 'my_map_10_10_room.map'  # 10-10
+    # img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+
+    random_seed = True
+    # random_seed = False
+    seed = 277
+    A_STAR_ITER_LIMIT = 5e7
+    A_STAR_CALLS_LIMIT = 1000
+    MAX_TIME = 5
+    PLOT_PER = 10
+    to_use_profiler = True
     profiler = cProfile.Profile()
     if to_use_profiler:
         profiler.enable()
@@ -126,10 +141,14 @@ def main():
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(
             algorithm=run_pp,
+            alg_name='PP',
+            a_star_func=a_star,
+            img_dir=img_dir,
             n_agents=n_agents,
             random_seed=random_seed,
             seed=seed,
             final_plot=True,
+            limit_type='norm_time',
             a_star_iter_limit=A_STAR_ITER_LIMIT,
             a_star_calls_limit=A_STAR_CALLS_LIMIT,
             max_time=MAX_TIME,
@@ -149,13 +168,4 @@ def main():
 
 
 if __name__ == '__main__':
-    random_seed = True
-    # random_seed = False
-    seed = 277
-    n_agents = 50
-    A_STAR_ITER_LIMIT = 5e7
-    A_STAR_CALLS_LIMIT = 1000
-    MAX_TIME = 5
-    PLOT_PER = 10
-    to_use_profiler = True
     main()

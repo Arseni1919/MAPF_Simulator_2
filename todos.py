@@ -7,7 +7,10 @@ DONE:
 - improve new algorithms regarding small iterations (expansion of k for every 10 small iterations)
 
 TODO:
-- insert message metric
+- correct k-SDS (look at the small map - what is going on there)
+- update k-MGDS
+- insert message metric -
+- insert neighbours metric
 - do big experiments with other algorithms
 - implement more algorithms from literature
 - make big experiments with the algorithms from literature
