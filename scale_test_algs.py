@@ -54,6 +54,7 @@ def create_to_save_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **k
                 'n_agents_conf': [],
                 'a_star_calls_per_agent': [],
                 'n_messages_per_agent': [],
+                'n_messages': [],
                 'confs_per_iter': [],
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
@@ -99,6 +100,9 @@ def update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_in
 
         if 'n_messages_per_agent' in alg_info:
             stats_dict[alg_name][n_agents]['n_messages_per_agent'].extend(alg_info['n_messages_per_agent'])
+
+        if 'n_messages' in alg_info:
+            stats_dict[alg_name][n_agents]['n_messages'].append(alg_info['n_messages'])
 
         if 'confs_per_iter' in alg_info:
             stats_dict[alg_name][n_agents]['confs_per_iter'] = alg_info['confs_per_iter']
@@ -253,102 +257,6 @@ def big_test(
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
-        # 'PBS': (run_pbs, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'norm_a_star_closed',
-        #     'dist': False,
-        #     'color': 'tab:purple',
-        # }),
-
-        # 'PP': (run_pp, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'norm_time',
-        #     'dist': False,
-        #     'color': 'tab:blue',
-        # }),
-
-        'SDS': (run_sds, {
-            'a_star_func': a_star,
-            'limit_type': 'dist_time',
-            'decision_type': 'min_prev_2',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
-
-
-        'MGDS': (run_mgds, {
-            'a_star_func': a_star,
-            'limit_type': 'dist_time',
-            'gain_type': 'rank',
-            'alpha': 0.9,
-            'dist': True,
-            'color': 'tab:green'
-        }),
-
-
-        # '10-MGDS': (run_k_mgds, {
-        #     'a_star_func': a_star,
-        #     'k': 10,
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'tab:olive',
-        # }),
-
-        # '2-SDS': (run_k_sds, {
-        #     'a_star_func': a_star,
-        #     'k': 2,
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'tab:red',
-        # }),
-        #
-        # '5-SDS': (run_k_sds, {
-        #     'a_star_func': a_star,
-        #     'k': 5,
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'tab:orange',
-        # }),
-        #
-        # '10-SDS': (run_k_sds, {
-        #     'a_star_func': a_star,
-        #     'k': 10,
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'yellow',
-        # }),
-        #
-        '10-SDS': (run_k_sds, {
-            'a_star_func': a_star,
-            'k': 10,
-            'p_h_type': 'max_prev',
-            'alpha': 0.5,
-            'pref_paths_type': 'pref_index',
-            'p_h': 0.9,
-            'p_l': 0.1,
-            'limit_type': 'dist_time',
-            'dist': True,
-            'color': 'tab:blue',
-        }),
-
-        # '40-SDS': (run_k_sds, {
-        #     'a_star_func': a_star,
-        #     'k': 40,
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'tab:blue',
-        # }),
-
         # 'DSA': (run_ds_mapf, {
         #     'a_star_func': a_star,
         #     'limit_type': 'dist_a_star_closed',
@@ -364,19 +272,151 @@ def main():
         #     'dist': True,
         #     'color': 'tab:olive',
         # }),
+
+        # 'PBS': (run_pbs, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_a_star_closed',
+        #     'dist': False,
+        #     'color': 'tab:purple',
+        # }),
+
+        # 'PP': (run_pp, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     'dist': False,
+        #     'color': 'tab:blue',
+        # }),
+
+        # 'SDS': (run_sds, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'dist_time',
+        #     'decision_type': 'min_prev_2',
+        #     'dist': True,
+        #     'color': 'tab:orange',
+        # }),
+
+
+        # 'MGDS': (run_mgds, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'dist_time',
+        #     'gain_type': 'rank',
+        #     'alpha': 0.9,
+        #     'dist': True,
+        #     'color': 'tab:green'
+        # }),
+
+
+        # '10-MGDS': (run_k_mgds, {
+        #     'a_star_func': a_star,
+        #     'k': 10,
+        #     'p_h': 0.9,
+        #     'p_l': 0.1,
+        #     'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'tab:olive',
+        # }),
+
+        # 'k-SDS': (run_k_sds, {
+        #     'a_star_func': a_star,
+        #     'k': 5,
+        #     'p_h_type': 'max_prev',
+        #     'alpha': 0.5,
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.1,
+        #     'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'tab:blue',
+        # }),
+
+        '2-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 2,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'tab:red',
+        }),
+
+        '5-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 5,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'tab:orange',
+        }),
+
+        '10-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 10,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'gold',
+        }),
+
+        '15-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 15,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'tab:blue',
+        }),
+
+        '20-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 20,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'tab:purple',
+        }),
     }
 
     # n_agents_list = [2, 3, 4, 5]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    # n_agents_list = [10, 20, 30, 40]
+    n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 60, 70, 80, 90, 100]
-    n_agents_list = [50, 100, 150, 200, 250, 300]
+    # n_agents_list = [50, 100, 150, 200, 250, 300]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
     # n_agents_list = [100, 150, 200, 250, 300, 350, 400, 450, 500]
@@ -388,8 +428,8 @@ def main():
     # runs_per_n_agents = 25
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
-    # runs_per_n_agents = 5
-    runs_per_n_agents = 1
+    runs_per_n_agents = 5
+    # runs_per_n_agents = 1
     # runs_per_n_agents = 3
 
     random_seed = True
@@ -397,8 +437,8 @@ def main():
     seed = 121
 
     # ------------------------------ MAPS ------------------------------ #
-    # img_dir = 'empty-48-48.map'  # 48-48
-    img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 

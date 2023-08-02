@@ -160,7 +160,7 @@ class SDSAgent:
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
-            print(f'\n ---------- ({kwargs["alg_name"]}) A* {self.name} ---------- \n')
+            print(f'\n ---------- ({kwargs["alg_name"]})[iteration: {kwargs["iteration"]}] A* {self.name} ---------- \n')
             a_star_func = kwargs['a_star_func']
             new_path, a_s_info = a_star_func(start=self.start_node, goal=self.goal_node,
                                              nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
@@ -209,6 +209,7 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # Distributed Part
     for iteration in range(1000000):
         # start_time = time.time()
+        kwargs['iteration'] = iteration
         max_time_list = []
         max_n_closed_list = []
         no_confs_list = []
@@ -279,7 +280,7 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 70
+    n_agents = 60
     img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
@@ -290,6 +291,7 @@ def main():
     # random_seed = False
     seed = 277
     PLOT_PER = 10
+    PLOT_RATE = 0.5
     to_use_profiler = True
     # to_use_profiler = False
     # DECISION_TYPE = 'simple'
@@ -315,6 +317,7 @@ def main():
             a_star_iter_limit=5e7,
             max_time=5,
             plot_per=PLOT_PER,
+            plot_rate=PLOT_RATE,
             limit_type='norm_time',
             alg_name='SDS',
             a_star_func=a_star,

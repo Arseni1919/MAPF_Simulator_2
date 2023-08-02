@@ -48,9 +48,9 @@ def get_node(successor_xy_name, node_current, nodes, nodes_dict, open_nodes, clo
              perm_constr_dict, max_final_time, **kwargs):
     new_t = node_current.t + 1
 
-    if 'short_a_star_list' in kwargs and len(kwargs['short_a_star_list']) > 0:
-        if successor_xy_name not in kwargs['short_a_star_list']:
-            return None, ''
+    # if 'short_a_star_list' in kwargs and len(kwargs['short_a_star_list']) > 0:
+    #     if successor_xy_name not in kwargs['short_a_star_list']:
+    #         return None, ''
 
     if v_constr_dict:
         if new_t in v_constr_dict[successor_xy_name]:
@@ -110,6 +110,7 @@ def a_star(start, goal, nodes, h_func,
     open_nodes.add(node_current)
     max_final_time = get_max_final(perm_constr_dict)
     future_constr = False
+    succeeded = False
     iteration = 0
     while len(open_nodes) > 0:
         iteration += 1
@@ -121,6 +122,7 @@ def a_star(start, goal, nodes, h_func,
         time_check = k_time_check(node_current, **kwargs)
         if node_current.xy_name == goal.xy_name or time_check:
             # break
+            succeeded = True
             # if there is a future constraint of a goal
             if len(v_constr_dict[node_current.xy_name]) > 0:
                 # we will take the maximum time out of all constraints
@@ -132,11 +134,7 @@ def a_star(start, goal, nodes, h_func,
                     break
             else:
                 break
-        if 'df_dict' in kwargs:
-            future_constr = check_future_constr(node_current, v_constr_dict, e_constr_dict, perm_constr_dict, kwargs['df_dict'], start)
-            if future_constr:
-                goal = node_current
-                break
+        succeeded = False
         for successor_xy_name in node_current.neighbours:
             node_successor, node_successor_status = get_node(
                 successor_xy_name, node_current, nodes, nodes_dict, open_nodes, closed_nodes,
@@ -177,8 +175,7 @@ def a_star(start, goal, nodes, h_func,
         print(f'\r(a_star) iter: {iteration}, closed: {len(closed_nodes.heap_list)}', end='')
 
     path = None
-    time_check = k_time_check(node_current, **kwargs)
-    if node_current.xy_name == goal.xy_name or time_check:
+    if succeeded:
         path = []
         while node_current is not None:
             path.append(node_current)

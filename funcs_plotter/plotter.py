@@ -395,7 +395,7 @@ class Plotter:
         ax.set_xlim([0, max_instances + 2])
         ax.set_xlabel('Solved Instances')
         is_log = set_log(ax)
-        ax.set_ylim([1, 1000])
+        ax.set_ylim([0, 3e7])
         set_plot_title(ax, f'A* Calls (cactus{" - log scale" if is_log else ""})')
         set_legend(ax, framealpha=0)
 
@@ -457,12 +457,12 @@ class Plotter:
         ax.set_xlabel('Solved Instances')
         # ax.set_xlabel('y: N expanded nodes (cactus - log scale)')
         is_log = set_log(ax)
-        ax.set_ylim([1e2, 3e7])
+        ax.set_ylim([0, 3e7])
         set_plot_title(ax, f'N expanded nodes (cactus{" - log scale" if is_log else ""})')
         set_legend(ax)
 
     @staticmethod
-    def plot_n_messages_boxplot(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
+    def plot_n_messages(ax, statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json):
         # stats_dict[alg_name][n_agents]['n_messages_per_agent'].extend(alg_info['n_messages_per_agent'])
         showfliers = False
         # showfliers = True
@@ -475,7 +475,7 @@ class Plotter:
                     if is_json:
                         n_agents = str(n_agents)
                     x_list.append(n_agents)
-                    y_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_messages_per_agent']))
+                    y_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_messages']))
 
                 if len(y_list) > 0:
                     if 'color' in alg_info:
@@ -557,7 +557,7 @@ class Plotter:
         # self.plot_a_star_calls_boxplot(
         #     self.ax[1, 0], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
         #
-        self.plot_n_messages_boxplot(
+        self.plot_n_messages(
             self.ax[1, 1], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
         self.plot_n_closed_cactus(

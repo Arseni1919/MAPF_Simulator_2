@@ -31,6 +31,7 @@ class KSDSAgent:
         self.middle_plot = middle_plot
         self.iter_limit = iter_limit
         self.path = []
+        self.path_names = []
         self.h = 0
         self.full_path = []
         self.full_path_names = []
@@ -79,8 +80,9 @@ class KSDSAgent:
             self.h = self.path[-1].h
             succeeded = True
         else:
-            # self.path = [self.curr_node]
+            self.path = [self.curr_node]
             succeeded = False
+        self.path_names = [node.xy_name for node in self.path]
         return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
 
     def update_nei(self, agents, **kwargs):
@@ -170,6 +172,7 @@ class KSDSAgent:
 
     def replan(self, **kwargs):
         k = kwargs['k']
+        # k = k + k * round(kwargs['small_iteration'] / 20)
         self.update_conf_agents_names(**kwargs)
         if len(self.conf_agents_names) == 0:
             return False, {}
@@ -196,14 +199,19 @@ class KSDSAgent:
             return alpha
 
         elif p_h_type == 'max_prev':
-            # A MORE SMART VERSION
-            path_lngths = []
+            #  gather all paths
+            full_path_lngths = []
             for agent_name, path in self.nei_paths_dict.items():
-                path_lngths.append(len(path))
-            path_lngths.append(len(self.path))
-            path_lngths.sort()
-            my_order = path_lngths.index(len(self.path))
-            my_alpha = 0.9 - 0.8 * (my_order / (len(path_lngths) - 1))
+                if agent_name in self.conf_agents_names:
+                    full_path_lngths.append(int(len(path) + self.nei_h_dict[agent_name]))
+            # break by index if equal
+            my_full_path_len = int(len(self.path) + self.h)
+            if len(full_path_lngths) == 1 and full_path_lngths[-1] == my_full_path_len:
+                return 0.9 if self.index < self.nei_dict[self.conf_agents_names[0]].index else 0.1
+            full_path_lngths.append(my_full_path_len)
+            full_path_lngths.sort()
+            my_order = full_path_lngths.index(my_full_path_len)
+            my_alpha = 0.9 - 0.8 * (my_order / (len(full_path_lngths) - 1))
             return my_alpha
 
         else:
@@ -211,18 +219,21 @@ class KSDSAgent:
 
     def update_full_path(self, **kwargs):
         k = kwargs['k']
+        step = k + 1
+        # step = 1
         goal_name = self.goal_node.xy_name
 
-        while len(self.path) < k + 1:
+        while len(self.path) < step:
             self.path.append(self.path[-1])
 
         if len(self.full_path) == 0:
-            self.full_path.extend(self.path[:k+1])
+            self.full_path.extend(self.path[:step])
         else:
-            self.full_path.extend(self.path[1:k + 1])
+            self.full_path.extend(self.path[1:step])
         self.full_path_names = [node.xy_name for node in self.full_path]
         self.curr_node = self.full_path[-1]
-        self.path = self.path[k:]
+        self.path = self.path[step - 1:]
+        self.path_names = [node.xy_name for node in self.path]
         return self.curr_node.xy_name == goal_name
 
     def cut_back_full_path(self):
@@ -328,6 +339,7 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
     # check for collisions
     plans = {agent.name: agent.path for agent in agents}
     there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, k+1, immediate=True)
+    # there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, k+1, immediate=False)
 
     func_info = {
         'runtime': runtime,
@@ -433,7 +445,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         full_plans = {agent.name: agent.full_path for agent in agents}
         iteration_print(agents, full_plans, alg_name, alg_info, runtime, k_step_iteration)
         if all_paths_are_finished:
-            there_is_col_0, c_v_0, c_e_0, cost_0 = just_check_plans(full_plans)
+            # there_is_col_0, c_v_0, c_e_0, cost_0 = just_check_plans(full_plans)
             all_cut_full_paths(agents, **kwargs)
             cut_full_plans = {agent.name: agent.full_path for agent in agents}
             there_is_col, c_v, c_e, cost = just_check_plans(cut_full_plans)
@@ -449,7 +461,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
-                alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
+                alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
                 # alg_info['avr_messages_per_iter'] = [ = agent.stats_n_messages for agent in agents]
                 alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
             return cut_full_plans, alg_info
@@ -462,7 +474,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 70
+    n_agents = 60
     img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
@@ -477,12 +489,12 @@ def main():
 
 
     # for the algorithm
-    k = 2
+    k = 3
     p_h_type = 'max_prev'
     # p_h_type = 'simple'
     alpha = 0.5
-    pref_paths_type = 'pref_index'
-    # pref_paths_type = 'pref_path_length'
+    # pref_paths_type = 'pref_index'
+    pref_paths_type = 'pref_path_length'
     # p_h = 1
     # p_l = 1
     p_h = 0.9
