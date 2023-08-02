@@ -566,8 +566,8 @@ class Plotter:
         # self.plot_n_agents_conf(
         #     self.ax[1, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json)
 
-        self.plot_conf_per_iter(
-            self.ax[1, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json, **kwargs)
+        # self.plot_conf_per_iter(
+        #     self.ax[1, 3], statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, is_json, **kwargs)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)
