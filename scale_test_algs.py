@@ -330,7 +330,7 @@ def main():
         #     'color': 'tab:blue',
         # }),
 
-        'k-SDS-1.0-0.9': (run_k_sds, {
+        'k-SDS-1-0.9': (run_k_sds, {
             'a_star_func': a_star,
             'k': 10,
             'p_h_type': 'max_prev',
@@ -390,7 +390,7 @@ def main():
             'color': 'green',
         }),
 
-        'k-SDS-0.0-0.9': (run_k_sds, {
+        'k-SDS-0-0.9': (run_k_sds, {
             'a_star_func': a_star,
             'k': 10,
             'p_h_type': 'max_prev',
@@ -425,12 +425,12 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [10, 30, 50, 70, 90, 110]
+    # n_agents_list = [10, 30, 50, 70, 90, 110]
+    n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
-    # n_agents_list = [50, 60, 70, 80, 90, 100]
     # n_agents_list = [50, 100, 150, 200, 250, 300]
     # n_agents_list = [100, 120, 140, 160, 180, 200]
     # n_agents_list = [100, 120, 140, 160, 180, 200, 220, 240, 260, 280, 300]
@@ -452,8 +452,8 @@ def main():
     seed = 121
 
     # ------------------------------ MAPS ------------------------------ #
-    img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
