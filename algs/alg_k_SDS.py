@@ -4,6 +4,8 @@ from typing import List
 import cProfile
 import pstats
 
+import numpy as np
+
 from functions import *
 
 from algs.alg_a_star_space_time import a_star
@@ -41,7 +43,8 @@ class KSDSAgent:
         self.stats_n_calls = 0
         self.stats_runtime = 0
         self.stats_n_messages = 0
-        self.stats_confs_per_iter = []
+        self.stats_n_step_m = 0
+        self.stats_n_step_m_list = []
         # nei
         self.nei_list = []
         self.nei_dict = {}
@@ -112,6 +115,7 @@ class KSDSAgent:
             nei.nei_paths_dict[self.name] = self.path
             nei.nei_h_dict[self.name] = self.h
             self.stats_n_messages += 1
+            self.stats_n_step_m += 1
 
     def update_conf_agents_names(self, **kwargs):
         k = kwargs['k']
@@ -234,6 +238,8 @@ class KSDSAgent:
         self.curr_node = self.full_path[-1]
         self.path = self.path[step - 1:]
         self.path_names = [node.xy_name for node in self.path]
+        self.stats_n_step_m_list.append(self.stats_n_step_m)
+        self.stats_n_step_m = 0
         return self.curr_node.xy_name == goal_name
 
     def cut_back_full_path(self):
@@ -405,6 +411,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
     plot_rate = kwargs['plot_rate'] if 'plot_rate' in kwargs else 1
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
+    stats_small_iters_list = []
     number_of_finished = 0
 
     # Creating agents
@@ -438,6 +445,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
+        stats_small_iters_list.append(kwargs['small_iteration'])
         all_paths_are_finished, number_of_finished, func_info = all_move_k_steps(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
             return None, {'agents': agents, 'success_rate': 0}
@@ -462,8 +470,9 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['sol_quality'] = cost
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
-                # alg_info['avr_messages_per_iter'] = [ = agent.stats_n_messages for agent in agents]
-                alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
+                alg_info['m_per_step'] = np.sum([np.mean(agent.stats_n_step_m_list) for agent in agents])
+                alg_info['n_steps'] = k_step_iteration,
+                alg_info['n_small_iters'] = np.mean(stats_small_iters_list),
             return cut_full_plans, alg_info
 
         if k_step_iteration > k_step_iteration_limit-1:

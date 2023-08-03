@@ -9,7 +9,7 @@ DONE:
 TODO:
 - correct k-SDS (look at the small map - what is going on there)
 - update k-MGDS
-- insert message metric - messages between physical steps steps
+- insert message metric - n messages between physical steps
 - insert neighbours metric
 - do big experiments with other algorithms
 - implement more algorithms from literature
