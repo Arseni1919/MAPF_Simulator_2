@@ -247,8 +247,6 @@ class KSDSAgent:
         return self.curr_node.xy_name == goal_name
 
     def cut_back_full_path(self):
-        # if self.name == 'agent_2':
-        #     print()
         len_full_path = len(self.full_path)
         if len_full_path > 1:
             if self.full_path[-1].xy_name == self.goal_node.xy_name:
@@ -406,7 +404,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
     if 'k' not in kwargs:
         raise RuntimeError("'k' not in kwargs")
-    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 1000
+    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 700
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
@@ -489,8 +487,8 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 def main():
     n_agents = 60
-    img_dir = 'my_map_10_10_room.map'  # 10-10
-    # img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'my_map_10_10_room.map'  # 10-10
+    img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251

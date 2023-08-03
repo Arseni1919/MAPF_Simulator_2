@@ -260,7 +260,7 @@ def big_test(
                 update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
                 if i_run % 1 == 0:
                     plotter.plot_big_test(stats_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir,
-                                          n_agents=n_agents)
+                                          n_agents=n_agents, time_per_alg_limit=time_per_alg_limit)
 
         if to_save_results:
             save_and_show_results(to_save_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list,
@@ -333,35 +333,67 @@ def main():
         #     'color': 'tab:olive',
         # }),
 
-        '15-SDS': (run_k_sds, {
+        '15-SDS-0.9-0.9': (run_k_sds, {
             'a_star_func': a_star,
             'k': 15,
             'p_h_type': 'max_prev',
             'alpha': 0.5,
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
-            'p_h': 0.95,
-            'p_l': 0.95,
+            'p_h': 0.9,
+            'p_l': 0.9,
             # 'limit_type': 'dist_time',
             'limit_type': 'norm_time',
             'dist': True,
             'color': 'tab:blue',
         }),
 
-        '5-SDS': (run_k_sds, {
+        '15-SDS-0.1-0.9': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 15,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'navy',
+        }),
+
+        '5-SDS-0.9-0.9': (run_k_sds, {
             'a_star_func': a_star,
             'k': 5,
             'p_h_type': 'max_prev',
             'alpha': 0.5,
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
-            'p_h': 0.95,
-            'p_l': 0.95,
+            'p_h': 0.9,
+            'p_l': 0.9,
             # 'limit_type': 'dist_time',
             'limit_type': 'norm_time',
             'dist': True,
             'color': 'tab:purple',
         }),
+
+        '5-SDS-0.1-0.9': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 5,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'gray',
+        }),
+
+
 
         # 'k-SDS-1-0.9': (run_k_sds, {
         #     'a_star_func': a_star,
@@ -477,6 +509,7 @@ def main():
     # n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
     n_agents_list = [100, 200, 300, 400, 500, 600, 700]
+    # n_agents_list = [400, 500, 600, 700, 800, 900]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
@@ -494,9 +527,9 @@ def main():
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
     # runs_per_n_agents = 5
-    runs_per_n_agents = 3
+    # runs_per_n_agents = 2
     # runs_per_n_agents = 1
-    # runs_per_n_agents = 3
+    runs_per_n_agents = 3
 
     random_seed = True
     # random_seed = False
@@ -511,7 +544,8 @@ def main():
     # ------------------------------ LIMITS ------------------------------ #
     # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
-    time_per_alg_limit = 3
+    # time_per_alg_limit = 2
+    time_per_alg_limit = 4
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 
