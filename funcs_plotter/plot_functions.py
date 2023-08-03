@@ -28,12 +28,12 @@ def set_log(ax):
 
 def plot_text_in_cactus(ax, l_x, l_y):
     if len(l_x) > 0:
-        ax.text(l_x[-1]-5, l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+        ax.text(l_x[-1] - 5, l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
 
 def set_legend(ax, framealpha=None):
     if not framealpha:
-        framealpha=0
+        framealpha = 0
     legend_properties = {'weight': 'bold', 'size': 9}
     # legend_properties = {}
     if framealpha is not None:
@@ -173,9 +173,42 @@ def get_list_a_star(statistics_dict, alg_name, n_agents_list, list_type, is_json
             curr_list.extend(curr_element)
     return curr_list
 
+
 # --------------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------------- #
+def plot_step_in_mapf_paths(ax, info):
+    ax.cla()
+    paths_dict = info['paths_dict']
+    nodes = info['nodes']
+    side_x = info['side_x']
+    side_y = info['side_y']
+    t = info['t']
+
+    field = np.zeros((side_x, side_y))
+
+    if nodes:
+        for node in nodes:
+            field[node.x, node.y] = -1
+
+    n = len(list(paths_dict.keys()))
+    color_map = plt.cm.get_cmap('hsv', n)
+    i = 0
+    for agent_name, path in paths_dict.items():
+        t_path = path[:t + 1]
+        for node in t_path:
+            field[node.x, node.y] = 3
+        ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
+        ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
+        ax.text(t_path[-1].y - 0.4, t_path[-1].x - 0.4, agent_name[6:])
+        i += 1
+
+    for agent_name, path in paths_dict.items():
+        field[path[0].x, path[0].y] = 4
+        field[path[-1].x, path[-1].y] = 5
+
+    ax.imshow(field, origin='lower')
+    ax.set_title(f'MAPF Paths (time: {t})')
 
 
 def plot_success_rate(ax, info):
@@ -532,45 +565,31 @@ def plot_conf_per_iter(ax, info, **kwargs):
     set_legend(ax)
 
 
-def plot_step_in_mapf_paths(ax, info):
+def plot_n_nei(ax, info):
+    # n_steps, n_small_iters
     ax.cla()
-    paths_dict = info['paths_dict']
-    nodes = info['nodes']
-    side_x = info['side_x']
-    side_y = info['side_y']
-    t = info['t']
+    statistics_dict = info['statistics_dict']
+    runs_per_n_agents = info['runs_per_n_agents']
+    algs_to_test_dict = info['algs_to_test_dict']
+    n_agents_list = info['n_agents_list']
+    is_json = info['is_json']
 
-    field = np.zeros((side_x, side_y))
+    for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
+        if alg_info['dist']:
+            x_list = []
+            nei_list = []
+            for n_agents in n_agents_list:
+                if is_json:
+                    n_agents = str(n_agents)
+                x_list.append(n_agents)
+                nei_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_nei']))
 
-    if nodes:
-        for node in nodes:
-            field[node.x, node.y] = -1
+            if len(nei_list) > 0:
+                if 'color' in alg_info:
+                    ax.plot(x_list, nei_list, '-v', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
 
-    n = len(list(paths_dict.keys()))
-    color_map = plt.cm.get_cmap('hsv', n)
-    i = 0
-    for agent_name, path in paths_dict.items():
-        t_path = path[:t + 1]
-        for node in t_path:
-            field[node.x, node.y] = 3
-        ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
-        ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
-        ax.text(t_path[-1].y-0.4, t_path[-1].x-0.4, agent_name[6:])
-        i += 1
-
-    for agent_name, path in paths_dict.items():
-        field[path[0].x, path[0].y] = 4
-        field[path[-1].x, path[-1].y] = 5
-
-    ax.imshow(field, origin='lower')
-    ax.set_title(f'MAPF Paths (time: {t})')
-
-
-
-
-
-
-
-
-
-
+    ax.set_ylabel('neighbours pre agent')
+    ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+    ax.set_xticks(n_agents_list)
+    ax.set_xlabel('N agents')
+    set_legend(ax)

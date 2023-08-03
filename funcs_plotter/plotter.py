@@ -99,15 +99,13 @@ class Plotter:
 
         plot_a_star_calls_counters(self.ax[0, 3], info)
 
-        plot_n_steps_iters(self.ax[1, 0], info)
+        plot_n_nei(self.ax[1, 0], info)
 
-        plot_n_messages(self.ax[1, 1], info)
+        plot_n_steps_iters(self.ax[1, 1], info)
 
-        plot_n_closed_cactus(self.ax[1, 2], info)
+        plot_n_messages(self.ax[1, 2], info)
 
-        # plot_n_agents_conf(self.ax[1, 3], info)
-
-        # plot_conf_per_iter(ax[1, 3], info, **kwargs)
+        plot_n_closed_cactus(self.ax[1, 3], info)
 
         # self.fig.tight_layout()
         self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP', fontsize=16)

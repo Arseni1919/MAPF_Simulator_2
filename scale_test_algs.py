@@ -59,6 +59,7 @@ def create_to_save_dict(algs_to_test_dict, n_agents_list, runs_per_n_agents, **k
                 'n_steps': [],
                 'n_small_iters': [],
                 'confs_per_iter': [],
+                'n_nei': [],
             } for n_agents in n_agents_list
         } for alg_name, _ in algs_to_test_dict.items()
     }
@@ -118,6 +119,9 @@ def update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_in
 
         if 'n_small_iters' in alg_info:
             stats_dict[alg_name][n_agents]['n_small_iters'].append(alg_info['n_small_iters'])
+
+        if 'n_nei' in alg_info:
+            stats_dict[alg_name][n_agents]['n_nei'].append(alg_info['n_nei'])
 
 
 def set_seed(random_seed, seed):
@@ -469,9 +473,10 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [10, 30, 50, 70, 90, 110]
+    # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
+    n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
@@ -488,7 +493,8 @@ def main():
     # runs_per_n_agents = 25
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
-    runs_per_n_agents = 5
+    # runs_per_n_agents = 5
+    runs_per_n_agents = 3
     # runs_per_n_agents = 1
     # runs_per_n_agents = 3
 
@@ -503,9 +509,9 @@ def main():
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # ------------------------------ LIMITS ------------------------------ #
-    time_per_alg_limit = 1  # According to PBS paper!
+    # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
-    # time_per_alg_limit = 3
+    time_per_alg_limit = 3
     # time_per_alg_limit = 10
     # time_per_alg_limit = 50
 

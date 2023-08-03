@@ -45,6 +45,7 @@ class KSDSAgent:
         self.stats_n_messages = 0
         self.stats_n_step_m = 0
         self.stats_n_step_m_list = []
+        self.stats_nei_list = []
         # nei
         self.nei_list = []
         self.nei_dict = {}
@@ -61,10 +62,11 @@ class KSDSAgent:
             e_constr_dict = {node.xy_name: [] for node in self.nodes}
         if not perm_constr_dict:
             perm_constr_dict = {node.xy_name: [] for node in self.nodes}
-        print(f'\n ---------- ({kwargs["alg_name"]}) '
-              f'[number_of_finished: {kwargs["number_of_finished"]}]'
-              f'[k_step_iter: {kwargs["k_step_iteration"]}]'
-              f'[small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
+        if kwargs["small_iteration"] > 0:
+            print(f'\n ---------- ({kwargs["alg_name"]}) '
+                  f'[number_of_finished: {kwargs["number_of_finished"]}]'
+                  f'[k_step_iter: {kwargs["k_step_iteration"]}]'
+                  f'[small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
         if k_time:
             new_path, a_s_info = a_star(start=self.curr_node, goal=self.goal_node, nodes=self.nodes,
                                         nodes_dict=self.nodes_dict, h_func=self.h_func,
@@ -101,6 +103,8 @@ class KSDSAgent:
                     self.nei_dict[agent.name] = agent
                     self.nei_h_dict[agent.name] = None
                     self.nei_paths_dict[agent.name] = None
+
+        self.stats_nei_list.append(len(self.nei_list))
 
     def init_plan(self, **kwargs):
         k = kwargs['k']
@@ -473,6 +477,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['m_per_step'] = np.sum([np.mean(agent.stats_n_step_m_list) for agent in agents])
                 alg_info['n_steps'] = k_step_iteration,
                 alg_info['n_small_iters'] = np.mean(stats_small_iters_list),
+                alg_info['n_nei'] = np.sum([np.mean(agent.stats_nei_list) for agent in agents])
             return cut_full_plans, alg_info
 
         if k_step_iteration > k_step_iteration_limit-1:
