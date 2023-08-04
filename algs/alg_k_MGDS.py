@@ -7,105 +7,124 @@ import pstats
 from functions import *
 
 from algs.alg_a_star_space_time import a_star
+from algs.alg_k_SDS import KSDSAgent
 from algs.test_mapf_alg import test_mapf_alg_from_pic
 from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
     limit_is_crossed, get_agents_in_conf, check_plan, just_check_plans, get_alg_info_dict, iteration_print
 
 
-class KMGDSAgent:
-    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func,
-                 plotter, middle_plot,
-                 iter_limit=1e100, map_dim=None):
-        self.index = index
-        self.name = f'agent_{index}'
-        self.start_node = start_node
-        self.curr_node = start_node
-        self.goal_node = goal_node
-        self.nodes = nodes
-        self.nodes_dict = nodes_dict
-        self.h_func = h_func
-        self.plotter = plotter
-        self.middle_plot = middle_plot
-        self.iter_limit = iter_limit
-        self.path = []
-        self.full_path = []
-        self.map_dim = map_dim
+class KMGDSAgent(KSDSAgent):
+    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit=1e100,
+                 map_dim=None):
+        super().__init__(index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
+                         map_dim)
+        # self.index = index
+        # self.name = f'agent_{index}'
+        # self.start_node = start_node
+        # self.curr_node = start_node
+        # self.goal_node = goal_node
+        # self.nodes = nodes
+        # self.nodes_dict = nodes_dict
+        # self.h_func = h_func
+        # self.plotter = plotter
+        # self.middle_plot = middle_plot
+        # self.iter_limit = iter_limit
+        # self.path = []
+        # self.path_names = []
+        # self.h = 0
+        # self.full_path = []
+        # self.full_path_names = []
+        # self.map_dim = map_dim
 
-        self.stats_n_closed = 0
-        self.stats_n_calls = 0
-        self.stats_runtime = 0
-        self.stats_n_messages = 0
-        self.stats_confs_per_iter = []
+        # stats
+        # self.stats_n_closed = 0
+        # self.stats_n_calls = 0
+        # self.stats_runtime = 0
+        # self.stats_n_messages = 0
+        # self.stats_confs_per_iter = []
+        # self.stats_n_step_m = 0
+        # self.stats_n_step_m_list = []
+        # self.stats_nei_list = []
         # nei
-        self.nei_list = []
-        self.nei_dict = {}
-        self.nei_paths_dict = {}
         self.gain = 0
-        self.conf_agents_names = []
         self.nei_gains_dict = {}
+        # self.nei_list = []
+        # self.nei_dict = {}
+        # self.nei_paths_dict = {}
+        # self.nei_h_dict = {}
+        # self.conf_agents_names = []
+        # self.names_to_consider_list = []
 
     def update_nei(self, agents, **kwargs):
         k = kwargs['k']
+        h = kwargs['h']
+        # nei_r = k
+        nei_r = h
         self.gain = 0
+        self.nei_gains_dict = {}
         self.conf_agents_names = []
-        self.nei_list, self.nei_dict, self.nei_paths_dict, self.nei_gains_dict = [], {}, {}, {}
-        nei_dist_const = 2 * k + 1
+        self.nei_list, self.nei_dict, self.nei_paths_dict, self.nei_h_dict = [], {}, {}, {}
+        nei_dist_const = 2 * nei_r + 1
         for agent in agents:
             if agent.name != self.name:
                 curr_distance = manhattan_distance_nodes(self.curr_node, agent.curr_node)
                 if curr_distance <= nei_dist_const:
                     self.nei_list.append(agent)
                     self.nei_dict[agent.name] = agent
+                    self.nei_h_dict[agent.name] = None
                     self.nei_paths_dict[agent.name] = None
                     self.nei_gains_dict[agent.name] = None
 
-    def calc_a_star_plan(self, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, **kwargs):
-        start_time = time.time()
-        if not v_constr_dict:
-            v_constr_dict = {node.xy_name: [] for node in self.nodes}
-        if not e_constr_dict:
-            e_constr_dict = {node.xy_name: [] for node in self.nodes}
-        if not perm_constr_dict:
-            perm_constr_dict = {node.xy_name: [] for node in self.nodes}
+    # def calc_a_star_plan(self, v_constr_dict=None, e_constr_dict=None, perm_constr_dict=None, **kwargs):
+    #     start_time = time.time()
+    #     if not v_constr_dict:
+    #         v_constr_dict = {node.xy_name: [] for node in self.nodes}
+    #     if not e_constr_dict:
+    #         e_constr_dict = {node.xy_name: [] for node in self.nodes}
+    #     if not perm_constr_dict:
+    #         perm_constr_dict = {node.xy_name: [] for node in self.nodes}
+    #
+    #     print(
+    #         f'\n ---------- ({kwargs["alg_name"]}) [k_step_iter: {kwargs["k_step_iteration"]}][small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
+    #     a_star_func = kwargs['a_star_func']
+    #     new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node,
+    #                                      nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
+    #                                      v_constr_dict=v_constr_dict,
+    #                                      e_constr_dict=e_constr_dict,
+    #                                      perm_constr_dict=perm_constr_dict,
+    #                                      plotter=self.plotter, middle_plot=self.middle_plot,
+    #                                      iter_limit=self.iter_limit)
+    #     if new_path is not None:
+    #         self.path = new_path
+    #         succeeded = True
+    #     else:
+    #         # self.path = [self.curr_node]
+    #         succeeded = False
+    #     return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
 
-        print(
-            f'\n ---------- ({kwargs["alg_name"]}) [k_step_iter: {kwargs["k_step_iteration"]}][small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
-        a_star_func = kwargs['a_star_func']
-        new_path, a_s_info = a_star_func(start=self.curr_node, goal=self.goal_node,
-                                         nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
-                                         v_constr_dict=v_constr_dict,
-                                         e_constr_dict=e_constr_dict,
-                                         perm_constr_dict=perm_constr_dict,
-                                         plotter=self.plotter, middle_plot=self.middle_plot,
-                                         iter_limit=self.iter_limit)
-        if new_path is not None:
-            self.path = new_path
-            succeeded = True
-        else:
-            # self.path = [self.curr_node]
-            succeeded = False
-        return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
+    # def init_plan(self, **kwargs):
+    #     if len(self.path) == 0:
+    #         succeeded, info = self.calc_a_star_plan(**kwargs)
+    #         return True, info
+    #     return False, {}
 
-    def init_plan(self, **kwargs):
-        if len(self.path) == 0:
-            succeeded, info = self.calc_a_star_plan(**kwargs)
-            return True, info
-        return False, {}
-
-    def exchange_paths(self):
-        for nei in self.nei_list:
-            # nei.nei_paths_dict[agent.name] = agent.path[:k]
-            nei.nei_paths_dict[self.name] = self.path
-            self.stats_n_messages += 1
+    # def exchange_paths(self):
+    #     for nei in self.nei_list:
+    #         # nei.nei_paths_dict[agent.name] = agent.path[:k]
+    #         nei.nei_paths_dict[self.name] = self.path
+    #         self.stats_n_messages += 1
 
     def exchange_gains(self, **kwargs):
         k = kwargs['k']
+        h = kwargs['h']
+        # check_r = k
+        check_r = h
         # update gain
         self.gain = 0
         self.conf_agents_names = []
-        nei_k_steps_paths_dict = {agent_name: path[:k] for agent_name, path in self.nei_paths_dict.items()}
-        conf_list = c_v_check_for_agent(self.name, self.path[:k], nei_k_steps_paths_dict)
-        c_e_list = c_e_check_for_agent(self.name, self.path[:k], nei_k_steps_paths_dict)
+        nei_k_steps_paths_dict = {agent_name: path[:check_r] for agent_name, path in self.nei_paths_dict.items()}
+        conf_list = c_v_check_for_agent(self.name, self.path[:check_r], nei_k_steps_paths_dict)
+        c_e_list = c_e_check_for_agent(self.name, self.path[:check_r], nei_k_steps_paths_dict)
         conf_list.extend(c_e_list)
         conf_agents_names = []
         for conf in conf_list:
@@ -117,6 +136,7 @@ class KMGDSAgent:
         for nei in self.nei_list:
             nei.nei_gains_dict[self.name] = self.gain
             self.stats_n_messages += 1
+            self.stats_n_step_m += 1
 
     def replan(self, **kwargs):
         if self.gain == 0:
@@ -174,28 +194,28 @@ class KMGDSAgent:
         else:
             return 0.1
 
-    def update_full_path(self, **kwargs):
-        k = kwargs['k']
-        goal_name = self.goal_node.xy_name
+    # def update_full_path(self, **kwargs):
+    #     k = kwargs['k']
+    #     goal_name = self.goal_node.xy_name
+    #
+    #     while len(self.path) < k:
+    #         self.path.append(self.path[-1])
+    #
+    #     self.full_path.extend(self.path[:k])
+    #     self.curr_node = self.full_path[-1]
+    #     self.path = self.path[k-1:]
+    #     return self.curr_node.xy_name == goal_name
 
-        while len(self.path) < k:
-            self.path.append(self.path[-1])
-
-        self.full_path.extend(self.path[:k])
-        self.curr_node = self.full_path[-1]
-        self.path = self.path[k-1:]
-        return self.curr_node.xy_name == goal_name
-
-    def cut_back_full_path(self):
-        len_full_path = len(self.full_path)
-        if len_full_path > 1:
-            if self.full_path[-1].xy_name == self.goal_node.xy_name:
-                for backwards_node in self.full_path[:-1][::-1]:
-                    if backwards_node.xy_name == self.goal_node.xy_name:
-                        len_full_path -= 1
-                    else:
-                        break
-        self.full_path = self.full_path[:len_full_path]
+    # def cut_back_full_path(self):
+    #     len_full_path = len(self.full_path)
+    #     if len_full_path > 1:
+    #         if self.full_path[-1].xy_name == self.goal_node.xy_name:
+    #             for backwards_node in self.full_path[:-1][::-1]:
+    #                 if backwards_node.xy_name == self.goal_node.xy_name:
+    #                     len_full_path -= 1
+    #                 else:
+    #                     break
+    #     self.full_path = self.full_path[:len_full_path]
 
 
 def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim):

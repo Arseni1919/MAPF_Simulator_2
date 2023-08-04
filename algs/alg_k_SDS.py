@@ -39,6 +39,7 @@ class KSDSAgent:
         self.full_path_names = []
         self.map_dim = map_dim
 
+        # stats
         self.stats_n_closed = 0
         self.stats_n_calls = 0
         self.stats_runtime = 0
@@ -319,8 +320,9 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
         # succeeded, info = agent.calc_a_star_plan(**kwargs)
         succeeded, info = agent.init_plan(**kwargs)
         # stats
-        runtime += time.time() - start_time
-        runtime_dist.append(time.time() - start_time)
+        end_time = time.time() - start_time
+        runtime += end_time
+        runtime_dist.append(end_time)
         if succeeded:
             a_star_calls_counter += 1
             a_star_n_closed += info['a_s_info']['n_closed']
@@ -349,8 +351,9 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
         start_time = time.time()
         agent.exchange_paths()
         # stats
-        runtime += time.time() - start_time
-        runtime_dist.append(time.time() - start_time)
+        end_time = time.time() - start_time
+        runtime += end_time
+        runtime_dist.append(end_time)
 
     # check for collisions
     plans = {agent.name: agent.path for agent in agents}
@@ -373,8 +376,9 @@ def all_replan(agents: List[KSDSAgent], **kwargs):
         start_time = time.time()
         succeeded, info = agent.replan(**kwargs)
         # stats
-        runtime += time.time() - start_time
-        runtime_dist.append(time.time() - start_time)
+        end_time = time.time() - start_time
+        runtime += end_time
+        runtime_dist.append(end_time)
         if len(info) > 0:
             a_star_calls_counter += 1
             a_star_n_closed += info['a_s_info']['n_closed']
