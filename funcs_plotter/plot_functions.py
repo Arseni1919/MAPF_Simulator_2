@@ -588,7 +588,7 @@ def plot_n_nei(ax, info):
                 if 'color' in alg_info:
                     ax.plot(x_list, nei_list, '-v', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
 
-    ax.set_ylabel('neighbours pre agent')
+    ax.set_ylabel('sum of neighbours')
     ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
     ax.set_xticks(n_agents_list)
     ax.set_xlabel('N agents')

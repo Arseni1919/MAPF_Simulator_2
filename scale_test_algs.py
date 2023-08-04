@@ -303,14 +303,14 @@ def main():
         #     'color': 'tab:blue',
         # }),
 
-        'SDS': (run_sds, {
-            'a_star_func': a_star,
-            # 'limit_type': 'dist_time',
-            'limit_type': 'norm_time',
-            'decision_type': 'min_prev_2',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
+        # 'SDS': (run_sds, {
+        #     'a_star_func': a_star,
+        #     # 'limit_type': 'dist_time',
+        #     'limit_type': 'norm_time',
+        #     'decision_type': 'min_prev_2',
+        #     'dist': True,
+        #     'color': 'tab:orange',
+        # }),
 
 
         # 'MGDS': (run_mgds, {
@@ -333,9 +333,42 @@ def main():
         #     'color': 'tab:olive',
         # }),
 
-        '15-SDS-0.9-0.9': (run_k_sds, {
+        '30-2-SDS': (run_k_sds, {
             'a_star_func': a_star,
-            'k': 15,
+            'k': 30,
+            'h': 2,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.9,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'lime',
+        }),
+
+        '30-5-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 30,
+            'h': 5,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.9,
+            # 'limit_type': 'dist_time',
+            'limit_type': 'norm_time',
+            'dist': True,
+            'color': 'orange',
+        }),
+
+        '30-15-SDS': (run_k_sds, {
+            'a_star_func': a_star,
+            'k': 30,
+            'h': 15,
             'p_h_type': 'max_prev',
             'alpha': 0.5,
             # 'pref_paths_type': 'pref_index',
@@ -348,24 +381,10 @@ def main():
             'color': 'tab:blue',
         }),
 
-        '15-SDS-0.1-0.9': (run_k_sds, {
+        '30-30-SDS': (run_k_sds, {
             'a_star_func': a_star,
-            'k': 15,
-            'p_h_type': 'max_prev',
-            'alpha': 0.5,
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.1,
-            # 'limit_type': 'dist_time',
-            'limit_type': 'norm_time',
-            'dist': True,
-            'color': 'navy',
-        }),
-
-        '5-SDS-0.9-0.9': (run_k_sds, {
-            'a_star_func': a_star,
-            'k': 5,
+            'k': 30,
+            'h': 30,
             'p_h_type': 'max_prev',
             'alpha': 0.5,
             # 'pref_paths_type': 'pref_index',
@@ -375,23 +394,38 @@ def main():
             # 'limit_type': 'dist_time',
             'limit_type': 'norm_time',
             'dist': True,
-            'color': 'tab:purple',
+            'color': 'navy',
         }),
 
-        '5-SDS-0.1-0.9': (run_k_sds, {
-            'a_star_func': a_star,
-            'k': 5,
-            'p_h_type': 'max_prev',
-            'alpha': 0.5,
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.1,
-            # 'limit_type': 'dist_time',
-            'limit_type': 'norm_time',
-            'dist': True,
-            'color': 'gray',
-        }),
+        # '5-SDS-0.9-0.9': (run_k_sds, {
+        #     'a_star_func': a_star,
+        #     'k': 5,
+        #     'p_h_type': 'max_prev',
+        #     'alpha': 0.5,
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.9,
+        #     # 'limit_type': 'dist_time',
+        #     'limit_type': 'norm_time',
+        #     'dist': True,
+        #     'color': 'tab:purple',
+        # }),
+        #
+        # '5-SDS-0.1-0.9': (run_k_sds, {
+        #     'a_star_func': a_star,
+        #     'k': 5,
+        #     'p_h_type': 'max_prev',
+        #     'alpha': 0.5,
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.1,
+        #     # 'limit_type': 'dist_time',
+        #     'limit_type': 'norm_time',
+        #     'dist': True,
+        #     'color': 'gray',
+        # }),
 
 
 
@@ -506,9 +540,9 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 30, 50, 70, 90, 110]
-    # n_agents_list = [50, 70, 90, 110, 130, 150]
+    n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
-    n_agents_list = [100, 200, 300, 400, 500, 600, 700]
+    # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]  # !!!!!!!!!!!!!!!!!

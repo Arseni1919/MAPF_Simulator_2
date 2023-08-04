@@ -92,9 +92,12 @@ class KSDSAgent:
 
     def update_nei(self, agents, **kwargs):
         k = kwargs['k']
+        h = kwargs['h']
+        # nei_r = k
+        nei_r = h
         self.conf_agents_names = []
         self.nei_list, self.nei_dict, self.nei_paths_dict, self.nei_h_dict = [], {}, {}, {}
-        nei_dist_const = 2 * k + 1
+        nei_dist_const = 2 * nei_r + 1
         for agent in agents:
             if agent.name != self.name:
                 curr_distance = manhattan_distance_nodes(self.curr_node, agent.curr_node)
@@ -227,7 +230,9 @@ class KSDSAgent:
 
     def update_full_path(self, **kwargs):
         k = kwargs['k']
-        step = k + 1
+        h = kwargs['h']
+        step = h + 1
+        # step = k + 1
         # step = 1
         goal_name = self.goal_node.xy_name
 
@@ -334,6 +339,9 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
 
 def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
     k = kwargs['k']
+    h = kwargs['h']
+    # check_radius = k
+    check_radius = h
     runtime, runtime_dist = 0, []
 
     # exchange paths
@@ -346,7 +354,7 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
 
     # check for collisions
     plans = {agent.name: agent.path for agent in agents}
-    there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, k+1, immediate=True)
+    there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, check_radius+1, immediate=True)
     # there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, k+1, immediate=False)
 
     func_info = {
@@ -404,7 +412,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     runtime = 0
     if 'k' not in kwargs:
         raise RuntimeError("'k' not in kwargs")
-    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 700
+    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 200
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
