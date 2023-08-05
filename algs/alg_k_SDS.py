@@ -518,7 +518,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 700
+    n_agents = 300
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
@@ -531,19 +531,31 @@ def main():
     PLOT_PER = 1
     PLOT_RATE = 0.5
 
-
-    # for the algorithm
+    # --------------------------------------------------- #
+    # --------------------------------------------------- #
+    # for the algorithms
+    alg_name = 'k-SDS'
     k = 10
     h = 10
     p_h_type = 'max_prev'
     # p_h_type = 'simple'
-    alpha = 0.5
+    alpha = 1.0
     # pref_paths_type = 'pref_index'
     pref_paths_type = 'pref_path_length'
     # p_h = 1
     # p_l = 1
     p_h = 0.9
     p_l = 0.9
+
+    # for the PP algorithm
+    # alg_name = 'k-PrP'
+    # k = 10
+    # h = 10
+    # p_h_type = 'simple'
+    # alpha = 1.0
+    # pref_paths_type = 'pref_index'
+    # p_h = 1.0
+    # p_l = 0.1
 
     to_use_profiler = True
     # to_use_profiler = False
@@ -555,7 +567,7 @@ def main():
         result, info = test_mapf_alg_from_pic(
             algorithm=run_k_sds,
             img_dir=img_dir,
-            alg_name='k-SDS',
+            alg_name=alg_name,
             k=k,
             h=h,
             p_h_type=p_h_type,
