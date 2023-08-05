@@ -303,7 +303,7 @@ def main():
             'color': 'tab:blue',
         }),
 
-        '30-PrP': (run_k_sds, {
+        '30-PrP-0.1-1': (run_k_sds, {
             'a_star_func': a_star,
             'k': 30,
             'h': 30,
