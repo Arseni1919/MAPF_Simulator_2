@@ -66,8 +66,10 @@ class Plotter:
         plt.pause(0.01)
         # plt.show()
 
-    def plot_mapf_paths(self, paths_dict, nodes=None, plot_per=10, plot_rate=0.01):
+    def plot_mapf_paths(self, paths_dict, nodes=None, **kwargs):
         plt.close()
+        plot_per = kwargs['plot_per']
+        plot_rate = kwargs['plot_rate']
         self.fig, self.ax = plt.subplots()
         longest_path = max([len(path) for path in paths_dict.values()])
 
@@ -76,6 +78,7 @@ class Plotter:
                 info = {
                     'paths_dict': paths_dict, 'nodes': nodes,
                     'side_x': self.side_x, 'side_y': self.side_y, 't': t,
+                    'img_dir': kwargs['img_dir'] if 'img_dir' in kwargs else '',
                 }
                 plot_step_in_mapf_paths(self.ax, info)
                 # plt.pause(1)

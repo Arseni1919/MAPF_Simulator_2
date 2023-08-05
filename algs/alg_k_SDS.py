@@ -125,12 +125,11 @@ class KSDSAgent:
             self.stats_n_messages += 1
             self.stats_n_step_m += 1
 
-    def update_conf_agents_names(self, **kwargs):
-        k = kwargs['k']
+    def update_conf_agents_names(self, check_r):
         self.conf_agents_names = []
         # self.nei_paths_dict
-        conf_list = check_single_agent_k_step_c_v(self.name, self.path, self.nei_paths_dict, k+1, immediate=False)
-        c_e_list = check_single_agent_k_step_c_e(self.name, self.path, self.nei_paths_dict, k+1, immediate=False)
+        conf_list = check_single_agent_k_step_c_v(self.name, self.path, self.nei_paths_dict, check_r+1, immediate=False)
+        c_e_list = check_single_agent_k_step_c_e(self.name, self.path, self.nei_paths_dict, check_r+1, immediate=False)
         conf_list.extend(c_e_list)
         conf_agents_names = []
         for conf in conf_list:
@@ -182,10 +181,28 @@ class KSDSAgent:
         self.names_to_consider_list = names_to_consider_list
         return paths_to_consider_dict, names_to_consider_list
 
+    @staticmethod
+    def k_transform(**kwargs):
+        k = kwargs['k']
+        # use also kwargs['k_step_iteration'] and kwargs['k_step_iteration_limit']
+        # k = k + k * round(kwargs['small_iteration'] / 20)
+        ratio = kwargs['k_step_iteration'] / kwargs['k_step_iteration_limit']
+        if ratio > 0.95:
+            return k * 8
+        if ratio > 0.9:
+            return k * 4
+        if ratio > 0.8:
+            return k * 2
+        return k
+
     def replan(self, **kwargs):
         k = kwargs['k']
-        # k = k + k * round(kwargs['small_iteration'] / 20)
-        self.update_conf_agents_names(**kwargs)
+        h = kwargs['h']
+        # check_r = k
+        # check_r = h
+        check_r = self.k_transform(**kwargs)
+        self.update_conf_agents_names(check_r)
+        # self.update_conf_agents_names(h)
         if len(self.conf_agents_names) == 0:
             return False, {}
         # probabilities to use: p_ch, p_h, p_l
@@ -195,8 +212,8 @@ class KSDSAgent:
             v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
             # v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
             full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
-            perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, k)
-            succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=k, **kwargs)
+            perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
+            succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=check_r, **kwargs)
             return succeeded, info
         return False, {}
 
@@ -358,7 +375,7 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
     # check for collisions
     plans = {agent.name: agent.path for agent in agents}
     there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, check_radius+1, immediate=True)
-    # there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, k+1, immediate=False)
+    # there_are_collisions, c_v, c_e = just_check_k_step_plans(plans, check_radius+1, immediate=False)
 
     func_info = {
         'runtime': runtime,
@@ -415,14 +432,16 @@ def all_cut_full_paths(agents: List[KSDSAgent], **kwargs):
 def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     if 'k' not in kwargs:
         raise RuntimeError("'k' not in kwargs")
-    k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 200
+    if 'k_step_iteration_limit' in kwargs:
+        k_step_iteration_limit = kwargs['k_step_iteration_limit']
+    else:
+        k_step_iteration_limit = 200
+        kwargs['k_step_iteration_limit'] = k_step_iteration_limit
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
     final_plot = kwargs['final_plot'] if 'final_plot' in kwargs else True
-    plot_per = kwargs['plot_per'] if 'plot_per' in kwargs else 10
-    plot_rate = kwargs['plot_rate'] if 'plot_rate' in kwargs else 1
     map_dim = kwargs['map_dim'] if 'map_dim' in kwargs else None
     stats_small_iters_list = []
     number_of_finished = 0
@@ -478,9 +497,8 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f"runtime: {alg_info['runtime']}\n{alg_info['dist_runtime']=}")
-                    print(f"a_star_n_closed: {alg_info['a_star_n_closed']}\n{sum(alg_info['a_star_n_closed_dist'])=}")
-                    plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, plot_per=plot_per,
-                                            plot_rate=plot_rate)
+                    print(f"a_star_n_closed: {sum(alg_info['a_star_n_closed'])}\n{alg_info['a_star_n_closed_dist']=}")
+                    plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, **kwargs)
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
@@ -500,23 +518,23 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 300
+    n_agents = 700
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
-    random_seed = True
-    # random_seed = False
-    seed = 277
+    # random_seed = True
+    random_seed = False
+    seed = 839
     PLOT_PER = 1
     PLOT_RATE = 0.5
 
 
     # for the algorithm
-    k = 30
-    h = 15
+    k = 10
+    h = 10
     p_h_type = 'max_prev'
     # p_h_type = 'simple'
     alpha = 0.5

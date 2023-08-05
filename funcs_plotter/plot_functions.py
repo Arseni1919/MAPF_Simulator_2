@@ -184,6 +184,7 @@ def plot_step_in_mapf_paths(ax, info):
     side_x = info['side_x']
     side_y = info['side_y']
     t = info['t']
+    img_dir = info['img_dir']
 
     field = np.zeros((side_x, side_y))
 
@@ -208,7 +209,7 @@ def plot_step_in_mapf_paths(ax, info):
         field[path[-1].x, path[-1].y] = 5
 
     ax.imshow(field, origin='lower')
-    ax.set_title(f'MAPF Paths (time: {t})')
+    ax.set_title(f'Paths in <{img_dir}> (time: {t})')
 
 
 def plot_success_rate(ax, info):
