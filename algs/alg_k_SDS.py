@@ -413,7 +413,6 @@ def all_cut_full_paths(agents: List[KSDSAgent], **kwargs):
 
 
 def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
-    runtime = 0
     if 'k' not in kwargs:
         raise RuntimeError("'k' not in kwargs")
     k_step_iteration_limit = kwargs['k_step_iteration_limit'] if 'k_step_iteration_limit' in kwargs else 200
@@ -465,7 +464,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             return None, {'agents': agents, 'success_rate': 0}
 
         full_plans = {agent.name: agent.full_path for agent in agents}
-        iteration_print(agents, full_plans, alg_name, alg_info, runtime, k_step_iteration)
+        iteration_print(agents, full_plans, alg_name, alg_info, alg_info['runtime'], k_step_iteration)
         if all_paths_are_finished:
             # there_is_col_0, c_v_0, c_e_0, cost_0 = just_check_plans(full_plans)
             all_cut_full_paths(agents, **kwargs)
@@ -478,6 +477,8 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
+                    print(f"runtime: {alg_info['runtime']}\n{alg_info['dist_runtime']=}")
+                    print(f"a_star_n_closed: {alg_info['a_star_n_closed']}\n{alg_info['a_star_n_closed_dist']=}")
                     plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, plot_per=plot_per,
                                             plot_rate=plot_rate)
                 alg_info['success_rate'] = 1
@@ -488,6 +489,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['n_steps'] = k_step_iteration,
                 alg_info['n_small_iters'] = np.mean(stats_small_iters_list),
                 alg_info['n_nei'] = np.sum([np.mean(agent.stats_nei_list) for agent in agents])
+                alg_info['avr_n_nei'] = np.mean([np.mean(agent.stats_nei_list) for agent in agents])
             return cut_full_plans, alg_info
 
         if k_step_iteration > k_step_iteration_limit-1:
@@ -498,22 +500,23 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 60
+    n_agents = 300
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
-    # random_seed = True
-    random_seed = False
+    random_seed = True
+    # random_seed = False
     seed = 277
     PLOT_PER = 1
     PLOT_RATE = 0.5
 
 
     # for the algorithm
-    k = 3
+    k = 30
+    h = 15
     p_h_type = 'max_prev'
     # p_h_type = 'simple'
     alpha = 0.5
@@ -522,7 +525,7 @@ def main():
     # p_h = 1
     # p_l = 1
     p_h = 0.9
-    p_l = 0.1
+    p_l = 0.9
 
     to_use_profiler = True
     # to_use_profiler = False
@@ -536,6 +539,7 @@ def main():
             img_dir=img_dir,
             alg_name='k-SDS',
             k=k,
+            h=h,
             p_h_type=p_h_type,
             alpha=alpha,
             p_h=p_h,
