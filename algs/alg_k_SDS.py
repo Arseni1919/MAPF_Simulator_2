@@ -478,7 +478,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f"runtime: {alg_info['runtime']}\n{alg_info['dist_runtime']=}")
-                    print(f"a_star_n_closed: {alg_info['a_star_n_closed']}\n{alg_info['a_star_n_closed_dist']=}")
+                    print(f"a_star_n_closed: {alg_info['a_star_n_closed']}\n{sum(alg_info['a_star_n_closed_dist'])=}")
                     plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, plot_per=plot_per,
                                             plot_rate=plot_rate)
                 alg_info['success_rate'] = 1
