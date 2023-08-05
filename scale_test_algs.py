@@ -579,9 +579,10 @@ def main():
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
     # runs_per_n_agents = 5
+    runs_per_n_agents = 4
+    # runs_per_n_agents = 3
     # runs_per_n_agents = 2
     # runs_per_n_agents = 1
-    runs_per_n_agents = 3
 
     random_seed = True
     # random_seed = False
