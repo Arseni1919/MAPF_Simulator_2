@@ -210,7 +210,6 @@ class KSDSAgent:
         if random.random() < p_ch:
             paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
             v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
-            # v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
             full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
             perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
             succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=check_r, **kwargs)
@@ -430,8 +429,8 @@ def all_cut_full_paths(agents: List[KSDSAgent], **kwargs):
 
 
 def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
-    if 'k' not in kwargs:
-        raise RuntimeError("'k' not in kwargs")
+    if 'k' not in kwargs or 'h' not in kwargs:
+        raise RuntimeError("'k' or 'h' not in kwargs")
     if 'k_step_iteration_limit' in kwargs:
         k_step_iteration_limit = kwargs['k_step_iteration_limit']
     else:
@@ -473,6 +472,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
             if not there_are_collisions:
                 break
+
             func_info = all_replan(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
@@ -556,6 +556,8 @@ def main():
     # pref_paths_type = 'pref_index'
     # p_h = 1.0
     # p_l = 0.1
+    # --------------------------------------------------- #
+    # --------------------------------------------------- #
 
     to_use_profiler = True
     # to_use_profiler = False
