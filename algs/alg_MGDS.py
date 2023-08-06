@@ -78,8 +78,10 @@ class MGDSAgent:
         return {'runtime': runtime}
 
     def exchange_gains(self, agents):
-        self.other_gains = {agent.name: agent.gain for agent in agents if agent.name != self.name}
-        self.stats_n_messages += len(self.agents_in_confs) - 1
+        for agent in agents:
+            if agent.name != self.name and agent.name in self.agents_in_confs:
+                self.other_gains[agent.name] = agent.gain
+                self.stats_n_messages += 1
 
     def decision_bool(self, agents_dict):
         if len(self.agents_in_confs) == 0:
@@ -212,8 +214,11 @@ def run_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['runtime'] = runtime
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
-                alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
-
+                alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
+                alg_info['m_per_step'] = np.sum([agent.stats_n_messages for agent in agents])
+                alg_info['n_steps'] = 1,
+                alg_info['n_small_iters'] = iteration,
+                alg_info['n_nei'] = (len(agents) - 1) ** 2
                 return plan, alg_info
 
     return plan, alg_info

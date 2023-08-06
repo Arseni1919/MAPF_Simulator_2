@@ -275,7 +275,6 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['n_steps'] = 1,
                 alg_info['n_small_iters'] = iteration,
                 alg_info['n_nei'] = (len(agents) - 1) ** 2
-                # alg_info['confs_per_iter'] = np.sum([agent.stats_confs_per_iter for agent in agents], 0).tolist()
                 return plan, alg_info
 
     # partial order

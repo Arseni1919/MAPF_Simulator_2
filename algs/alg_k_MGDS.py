@@ -42,7 +42,7 @@ class KMGDSAgent(KSDSAgent):
                     self.nei_dict[agent.name] = agent
                     self.nei_h_dict[agent.name] = None
                     self.nei_paths_dict[agent.name] = None
-                    self.nei_gains_dict[agent.name] = None
+                    self.nei_gains_dict[agent.name] = 0
 
     def exchange_gains(self, **kwargs):
         # update gain
@@ -53,9 +53,11 @@ class KMGDSAgent(KSDSAgent):
 
         # send the gain to nei
         for nei in self.nei_list:
-            nei.nei_gains_dict[self.name] = self.gain
-            self.stats_n_messages += 1
-            self.stats_n_step_m += 1
+            if nei.name in self.conf_agents_names:
+                nei.nei_gains_dict[self.name] = self.gain
+                self.stats_n_messages += 1
+                self.stats_n_step_m += 1
+        return self.gain
 
     def pref_max_gain(self, **kwargs):
         p_gain_h = kwargs['p_gain_h']
@@ -153,16 +155,19 @@ def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, m
 
 def all_exchange_gains(agents: List[KMGDSAgent], **kwargs):
     runtime, runtime_dist = 0, []
+    gain_list = []
 
     # exchange paths
     for agent in agents:
         start_time = time.time()
-        agent.exchange_gains(**kwargs)
+        gain = agent.exchange_gains(**kwargs)
+        gain_list.append(gain)
         # stats
         end_time = time.time() - start_time
         runtime += end_time
         runtime_dist.append(end_time)
-
+    if sum(gain_list) == 0:
+        raise RuntimeError('no no')
     func_info = {
         'runtime': runtime,
         'dist_runtime': max(runtime_dist)
@@ -264,11 +269,11 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 300
+    n_agents = 400
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # random_seed = True
@@ -281,7 +286,7 @@ def main():
     # --------------------------------------------------- #
     # for the algorithms
     alg_name = 'k-MGDS'
-    k = 5
+    k = 30
     h = 5
     p_gain_h = 0.9
     p_gain_l = 0.1
@@ -289,8 +294,8 @@ def main():
     pref_paths_type = 'pref_path_length'
     # p_h = 1
     # p_l = 1
-    p_h = 0.95
-    p_l = 0.95
+    p_h = 0.9
+    p_l = 0.9
     # --------------------------------------------------- #
     # --------------------------------------------------- #
 
