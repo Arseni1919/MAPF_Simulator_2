@@ -44,6 +44,8 @@ class KMGDSAgent(KSDSAgent):
                     self.nei_paths_dict[agent.name] = None
                     self.nei_gains_dict[agent.name] = 0
 
+        self.stats_nei_list.append(len(self.nei_list))
+
     def exchange_gains(self, **kwargs):
         # update gain
         self.gain = 0
@@ -255,8 +257,8 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
                 alg_info['m_per_step'] = np.sum([np.mean(agent.stats_n_step_m_list) for agent in agents])
-                alg_info['n_steps'] = k_step_iteration,
-                alg_info['n_small_iters'] = np.mean(stats_small_iters_list),
+                alg_info['n_steps'] = k_step_iteration
+                alg_info['n_small_iters'] = np.mean(stats_small_iters_list)
                 alg_info['n_nei'] = np.sum([np.mean(agent.stats_nei_list) for agent in agents])
                 alg_info['avr_n_nei'] = np.mean([np.mean(agent.stats_nei_list) for agent in agents])
             return cut_full_plans, alg_info
@@ -285,7 +287,6 @@ def main():
     # --------------------------------------------------- #
     # --------------------------------------------------- #
     # for the algorithms
-    alg_name = 'k-MGDS'
     k = 30
     h = 5
     p_gain_h = 0.9
@@ -296,6 +297,7 @@ def main():
     # p_l = 1
     p_h = 0.9
     p_l = 0.9
+    alg_name = f'{k}-{h}-MGDS-{p_gain_l}-{p_gain_h}-{p_l}-{p_h}'
     # --------------------------------------------------- #
     # --------------------------------------------------- #
 

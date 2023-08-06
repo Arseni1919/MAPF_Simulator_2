@@ -375,9 +375,9 @@ def plot_n_messages(ax, info):
             y_list = []
             y2_list = []
             for n_agents in n_agents_list:
+                x_list.append(n_agents)
                 if is_json:
                     n_agents = str(n_agents)
-                x_list.append(n_agents)
                 y_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_messages']))
                 y2_list.append(np.mean(statistics_dict[alg_name][n_agents]['m_per_step']))
 
@@ -410,9 +410,9 @@ def plot_n_steps_iters(ax, info):
             steps_list = []
             iters_list = []
             for n_agents in n_agents_list:
+                x_list.append(n_agents)
                 if is_json:
                     n_agents = str(n_agents)
-                x_list.append(n_agents)
                 steps_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_steps']))
                 iters_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_small_iters']))
 
@@ -580,9 +580,9 @@ def plot_n_nei(ax, info):
             x_list = []
             nei_list = []
             for n_agents in n_agents_list:
+                x_list.append(n_agents)
                 if is_json:
                     n_agents = str(n_agents)
-                x_list.append(n_agents)
                 nei_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_nei']))
 
             if len(nei_list) > 0:

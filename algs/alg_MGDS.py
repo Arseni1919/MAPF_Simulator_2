@@ -207,7 +207,7 @@ def run_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
-                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
+                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, **kwargs)
 
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
@@ -216,8 +216,8 @@ def run_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
                 alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
                 alg_info['m_per_step'] = np.sum([agent.stats_n_messages for agent in agents])
-                alg_info['n_steps'] = 1,
-                alg_info['n_small_iters'] = iteration,
+                alg_info['n_steps'] = 1
+                alg_info['n_small_iters'] = iteration
                 alg_info['n_nei'] = (len(agents) - 1) ** 2
                 return plan, alg_info
 
@@ -225,6 +225,23 @@ def run_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
+    n_agents = 50
+    img_dir = 'my_map_10_10_room.map'  # 10-10
+    # img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+
+    random_seed = True
+    # random_seed = False
+    seed = 474
+    A_STAR_ITER_LIMIT = 5e7
+    A_STAR_CALLS_LIMIT = 1000
+    MAX_TIME = 5
+    PLOT_PER = 1
+    PLOT_RATE = 0.5
+
+    to_use_profiler = True
     profiler = cProfile.Profile()
     if to_use_profiler:
         profiler.enable()
@@ -233,6 +250,10 @@ def main():
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(
             algorithm=run_mgds,
+            img_dir=img_dir,
+            alg_name='MGM',  # alg
+            gain_type='rank',  # alg
+            alpha=0.9,  # alg
             n_agents=n_agents,
             random_seed=random_seed,
             seed=seed,
@@ -241,10 +262,9 @@ def main():
             a_star_iter_limit=A_STAR_ITER_LIMIT,
             a_star_calls_limit=A_STAR_CALLS_LIMIT,
             max_time=MAX_TIME,
-            plot_per=PLOT_PER,
             limit_type='norm_time',
-            alg_name='MGM',
-            gain_type='rank'
+            plot_per=PLOT_PER,
+            plot_rate=PLOT_RATE,
         )
 
         if not random_seed:
@@ -260,13 +280,4 @@ def main():
 
 
 if __name__ == '__main__':
-    random_seed = True
-    # random_seed = False
-    seed = 474
-    n_agents = 150
-    A_STAR_ITER_LIMIT = 5e7
-    A_STAR_CALLS_LIMIT = 1000
-    MAX_TIME = 5
-    PLOT_PER = 10
-    to_use_profiler = True
     main()

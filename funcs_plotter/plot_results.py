@@ -41,10 +41,12 @@ def main():
     # file_dir = f'../logs_for_graphs/2023-01-07--21-03_ALGS-3_RUNS-20_MAP-lt_gallowstemplar_n.json'
 
     # file_dir = f'../logs_for_graphs/2023-01-17--19-06_ALGS-4_RUNS-10_MAP-empty-48-48.json'  # pbs
-    file_dir = f'../logs_for_graphs/2023-01-17--21-44_ALGS-4_RUNS-10_MAP-random-64-64-10.json'  # pbs
+    # file_dir = f'../logs_for_graphs/2023-01-17--21-44_ALGS-4_RUNS-10_MAP-random-64-64-10.json'  # pbs
 
     # file_dir = '../logs_for_graphs/2023-01-17--13-51_ALGS-3_RUNS-5_MAP-random-64-64-10.json'  # mgm
     # file_dir = '../logs_for_graphs/2023-01-17--16-19_ALGS-3_RUNS-5_MAP-empty-48-48.json'  # dsa
+
+    file_dir = f'../logs_for_graphs/2023-08-06--17-00_ALGS-9_RUNS-2_MAP-empty-48-48.json'
 
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)

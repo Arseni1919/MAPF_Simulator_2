@@ -264,7 +264,7 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
-                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, plot_per=plot_per)
+                    plotter.plot_mapf_paths(paths_dict=plan, nodes=nodes, **kwargs)
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['runtime'] = runtime
@@ -272,8 +272,8 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['n_messages_per_agent'] = [agent.stats_n_messages for agent in agents]
                 alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
                 alg_info['m_per_step'] = np.sum([agent.stats_n_messages for agent in agents])
-                alg_info['n_steps'] = 1,
-                alg_info['n_small_iters'] = iteration,
+                alg_info['n_steps'] = 1
+                alg_info['n_small_iters'] = iteration
                 alg_info['n_nei'] = (len(agents) - 1) ** 2
                 return plan, alg_info
 
@@ -284,7 +284,7 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 60
+    n_agents = 50
     img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
@@ -294,7 +294,7 @@ def main():
     random_seed = True
     # random_seed = False
     seed = 277
-    PLOT_PER = 10
+    PLOT_PER = 1
     PLOT_RATE = 0.5
     to_use_profiler = True
     # to_use_profiler = False
@@ -320,12 +320,12 @@ def main():
             final_plot=True,
             a_star_iter_limit=5e7,
             max_time=5,
-            plot_per=PLOT_PER,
-            plot_rate=PLOT_RATE,
             limit_type='norm_time',
             alg_name='SDS',
             a_star_func=a_star,
-            decision_type=DECISION_TYPE
+            decision_type=DECISION_TYPE,
+            plot_per=PLOT_PER,
+            plot_rate=PLOT_RATE,
         )
 
         if not random_seed:

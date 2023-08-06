@@ -9,9 +9,9 @@ DONE:
 - insert message metric - n messages between physical steps
 - insert neighbours metric
 - check different time horizons (w) with different replanning periods (h)
+- update k-MGDS and MGDS
 
 TODO:
-- update k-MGDS and MGDS
 - prepare saving functions for results
 - prepare the flow of the paper - what experiments exactly needed to be done
 - do the big experiments with other algorithms
