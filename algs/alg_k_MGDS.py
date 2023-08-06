@@ -281,8 +281,8 @@ def main():
     # --------------------------------------------------- #
     # for the algorithms
     alg_name = 'k-MGDS'
-    k = 10
-    h = 10
+    k = 5
+    h = 5
     p_gain_h = 0.9
     p_gain_l = 0.1
     # pref_paths_type = 'pref_index'
@@ -334,7 +334,7 @@ def main():
     if to_use_profiler:
         profiler.disable()
         stats = pstats.Stats(profiler).sort_stats('cumtime')
-        stats.dump_stats('../stats/results_k_sds.pstat')
+        stats.dump_stats('../stats/results_k_mgds.pstat')
 
 
 if __name__ == '__main__':

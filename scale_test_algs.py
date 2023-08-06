@@ -296,12 +296,12 @@ def main():
         #     'color': 'tab:purple',
         # }),
 
-        'PP': (run_pp, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            'dist': False,
-            'color': 'tab:blue',
-        }),
+        # 'PP': (run_pp, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     'dist': False,
+        #     'color': 'tab:blue',
+        # }),
 
         '30-PrP-0.1-1': (run_k_sds, {
             'a_star_func': a_star,
@@ -329,7 +329,6 @@ def main():
         }),
 
         '30-30-SDS': (run_k_sds, {
-            'a_star_func': a_star,
             'k': 30,
             'h': 30,
             'p_h_type': 'max_prev',
@@ -345,25 +344,30 @@ def main():
         }),
 
 
-        # 'MGDS': (run_mgds, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'dist_time',
-        #     'gain_type': 'rank',
-        #     'alpha': 0.9,
-        #     'dist': True,
-        #     'color': 'tab:green'
-        # }),
+        'MGDS': (run_mgds, {
+            'a_star_func': a_star,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            'gain_type': 'rank',
+            'alpha': 0.9,
+            'dist': True,
+            'color': 'tab:green'
+        }),
 
 
-        # '10-MGDS': (run_k_mgds, {
-        #     'a_star_func': a_star,
-        #     'k': 10,
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'tab:olive',
-        # }),
+        '10-MGDS': (run_k_mgds, {
+            'k': 10,
+            'h': 10,
+            'p_gain_h': 0.9,
+            'p_gain_l': 0.1,
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.9,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            'dist': True,
+            'color': 'tab:olive',
+        }),
 
         # '30-2-SDS': (run_k_sds, {
         #     'a_star_func': a_star,
@@ -557,9 +561,9 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
-    n_agents_list = [10, 30, 50, 70, 90, 110]
+    # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
-    # n_agents_list = [150, 200, 250, 300, 350, 400]
+    n_agents_list = [150, 200, 250, 300, 350, 400]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
@@ -591,8 +595,8 @@ def main():
     # ------------------------------ MAPS ------------------------------ #
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # ------------------------------ LIMITS ------------------------------ #
     time_per_alg_limit = 0.5
