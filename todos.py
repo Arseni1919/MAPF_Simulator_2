@@ -10,13 +10,15 @@ DONE:
 - insert neighbours metric
 - check different time horizons (w) with different replanning periods (h)
 - update k-MGDS and MGDS
+- prepare saving functions for results
 
 TODO:
-- prepare saving functions for results
+- create Dist-PrP algorithm
 - prepare the flow of the paper - what experiments exactly needed to be done
+- prepare the paper
 - do the big experiments with other algorithms
 - implement more algorithms from literature
 - make big experiments with the algorithms from literature
 - export graphs
-- prepare the paper
+- finalize the paper
 """

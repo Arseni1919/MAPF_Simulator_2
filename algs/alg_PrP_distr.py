@@ -15,129 +15,45 @@ from algs.metrics import build_constraints, limit_is_crossed, just_check_plans, 
 from algs.metrics import get_alg_info_dict, iteration_print, just_check_k_step_plans
 
 
-class KMGDSAgent(KSDSAgent):
+class KPrPAgent(KSDSAgent):
     def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit=1e100,
                  map_dim=None):
         super().__init__(index, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
                          map_dim)
         # nei
-        self.gain = 0
-        self.nei_gains_dict = {}
+        pass
 
-    def update_nei(self, agents, **kwargs):
-        k = kwargs['k']
-        h = kwargs['h']
-        # nei_r = k
-        nei_r = h
-        self.gain = 0
-        self.nei_gains_dict = {}
-        self.conf_agents_names = []
-        self.nei_list, self.nei_dict, self.nei_paths_dict, self.nei_h_dict = [], {}, {}, {}
-        nei_dist_const = 2 * nei_r + 1
-        for agent in agents:
-            if agent.name != self.name:
-                curr_distance = manhattan_distance_nodes(self.curr_node, agent.curr_node)
-                if curr_distance <= nei_dist_const:
-                    self.nei_list.append(agent)
-                    self.nei_dict[agent.name] = agent
-                    self.nei_h_dict[agent.name] = None
-                    self.nei_paths_dict[agent.name] = None
-                    self.nei_gains_dict[agent.name] = 0
-
-        self.stats_nei_list.append(len(self.nei_list))
-
-    def exchange_gains(self, **kwargs):
-        # update gain
-        self.gain = 0
-        check_r = self.k_transform(**kwargs)
-        self.update_conf_agents_names(check_r)
-        self.gain = len(self.conf_agents_names)
-
-        # send the gain to nei
-        for nei in self.nei_list:
-            if nei.name in self.conf_agents_names:
-                nei.nei_gains_dict[self.name] = self.gain
-                self.stats_n_messages += 1
-                self.stats_n_step_m += 1
-        return self.gain
-
-    def pref_max_gain(self, **kwargs):
-        p_gain_h = kwargs['p_gain_h']
-        p_gain_l = kwargs['p_gain_l']
-
-        # the length of nei_gain_list must be more than 0
-        max_nei_gain_list = []
-        for nei_name, gain in self.nei_gains_dict.items():
-            if nei_name in self.conf_agents_names:  # the agent looks only on those it is in conflict with
-                max_nei_gain_list.append(gain)
-        max_nei_gain = max(max_nei_gain_list)
-
-        if max_nei_gain < self.gain:
-            return p_gain_h
-        elif max_nei_gain == self.gain:
-            max_nei_gain_indecies = []
-            for nei_name, gain in self.nei_gains_dict.items():
-                if gain == max_nei_gain and nei_name in self.conf_agents_names:
-                    max_nei_gain_indecies.append(self.nei_dict[nei_name].index)
-            min_nei_gain_indx = min(max_nei_gain_indecies)
-            return p_gain_h if self.index < min_nei_gain_indx else p_gain_l
+    def change_priority(self, priority, **kwargs):
+        self.index = priority
+        self.name = f'agent_{self.index}'
+        reset_type = kwargs['reset_type']
+        if reset_type == 'reset_start':
+            self.reset_start()
+        elif reset_type == 'reset_step':
+            pass
         else:
-            return p_gain_l
+            raise RuntimeError('mmmmm nope')
 
-    def pref_min_gain(self, **kwargs):
-        p_gain_h = kwargs['p_gain_h']
-        p_gain_l = kwargs['p_gain_l']
-
-        # the length of nei_gain_list must be more than 0
-        max_nei_gain_list = []
-        for nei_name, gain in self.nei_gains_dict.items():
-            if nei_name in self.conf_agents_names:  # the agent looks only on those it is in conflict with
-                max_nei_gain_list.append(gain)
-        min_nei_gain = max(max_nei_gain_list)
-
-        if self.gain < min_nei_gain:
-            return p_gain_h
-        elif min_nei_gain == self.gain:
-            max_nei_gain_indecies = []
-            for nei_name, gain in self.nei_gains_dict.items():
-                if gain == min_nei_gain and nei_name in self.conf_agents_names:
-                    max_nei_gain_indecies.append(self.nei_dict[nei_name].index)
-            min_nei_gain_indx = min(max_nei_gain_indecies)
-            if self.index < min_nei_gain_indx:
-                return p_gain_h
-        return p_gain_l
-
-    def set_p_gain(self, **kwargs):
-
-        if len(self.path) == 0:
-            return 1
-
-        p_gain_type = 'pref_max_gain'
-        # p_gain_type = 'pref_min_gain'
-
-        if p_gain_type == 'pref_max_gain':
-            return self.pref_max_gain(**kwargs)
-
-        elif p_gain_type == 'pref_min_gain':
-            return self.pref_min_gain(**kwargs)
-
-        else:
-            raise RuntimeError('baam')
+    def reset_start(self):
+        self.curr_node = self.start_node
+        self.path = []
+        self.path_names = []
+        self.h = 0
+        self.full_path = []
+        self.full_path_names = []
 
     def replan(self, **kwargs):
-        if self.gain == 0:
+        check_r = self.k_transform(**kwargs)
+        self.update_conf_agents_names(check_r)
+        # self.update_conf_agents_names(h)
+        if len(self.conf_agents_names) == 0:
             return False, {}
-        # probabilities to use: p_ch, p_h, p_l
-        p_gain = self.set_p_gain(**kwargs)
-        if random.random() < p_gain:
-            paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
-            v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
-            full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
-            check_r = self.k_transform(**kwargs)
-            perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
-            succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, **kwargs)
-            return succeeded, info
-        return True, {}
+        paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
+        v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
+        full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
+        perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
+        succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, **kwargs)
+        return succeeded, info
 
 
 def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit, map_dim):
@@ -146,8 +62,8 @@ def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, m
     agents_dict = {}
     n_agent = 0
     for start_node, goal_node in zip(start_nodes, goal_nodes):
-        agent = KMGDSAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
-                           map_dim)
+        agent = KPrPAgent(n_agent, start_node, goal_node, nodes, nodes_dict, h_func, plotter, middle_plot, iter_limit,
+                          map_dim)
         agents.append(agent)
         agents_dict[agent.name] = agent
         n_agent += 1
@@ -155,21 +71,19 @@ def create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, m
     return agents, agents_dict
 
 
-def all_exchange_gains(agents: List[KMGDSAgent], **kwargs):
+def all_change_priority(agents: List[KPrPAgent], **kwargs):
     runtime, runtime_dist = 0, []
-    gain_list = []
 
+    priorities_list = list(range(len(agents)))
+    random.shuffle(priorities_list)
     # exchange paths
-    for agent in agents:
+    for new_priority, agent in zip(priorities_list, agents):
         start_time = time.time()
-        gain = agent.exchange_gains(**kwargs)
-        gain_list.append(gain)
+        agent.change_priority(new_priority, **kwargs)
         # stats
         end_time = time.time() - start_time
         runtime += end_time
         runtime_dist.append(end_time)
-    if sum(gain_list) == 0:
-        raise RuntimeError('no no')
     func_info = {
         'runtime': runtime,
         'dist_runtime': max(runtime_dist)
@@ -177,7 +91,7 @@ def all_exchange_gains(agents: List[KMGDSAgent], **kwargs):
     return func_info
 
 
-def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
+def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     if 'k' not in kwargs or 'h' not in kwargs:
         raise RuntimeError("'k' or 'h' not in kwargs")
     if 'k_step_iteration_limit' in kwargs:
@@ -186,6 +100,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         k_step_iteration_limit = 200
         kwargs['k_step_iteration_limit'] = k_step_iteration_limit
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-MGDS'
+    reset_type = kwargs['reset_type']
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
     middle_plot = kwargs['middle_plot'] if 'middle_plot' in kwargs else False
@@ -201,7 +116,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # alg info dict
     alg_info = get_alg_info_dict()
 
-    # Distributed Part
+    # STEPS
     for k_step_iteration in range(1000000):
         kwargs['k_step_iteration'] = k_step_iteration
         kwargs['small_iteration'] = 0
@@ -211,6 +126,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
             return None, {'agents': agents, 'success_rate': 0}
 
+        # SMALL ITERATIONS
         there_are_collisions = True
         while there_are_collisions:
             kwargs['small_iteration'] += 1
@@ -222,14 +138,23 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             if not there_are_collisions:
                 break
 
-            func_info = all_exchange_gains(agents, **kwargs)  # agents
-            if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
-                return None, {'agents': agents, 'success_rate': 0}
-
             func_info = all_replan(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
+            if not func_info['all_succeeded']:
+                all_change_priority(agents, **kwargs)  # agents
+                if reset_type == 'reset_step':
+                    func_info = all_plan_and_find_nei(agents, **kwargs)  # agents
+                    if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
+                        return None, {'agents': agents, 'success_rate': 0}
+                    continue
+                if reset_type == 'reset_start':
+                    break
+
+        if reset_type == 'reset_start':
+            number_of_finished = 0
+            continue
         stats_small_iters_list.append(kwargs['small_iteration'])
         all_paths_are_finished, number_of_finished, func_info = all_move_k_steps(agents, **kwargs)  # agents
         if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
@@ -271,7 +196,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 400
+    n_agents = 200
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
@@ -286,18 +211,15 @@ def main():
 
     # --------------------------------------------------- #
     # --------------------------------------------------- #
-    # for the algorithms
-    k = 30
-    h = 5
-    p_gain_h = 0.9
-    p_gain_l = 0.1
-    # pref_paths_type = 'pref_index'
-    pref_paths_type = 'pref_path_length'
-    # p_h = 1
-    # p_l = 1
-    p_h = 0.9
-    p_l = 0.9
-    alg_name = f'{k}-{h}-MGDS-{p_gain_l}-{p_gain_h}-{p_l}-{p_h}'
+    # for the PP algorithm
+    alg_name = 'k-PrP'
+    k = 10
+    h = 10
+    pref_paths_type = 'pref_index'
+    p_h = 1
+    p_l = 0
+    reset_type = 'reset_start'
+    # reset_type = 'reset_step'
     # --------------------------------------------------- #
     # --------------------------------------------------- #
 
@@ -309,13 +231,12 @@ def main():
     for i in range(3):
         print(f'\n[run {i}]')
         result, info = test_mapf_alg_from_pic(
-            algorithm=run_k_mgds,
+            algorithm=run_k_distr_pp,
             img_dir=img_dir,
             alg_name=alg_name,
             k=k,
             h=h,
-            p_gain_h=p_gain_h,
-            p_gain_l=p_gain_l,
+            reset_type=reset_type,
             p_h=p_h,
             p_l=p_l,
             pref_paths_type=pref_paths_type,

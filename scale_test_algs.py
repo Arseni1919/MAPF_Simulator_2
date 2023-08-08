@@ -15,7 +15,7 @@ from algs.alg_k_MGDS import run_k_mgds
 from algs.alg_PBS import run_pbs
 from algs.alg_MGDS import run_mgds
 from algs.alg_MGM_classic import run_mgm_classic
-from algs.alg_PP import run_pp
+from algs.alg_PrP_seq import run_pp
 from algs.alg_a_star_space_time import a_star
 # from algs.alg_a_star_short import a_star_short
 # from algs.alg_depth_first_a_star import df_a_star
@@ -273,54 +273,70 @@ def big_test(
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
-        'DSA': (run_sds, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'decision_type': 'simple',
-            'alpha': 0.5,
-            'dist': True,
-            'color': 'tab:brown',
-        }),
+        # 'DSA': (run_sds, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'decision_type': 'simple',
+        #     'alpha': 0.5,
+        #     'dist': True,
+        #     'color': 'tab:brown',
+        # }),
+        #
+        # 'MGM': (run_mgm_classic, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'tab:olive',
+        # }),
+        #
+        # 'PBS': (run_pbs, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'norm_a_star_closed',
+        #     'dist': False,
+        #     'color': 'tab:purple',
+        # }),
 
-        'MGM': (run_mgm_classic, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'tab:olive',
-        }),
+        # 'PP': (run_pp, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     'dist': False,
+        #     'color': 'tab:blue',
+        # }),
 
-        'PBS': (run_pbs, {
+        'Dist. PrP': (run_k_sds, {
             'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'norm_a_star_closed',
-            'dist': False,
-            'color': 'tab:purple',
-        }),
-
-        'PP': (run_pp, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            'dist': False,
-            'color': 'tab:blue',
-        }),
-
-        '30-PrP-0.1-1': (run_k_sds, {
-            'a_star_func': a_star,
-            'k': 30,
-            'h': 30,
+            'k': 1000,
+            'h': 1000,
             'p_h_type': 'simple',
             'alpha': 1,
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
             'p_h': 1,
-            'p_l': 0.1,
+            'p_l': 0.01,
             'limit_type': 'norm_time',
             # 'limit_type': 'dist_time',
             'dist': True,
             'color': 'c',
         }),
+
+        # '10-PrP-index': (run_k_sds, {
+        #     'a_star_func': a_star,
+        #     'k': 10,
+        #     'h': 10,
+        #     'p_h_type': 'simple',
+        #     'alpha': 1,
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0.01,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'crimson',
+        # }),
 
         'SDS': (run_sds, {
             'a_star_func': a_star,
@@ -331,56 +347,71 @@ def main():
             'color': 'tab:orange',
         }),
 
-        '30-30-SDS': (run_k_sds, {
-            'k': 30,
-            'h': 30,
-            'p_h_type': 'max_prev',
-            'alpha': 0.5,
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.9,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
-            'dist': True,
-            'color': 'red',
-        }),
+        # '10-10-SDS-0.9': (run_k_sds, {
+        #     'k': 10,
+        #     'h': 10,
+        #     'p_h_type': 'max_prev',
+        #     'alpha': 0.5,
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.9,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'green',
+        # }),
+        #
+        # '10-10-SDS-0.1': (run_k_sds, {
+        #     'k': 10,
+        #     'h': 10,
+        #     'p_h_type': 'max_prev',
+        #     'alpha': 0.5,
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.1,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'm',
+        # }),
 
 
-        'MGDS': (run_mgds, {
-            'a_star_func': a_star,
-            'gain_type': 'rank',
-            'alpha': 0.9,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
-            'dist': True,
-            'color': 'tab:green'
-        }),
+        # 'MGDS': (run_mgds, {
+        #     'a_star_func': a_star,
+        #     'gain_type': 'rank',
+        #     'alpha': 0.9,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'tab:green'
+        # }),
 
-
-        '10-MGDS': (run_k_mgds, {
-            'k': 10,
-            'h': 10,
-            'p_gain_h': 0.9,
-            'p_gain_l': 0.1,
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.9,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
-            'dist': True,
-            'color': 'yellowgreen',
-        }),
+        #
+        # '10-MGDS': (run_k_mgds, {
+        #     'k': 10,
+        #     'h': 10,
+        #     'p_gain_h': 0.9,
+        #     'p_gain_l': 0.1,
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.9,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'yellowgreen',
+        # }),
 
     }
 
     # n_agents_list = [5, 10]
-    n_agents_list = [10, 15, 20, 25, 30]
+    # n_agents_list = [10, 15, 20, 25, 30]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 30, 50, 70, 90, 110]
-    # n_agents_list = [50, 70, 90, 110, 130, 150]
+    n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
@@ -401,9 +432,9 @@ def main():
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
     # runs_per_n_agents = 5
-    # runs_per_n_agents = 4
+    runs_per_n_agents = 4
     # runs_per_n_agents = 3
-    runs_per_n_agents = 2
+    # runs_per_n_agents = 2
     # runs_per_n_agents = 1
 
     random_seed = True
@@ -440,8 +471,8 @@ def main():
 
     plotter = Plotter()
 
-    to_save_results = True
-    # to_save_results = False
+    # to_save_results = True
+    to_save_results = False
     file_dir = f'logs_for_graphs/{datetime.now().strftime("%Y-%m-%d--%H-%M")}_ALGS-{len(algs_to_test_dict)}_RUNS-{runs_per_n_agents}_MAP-{img_dir[:-4]}.json'
 
     # profiler = None

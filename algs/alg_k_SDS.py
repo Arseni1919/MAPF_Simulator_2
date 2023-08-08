@@ -115,7 +115,7 @@ class KSDSAgent:
         self.names_to_consider_list = list(self.nei_paths_dict.keys())
         if len(self.path) == 0 or self.path[-1].xy_name != self.goal_node.xy_name:
             succeeded, info = self.calc_a_star_plan(k_time=k, **kwargs)
-            return True, info
+            return succeeded, info
         return False, {}
 
     def exchange_paths(self):
@@ -214,7 +214,7 @@ class KSDSAgent:
             perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
             succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=check_r, **kwargs)
             return succeeded, info
-        return False, {}
+        return True, {}
 
     def set_p_ch(self, **kwargs):
         p_h_type = kwargs['p_h_type']
@@ -325,6 +325,7 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
     runtime, runtime_dist = 0, []
     a_star_calls_counter, a_star_calls_counter_dist = 0, []
     a_star_n_closed, a_star_n_closed_dist = 0, []
+    succeeded_list = []
     for agent in agents:
 
         # find_nei
@@ -339,6 +340,7 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
         end_time = time.time() - start_time
         runtime += end_time
         runtime_dist.append(end_time)
+        succeeded_list.append(succeeded)
         if succeeded:
             a_star_calls_counter += 1
             a_star_n_closed += info['a_s_info']['n_closed']
@@ -350,7 +352,8 @@ def all_plan_and_find_nei(agents: List[KSDSAgent], **kwargs):
         'a_star_calls_counter': a_star_calls_counter,
         'a_star_calls_counter_dist': 1,
         'a_star_n_closed': a_star_n_closed,
-        'a_star_n_closed_dist': max(a_star_n_closed_dist) if a_star_n_closed > 0 else 0
+        'a_star_n_closed_dist': max(a_star_n_closed_dist) if a_star_n_closed > 0 else 0,
+        'all_succeeded': all(succeeded_list),
     }
     return func_info
 
@@ -387,11 +390,13 @@ def all_replan(agents: List[KSDSAgent], **kwargs):
     runtime, runtime_dist = 0, [0]
     a_star_calls_counter, a_star_calls_counter_dist = 0, []
     a_star_n_closed, a_star_n_closed_dist = 0, [0]
+    succeeded_list = []
 
     for agent in agents:
         start_time = time.time()
         succeeded, info = agent.replan(**kwargs)
         # stats
+        succeeded_list.append(succeeded)
         end_time = time.time() - start_time
         runtime += end_time
         runtime_dist.append(end_time)
@@ -406,7 +411,8 @@ def all_replan(agents: List[KSDSAgent], **kwargs):
         'a_star_calls_counter': a_star_calls_counter,
         'a_star_calls_counter_dist': 1,
         'a_star_n_closed': a_star_n_closed,
-        'a_star_n_closed_dist': max(a_star_n_closed_dist)
+        'a_star_n_closed_dist': max(a_star_n_closed_dist),
+        'all_succeeded': all(succeeded_list),
     }
     return func_info
 
@@ -518,7 +524,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 400
+    n_agents = 200
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
