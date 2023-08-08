@@ -43,20 +43,20 @@ class KPrPAgent(KSDSAgent):
         self.full_path = []
         self.full_path_names = []
 
-    def update_conf_agents_names(self, check_r):
-        self.conf_agents_names = []
-        # self.nei_paths_dict
-        h_nei_paths_dict = {}
-        for nei_name, nei_path in self.nei_paths_dict.items():
-            if self.nei_dict[nei_name].index < self.index:
-                h_nei_paths_dict[nei_name] = nei_path
-        conf_list = check_single_agent_k_step_c_v(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
-        c_e_list = check_single_agent_k_step_c_e(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
-        conf_list.extend(c_e_list)
-        conf_agents_names = []
-        for conf in conf_list:
-            conf_agents_names.append(conf[1])
-        self.conf_agents_names = list(set(conf_agents_names))
+    # def update_conf_agents_names(self, check_r):
+    #     self.conf_agents_names = []
+    #     # self.nei_paths_dict
+    #     h_nei_paths_dict = {}
+    #     for nei_name, nei_path in self.nei_paths_dict.items():
+    #         if self.nei_dict[nei_name].index < self.index:
+    #             h_nei_paths_dict[nei_name] = nei_path
+    #     conf_list = check_single_agent_k_step_c_v(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
+    #     c_e_list = check_single_agent_k_step_c_e(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
+    #     conf_list.extend(c_e_list)
+    #     conf_agents_names = []
+    #     for conf in conf_list:
+    #         conf_agents_names.append(conf[1])
+    #     self.conf_agents_names = list(set(conf_agents_names))
 
     def replan(self, **kwargs):
         check_r = self.k_transform(**kwargs)
