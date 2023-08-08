@@ -108,7 +108,7 @@ class KSDSAgent:
                     self.nei_h_dict[agent.name] = None
                     self.nei_paths_dict[agent.name] = None
 
-        self.stats_nei_list.append(len(self.nei_list))
+        self.stats_nei_list.append(len(self.nei_list) - 1)
 
     def init_plan(self, **kwargs):
         k = kwargs['k']
@@ -141,10 +141,10 @@ class KSDSAgent:
         paths_to_consider_dict = {}
         # just index
         for agent_name, path in self.nei_paths_dict.items():
-            if self.index > self.nei_dict[agent_name].index:
-                if random.random() < p_l:
+            if self.nei_dict[agent_name].index < self.index:
+                if random.random() < p_h:
                     paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
-            elif random.random() < p_h:
+            elif random.random() < p_l:
                 paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
         return paths_to_consider_dict
 
@@ -204,7 +204,7 @@ class KSDSAgent:
         self.update_conf_agents_names(check_r)
         # self.update_conf_agents_names(h)
         if len(self.conf_agents_names) == 0:
-            return False, {}
+            return True, {}
         # probabilities to use: p_ch, p_h, p_l
         p_ch = self.set_p_ch(**kwargs)
         if random.random() < p_ch:
@@ -391,15 +391,18 @@ def all_replan(agents: List[KSDSAgent], **kwargs):
     a_star_calls_counter, a_star_calls_counter_dist = 0, []
     a_star_n_closed, a_star_n_closed_dist = 0, [0]
     succeeded_list = []
+    failed_paths_dict = {}
 
     for agent in agents:
         start_time = time.time()
         succeeded, info = agent.replan(**kwargs)
         # stats
-        succeeded_list.append(succeeded)
         end_time = time.time() - start_time
         runtime += end_time
         runtime_dist.append(end_time)
+        succeeded_list.append(succeeded)
+        if not succeeded:
+            failed_paths_dict[agent.name] = agent.path_names
         if len(info) > 0:
             a_star_calls_counter += 1
             a_star_n_closed += info['a_s_info']['n_closed']
@@ -413,6 +416,7 @@ def all_replan(agents: List[KSDSAgent], **kwargs):
         'a_star_n_closed': a_star_n_closed,
         'a_star_n_closed_dist': max(a_star_n_closed_dist),
         'all_succeeded': all(succeeded_list),
+        'failed_paths_dict': failed_paths_dict,
     }
     return func_info
 
@@ -502,7 +506,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                     print(f'#########################################################')
                     print(f'#########################################################')
                     print(f'#########################################################')
-                    print(f"runtime: {alg_info['runtime']}\n{alg_info['dist_runtime']=}")
+                    print(f"runtime: {alg_info['runtime']}\n{alg_info['dist_runtime']=}\n{cost=}")
                     print(f"a_star_n_closed: {sum(alg_info['a_star_n_closed'])}\n{alg_info['a_star_n_closed_dist']=}")
                     plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, **kwargs)
                 alg_info['success_rate'] = 1
@@ -510,10 +514,10 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
                 alg_info['m_per_step'] = np.sum([np.mean(agent.stats_n_step_m_list) for agent in agents])
-                alg_info['n_steps'] = k_step_iteration
-                alg_info['n_small_iters'] = int(np.mean(stats_small_iters_list))
+                alg_info['n_steps'] = k_step_iteration + 1
+                alg_info['n_small_iters'] = float(np.mean(stats_small_iters_list))
                 alg_info['n_nei'] = np.sum([np.mean(agent.stats_nei_list) for agent in agents])
-                alg_info['avr_n_nei'] = np.mean([np.mean(agent.stats_nei_list) for agent in agents])
+                # alg_info['avr_n_nei'] = np.mean([np.mean(agent.stats_nei_list) for agent in agents])
             return cut_full_plans, alg_info
 
         if k_step_iteration > k_step_iteration_limit-1:
@@ -524,10 +528,10 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 200
+    n_agents = 50
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 

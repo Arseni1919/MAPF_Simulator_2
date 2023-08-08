@@ -11,6 +11,7 @@ from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_plotter.plotter import Plotter
 from algs.alg_SDS import run_sds
 from algs.alg_k_SDS import run_k_sds
+from algs.alg_PrP_distr import run_k_distr_pp
 from algs.alg_k_MGDS import run_k_mgds
 from algs.alg_PBS import run_pbs
 from algs.alg_MGDS import run_mgds
@@ -299,25 +300,24 @@ def main():
         #     'color': 'tab:purple',
         # }),
 
-        # 'PP': (run_pp, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'norm_time',
-        #     'dist': False,
-        #     'color': 'tab:blue',
-        # }),
-
-        'Dist. PrP': (run_k_sds, {
+        'PP': (run_pp, {
             'a_star_func': a_star,
-            'k': 1000,
-            'h': 1000,
-            'p_h_type': 'simple',
-            'alpha': 1,
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0.01,
             'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
+            'dist': False,
+            'color': 'tab:blue',
+        }),
+        #
+        '10-Dist-PrP': (run_k_distr_pp, {
+            'k': 10,
+            'h': 10,
+            # reset_type: 'reset_start',
+            'reset_type': 'reset_step',
+            'pref_paths_type': 'pref_index',
+            # 'pref_paths_type': 'pref_path_length',
+            'p_h': 1,
+            'p_l': 0,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
             'dist': True,
             'color': 'c',
         }),
@@ -341,27 +341,57 @@ def main():
         'SDS': (run_sds, {
             'a_star_func': a_star,
             'decision_type': 'min_prev_2',
-            'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
             'dist': True,
             'color': 'tab:orange',
         }),
 
-        # '10-10-SDS-0.9': (run_k_sds, {
+        '10-SDS': (run_k_sds, {
+            'k': 10,
+            'h': 10,
+            'p_h_type': 'max_prev',
+            'alpha': 0.5,
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.9,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            'dist': True,
+            'color': 'red',
+        }),
+
+        # 'k-SDS-0.95': (run_k_sds, {
         #     'k': 10,
         #     'h': 10,
         #     'p_h_type': 'max_prev',
         #     'alpha': 0.5,
         #     # 'pref_paths_type': 'pref_index',
         #     'pref_paths_type': 'pref_path_length',
-        #     'p_h': 0.9,
-        #     'p_l': 0.9,
+        #     'p_h': 0.95,
+        #     'p_l': 0.95,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'purple',
+        # }),
+
+        # 'k-SDS-1': (run_k_sds, {
+        #     'k': 1000,
+        #     'h': 1000,
+        #     'p_h_type': 'max_prev',
+        #     'alpha': 0.5,
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 1,
         #     'limit_type': 'norm_time',
         #     # 'limit_type': 'dist_time',
         #     'dist': True,
         #     'color': 'green',
         # }),
-        #
+
         # '10-10-SDS-0.1': (run_k_sds, {
         #     'k': 10,
         #     'h': 10,
@@ -411,8 +441,9 @@ def main():
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 30, 50, 70, 90, 110]
-    n_agents_list = [50, 70, 90, 110, 130, 150]
+    # n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
+    n_agents_list = [50, 150, 250, 350, 450, 550]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]  # !!!!!!!!!!!!!!!!!
@@ -429,10 +460,10 @@ def main():
 
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25
-    # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
+    runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
     # runs_per_n_agents = 5
-    runs_per_n_agents = 4
+    # runs_per_n_agents = 4
     # runs_per_n_agents = 3
     # runs_per_n_agents = 2
     # runs_per_n_agents = 1
@@ -448,8 +479,8 @@ def main():
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # ------------------------------ LIMITS ------------------------------ #
-    time_per_alg_limit = 0.5
-    # time_per_alg_limit = 1  # According to PBS paper!
+    # time_per_alg_limit = 0.5
+    time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
     # time_per_alg_limit = 2
     # time_per_alg_limit = 4
@@ -461,10 +492,10 @@ def main():
     # a_star_calls_limit = 1500
     a_star_calls_limit = 1e100
 
-    # a_star_closed_nodes_limit = 1e100
+    a_star_closed_nodes_limit = 1e100
     # a_star_closed_nodes_limit = 1e7
     # a_star_closed_nodes_limit = 1e6
-    a_star_closed_nodes_limit = 5e5
+    # a_star_closed_nodes_limit = 5e5
 
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
