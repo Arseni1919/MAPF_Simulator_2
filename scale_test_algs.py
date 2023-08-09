@@ -304,8 +304,8 @@ def main():
 
         # 'PrP': (run_pp, {
         #     'a_star_func': a_star,
-        #     # 'limit_type': 'norm_time',
-        #     'limit_type': 'norm_a_star_closed',
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'norm_a_star_closed',
         #     'dist': False,
         #     'color': 'tab:blue',
         # }),
@@ -320,8 +320,8 @@ def main():
             'p_h': 1,
             'p_l': 0,
             # 'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
-            'limit_type': 'dist_a_star_closed',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
             'dist': True,
             'color': 'c',
         }),
@@ -336,21 +336,21 @@ def main():
             'p_h': 1,
             'p_l': 0,
             # 'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
-            'limit_type': 'dist_a_star_closed',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
             'dist': True,
             'color': 'purple',
         }),
 
-        # 'SDS': (run_sds, {
-        #     'a_star_func': a_star,
-        #     'decision_type': 'min_prev_2',
-        #     # 'limit_type': 'norm_time',
-        #     # 'limit_type': 'dist_time',
-        #     'limit_type': 'dist_a_star_closed',
-        #     'dist': True,
-        #     'color': 'tab:orange',
-        # }),
+        'SDS': (run_sds, {
+            'a_star_func': a_star,
+            'decision_type': 'min_prev_2',
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'tab:orange',
+        }),
 
         '10-SDS': (run_k_sds, {
             'k': 10,
@@ -361,8 +361,8 @@ def main():
             'p_h': 0.9,
             'p_l': 0.9,
             # 'limit_type': 'norm_time',
-            # 'limit_type': 'dist_time',
-            'limit_type': 'dist_a_star_closed',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
             'dist': True,
             'color': 'red',
         }),
@@ -447,10 +447,10 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
-    # n_agents_list = [150, 200, 250, 300, 350, 400]
-    # n_agents_list = [3, 50, 150, 250, 350, 450, 550]  # !!!!!!!!!!!!!!!!!
+    n_agents_list = [30, 80, 130, 180, 230, 280, 330]
+    # n_agents_list = [50, 150, 250, 350, 450, 550]  # !!!!!!!!!!!!!!!!!
     # n_agents_list = [250, 350, 450, 550]
-    n_agents_list = [450, 500, 550, 600, 650]
+    # n_agents_list = [10, 450, 500, 550, 600, 650]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -468,11 +468,11 @@ def main():
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 10
+    runs_per_n_agents = 10
     # runs_per_n_agents = 5
     # runs_per_n_agents = 4
     # runs_per_n_agents = 3
-    runs_per_n_agents = 2
+    # runs_per_n_agents = 2
     # runs_per_n_agents = 1
 
     random_seed = True
@@ -500,18 +500,18 @@ def main():
     a_star_calls_limit = 1e100
 
     # a_star_closed_nodes_limit = 1e100
-    # a_star_closed_nodes_limit = 1e7
+    a_star_closed_nodes_limit = 1e7
     # a_star_closed_nodes_limit = 1e6
     # a_star_closed_nodes_limit = 5e5
-    a_star_closed_nodes_limit = 1e5
+    # a_star_closed_nodes_limit = 1e5
 
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
 
     plotter = Plotter()
 
-    # to_save_results = True
-    to_save_results = False
+    to_save_results = True
+    # to_save_results = False
     file_dir = f'logs_for_graphs/{datetime.now().strftime("%Y-%m-%d--%H-%M")}_ALGS-{len(algs_to_test_dict)}_RUNS-{runs_per_n_agents}_MAP-{img_dir[:-4]}.json'
 
     # profiler = None
