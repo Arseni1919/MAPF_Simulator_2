@@ -304,7 +304,8 @@ def main():
 
         # 'PrP': (run_pp, {
         #     'a_star_func': a_star,
-        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'norm_a_star_closed',
         #     'dist': False,
         #     'color': 'tab:blue',
         # }),
@@ -319,7 +320,8 @@ def main():
             'p_h': 1,
             'p_l': 0,
             # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_time',
+            'limit_type': 'dist_a_star_closed',
             'dist': True,
             'color': 'c',
         }),
@@ -334,7 +336,8 @@ def main():
             'p_h': 1,
             'p_l': 0,
             # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_time',
+            'limit_type': 'dist_a_star_closed',
             'dist': True,
             'color': 'purple',
         }),
@@ -343,7 +346,8 @@ def main():
         #     'a_star_func': a_star,
         #     'decision_type': 'min_prev_2',
         #     # 'limit_type': 'norm_time',
-        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_time',
+        #     'limit_type': 'dist_a_star_closed',
         #     'dist': True,
         #     'color': 'tab:orange',
         # }),
@@ -357,7 +361,8 @@ def main():
             'p_h': 0.9,
             'p_l': 0.9,
             # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_time',
+            'limit_type': 'dist_a_star_closed',
             'dist': True,
             'color': 'red',
         }),
@@ -494,10 +499,11 @@ def main():
     # a_star_calls_limit = 1500
     a_star_calls_limit = 1e100
 
-    a_star_closed_nodes_limit = 1e100
+    # a_star_closed_nodes_limit = 1e100
     # a_star_closed_nodes_limit = 1e7
     # a_star_closed_nodes_limit = 1e6
     # a_star_closed_nodes_limit = 5e5
+    a_star_closed_nodes_limit = 1e5
 
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
