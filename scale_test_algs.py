@@ -257,7 +257,9 @@ def big_test(
                 print(f'#########################################################')
                 print(f'#########################################################')
                 print(f'#########################################################')
-                print(f'\r[{n_agents} agents][{i_run} run][{alg_name}] -> success_rate: {alg_info["success_rate"]}\n')
+                print(f'\r[{alg_name}][{n_agents} agents] -> success_rate: {alg_info["success_rate"]}\n')
+                if alg_info["success_rate"] == 1:
+                    print(f'[{alg_name}][runtime: {alg_info["runtime"]:0.2f}]\n')
                 update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
                 if i_run % 1 == 0:
                     plotter.plot_big_test(stats_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir,
@@ -300,13 +302,13 @@ def main():
         #     'color': 'tab:purple',
         # }),
 
-        'PP': (run_pp, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            'dist': False,
-            'color': 'tab:blue',
-        }),
-        #
+        # 'PrP': (run_pp, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     'dist': False,
+        #     'color': 'tab:blue',
+        # }),
+
         'Dist-PrP': (run_k_distr_pp, {
             'k': 1e7,
             'h': 1e7,
@@ -322,7 +324,7 @@ def main():
             'color': 'c',
         }),
 
-        '10-PrP-index': (run_k_distr_pp, {
+        '10-PrP': (run_k_distr_pp, {
             'k': 10,
             'h': 10,
             # reset_type: 'reset_start',
@@ -334,23 +336,22 @@ def main():
             # 'limit_type': 'norm_time',
             'limit_type': 'dist_time',
             'dist': True,
-            'color': 'crimson',
+            'color': 'purple',
         }),
 
-        'SDS': (run_sds, {
-            'a_star_func': a_star,
-            'decision_type': 'min_prev_2',
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
+        # 'SDS': (run_sds, {
+        #     'a_star_func': a_star,
+        #     'decision_type': 'min_prev_2',
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     'dist': True,
+        #     'color': 'tab:orange',
+        # }),
 
         '10-SDS': (run_k_sds, {
             'k': 10,
             'h': 10,
-            'p_h_type': 'max_prev',
-            'alpha': 0.5,
+            'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
             'p_h': 0.9,
@@ -364,7 +365,7 @@ def main():
         # 'k-SDS-0.95': (run_k_sds, {
         #     'k': 10,
         #     'h': 10,
-        #     'p_h_type': 'max_prev',
+        #     'p_ch_type': 'max_prev',
         #     'alpha': 0.5,
         #     # 'pref_paths_type': 'pref_index',
         #     'pref_paths_type': 'pref_path_length',
@@ -379,7 +380,7 @@ def main():
         # 'k-SDS-1': (run_k_sds, {
         #     'k': 1000,
         #     'h': 1000,
-        #     'p_h_type': 'max_prev',
+        #     'p_ch_type': 'max_prev',
         #     'alpha': 0.5,
         #     # 'pref_paths_type': 'pref_index',
         #     'pref_paths_type': 'pref_path_length',
@@ -394,7 +395,7 @@ def main():
         # '10-10-SDS-0.1': (run_k_sds, {
         #     'k': 10,
         #     'h': 10,
-        #     'p_h_type': 'max_prev',
+        #     'p_ch_type': 'max_prev',
         #     'alpha': 0.5,
         #     # 'pref_paths_type': 'pref_index',
         #     'pref_paths_type': 'pref_path_length',
@@ -442,7 +443,9 @@ def main():
     # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [150, 200, 250, 300, 350, 400]
-    n_agents_list = [50, 150, 250, 350, 450, 550]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [3, 50, 150, 250, 350, 450, 550]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [250, 350, 450, 550]
+    n_agents_list = [450, 500, 550, 600, 650]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
     # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -469,7 +472,7 @@ def main():
 
     random_seed = True
     # random_seed = False
-    seed = 121
+    seed = 338
 
     # ------------------------------ MAPS ------------------------------ #
     img_dir = 'empty-48-48.map'  # 48-48
@@ -478,8 +481,8 @@ def main():
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # ------------------------------ LIMITS ------------------------------ #
-    # time_per_alg_limit = 0.5
-    time_per_alg_limit = 1  # According to PBS paper!
+    time_per_alg_limit = 0.1667  # approximately 10 seconds
+    # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
     # time_per_alg_limit = 2
     # time_per_alg_limit = 4
@@ -541,7 +544,7 @@ if __name__ == '__main__':
 #     'a_star_func': a_star,
 #     'k': 30,
 #     'h': 2,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -557,7 +560,7 @@ if __name__ == '__main__':
 #     'a_star_func': a_star,
 #     'k': 30,
 #     'h': 5,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -573,7 +576,7 @@ if __name__ == '__main__':
 #     'a_star_func': a_star,
 #     'k': 30,
 #     'h': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -589,7 +592,7 @@ if __name__ == '__main__':
 #     'a_star_func': a_star,
 #     'k': 30,
 #     'h': 15,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -605,7 +608,7 @@ if __name__ == '__main__':
 # '5-SDS-0.1-0.9': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 5,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -621,7 +624,7 @@ if __name__ == '__main__':
 # 'k-SDS-1-0.9': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -636,7 +639,7 @@ if __name__ == '__main__':
 # 'k-SDS-0.9-0.9': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -651,7 +654,7 @@ if __name__ == '__main__':
 # 'k-SDS-0.6-0.9': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -666,7 +669,7 @@ if __name__ == '__main__':
 # 'k-SDS-0.3-0.9': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -681,7 +684,7 @@ if __name__ == '__main__':
 # 'k-SDS-0-0.9': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -696,7 +699,7 @@ if __name__ == '__main__':
 # 'k-SDS-0.95-0.95': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',
@@ -711,7 +714,7 @@ if __name__ == '__main__':
 # 'k-SDS-1-1': (run_k_sds, {
 #     'a_star_func': a_star,
 #     'k': 10,
-#     'p_h_type': 'max_prev',
+#     'p_ch_type': 'max_prev',
 #     'alpha': 0.5,
 #     # 'pref_paths_type': 'pref_index',
 #     'pref_paths_type': 'pref_path_length',

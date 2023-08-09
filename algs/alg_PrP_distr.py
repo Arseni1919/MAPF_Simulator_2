@@ -60,15 +60,16 @@ class KPrPAgent(KSDSAgent):
 
     def replan(self, **kwargs):
         check_r = self.k_transform(**kwargs)
-        self.update_conf_agents_names(check_r, immediate=True)
+        self.update_conf_agents_names(check_r, immediate=False)
+        nei_index_list = [self.nei_dict[nei_name].index for nei_name in self.conf_agents_names]
         # self.update_conf_agents_names(h)
-        if len(self.conf_agents_names) == 0:
+        if len(self.conf_agents_names) == 0 or min(nei_index_list) > self.index:
             return True, {}
         paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
         v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
-        full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
-        perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
-        succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, **kwargs)
+        perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, paths_to_consider_dict, check_r)
+        succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=check_r, **kwargs)
+        succeeded, info = self.check_if_all_around_finished(succeeded, info, paths_to_consider_dict, check_r, **kwargs)
         return succeeded, info
 
 
@@ -161,7 +162,9 @@ def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs)
 
             if not func_info['all_succeeded']:
                 print(f"\n###########################\nPRIORITY CHANGE {reset_type}\n###########################\n")
-                all_change_priority(agents, **kwargs)  # agents
+                func_info = all_change_priority(agents, **kwargs)  # agents
+                if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
+                    return None, {'agents': agents, 'success_rate': 0}
                 if reset_type == 'reset_step':
                     func_info = all_plan_and_find_nei(agents, **kwargs)  # agents
                     if check_if_limit_is_crossed(func_info, alg_info, **kwargs):

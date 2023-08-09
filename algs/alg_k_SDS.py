@@ -195,11 +195,17 @@ class KSDSAgent:
             return k * 2
         return k
 
+    def check_if_all_around_finished(self, succeeded, info, paths_to_consider_dict, check_r, **kwargs):
+        all_finished = True
+        for agent_name, path in paths_to_consider_dict.items():
+            if check_r < len(path):
+                all_finished = False
+        if all_finished and self.path[-1].xy_name != self.goal_node.xy_name:
+            self.init_plan(**kwargs)
+            return False, info
+        return succeeded, info
+
     def replan(self, **kwargs):
-        k = kwargs['k']
-        h = kwargs['h']
-        # check_r = k
-        # check_r = h
         check_r = self.k_transform(**kwargs)
         self.update_conf_agents_names(check_r)
         # self.update_conf_agents_names(h)
@@ -210,23 +216,25 @@ class KSDSAgent:
         if random.random() < p_ch:
             paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
             v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
-            full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
-            perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, full_paths_dict, check_r)
+            # full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
+            perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, paths_to_consider_dict, check_r)
             succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=check_r, **kwargs)
+            succeeded, info = self.check_if_all_around_finished(succeeded, info, paths_to_consider_dict, check_r,
+                                                                **kwargs)
             return succeeded, info
         return True, {}
 
     def set_p_ch(self, **kwargs):
-        p_h_type = kwargs['p_h_type']
+        p_ch_type = kwargs['p_ch_type']
 
         if len(self.path) == 0:
             return 1
 
-        if p_h_type == 'simple':
+        if p_ch_type == 'simple':
             alpha = kwargs['alpha']
             return alpha
 
-        elif p_h_type == 'max_prev':
+        elif p_ch_type == 'max_prev':
             #  gather all paths
             full_path_lngths = []
             for agent_name, path in self.nei_paths_dict.items():
@@ -234,8 +242,9 @@ class KSDSAgent:
                     full_path_lngths.append(int(len(path) + self.nei_h_dict[agent_name]))
             # break by index if equal
             my_full_path_len = int(len(self.path) + self.h)
-            if len(full_path_lngths) == 1 and full_path_lngths[-1] == my_full_path_len:
-                return 0.9 if self.index < self.nei_dict[self.conf_agents_names[0]].index else 0.1
+            if len(full_path_lngths) == 1 and full_path_lngths[0] == my_full_path_len:
+                return 0.5
+                # return 0.9 if self.index < self.nei_dict[self.conf_agents_names[0]].index else 0.1
             full_path_lngths.append(my_full_path_len)
             full_path_lngths.sort()
             my_order = full_path_lngths.index(my_full_path_len)
@@ -243,7 +252,7 @@ class KSDSAgent:
             return my_alpha
 
         else:
-            raise RuntimeError('no such p_h_type')
+            raise RuntimeError('no such p_ch_type')
 
     def update_full_path_no_k(self):
         if len(self.full_path) == 0:

@@ -58,9 +58,11 @@ def sub_plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
     linewidth = 1
     alpha = 0.43
     if 'color' in alg_info:
-        ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+        # ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+        ax.plot(l_x, l_y, marker, alpha=alpha, color=alg_info['color'], linewidth=linewidth)
     else:
-        ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, linewidth=linewidth)
+        raise RuntimeError('no color! ufff')
+        # ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, linewidth=linewidth)
     plot_text_in_cactus(ax, l_x, l_y)
 
 
@@ -428,7 +430,7 @@ def plot_n_steps_iters(ax, info):
     set_legend(ax)
 
 
-def plot_n_closed_cactus(ax, info):
+def plot_n_expanded_cactus(ax, info):
     ax.cla()
     statistics_dict = info['statistics_dict']
     runs_per_n_agents = info['runs_per_n_agents']

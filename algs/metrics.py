@@ -197,6 +197,7 @@ def check_plan(agents, plan, alg_name, alg_info, runtime, iteration, immediate=F
 def just_check_plans(plans):
     cost = sum([len(path) for path in plans.values()])
     there_is_col, c_v, c_e = check_for_collisions(plans, immediate=False)
+    # there_is_col, c_v, c_e = check_for_collisions(plans, immediate=True)
     return there_is_col, c_v, c_e, cost
 
 
@@ -283,9 +284,10 @@ def just_check_k_step_plans(plans, k, immediate=False):
 def build_k_step_perm_constr_dict(nodes, other_paths, k):
     perm_constr_dict = {node.xy_name: [] for node in nodes}
     for agent_name, path in other_paths.items():
-        if 0 < len(path) < k:
+        if 0 < len(path) <= k:
             final_node = path[-1]
-            perm_constr_dict[final_node.xy_name].append(final_node.t)
+            # perm_constr_dict[final_node.xy_name].append(final_node.t)
+            perm_constr_dict[final_node.xy_name].append(len(path) - 1)
             perm_constr_dict[final_node.xy_name] = [max(perm_constr_dict[final_node.xy_name])]
 
     return perm_constr_dict

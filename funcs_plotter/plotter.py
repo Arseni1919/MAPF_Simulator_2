@@ -108,11 +108,12 @@ class Plotter:
 
         plot_n_messages(self.ax[1, 2], info)
 
-        plot_n_closed_cactus(self.ax[1, 3], info)
+        plot_n_expanded_cactus(self.ax[1, 3], info)
 
         time_per_alg_limit = f'{kwargs["time_per_alg_limit"]}' if 'time_per_alg_limit' in kwargs else '-'
         # self.fig.tight_layout()
-        self.fig.suptitle(f'{img_png} Map, {kwargs["i_run"]+1}/{runs_per_n_agents} RpP, time limit: {time_per_alg_limit}', fontsize=16)
+        title = f'{img_png}, {kwargs["i_run"]+1}/{runs_per_n_agents}, time limit: {time_per_alg_limit * 60:0.2f}sec.'
+        self.fig.suptitle(title, fontsize=16)
         plt.pause(0.1)
         print('big plot ends')
         # plt.show()

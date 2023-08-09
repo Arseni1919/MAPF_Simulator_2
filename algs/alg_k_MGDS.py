@@ -257,7 +257,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
                 alg_info['n_messages'] = np.sum([agent.stats_n_messages for agent in agents])
                 alg_info['m_per_step'] = np.sum([np.mean(agent.stats_n_step_m_list) for agent in agents])
-                alg_info['n_steps'] = k_step_iteration
+                alg_info['n_steps'] = k_step_iteration + 1
                 alg_info['n_small_iters'] = np.mean(stats_small_iters_list)
                 alg_info['n_nei'] = np.sum([np.mean(agent.stats_nei_list) for agent in agents])
                 alg_info['avr_n_nei'] = np.mean([np.mean(agent.stats_nei_list) for agent in agents])
