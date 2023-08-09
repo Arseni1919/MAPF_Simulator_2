@@ -125,11 +125,11 @@ class KSDSAgent:
             self.stats_n_messages += 1
             self.stats_n_step_m += 1
 
-    def update_conf_agents_names(self, check_r):
+    def update_conf_agents_names(self, check_r, immediate=False):
         self.conf_agents_names = []
         # self.nei_paths_dict
-        conf_list = check_single_agent_k_step_c_v(self.name, self.path, self.nei_paths_dict, check_r+1, immediate=False)
-        c_e_list = check_single_agent_k_step_c_e(self.name, self.path, self.nei_paths_dict, check_r+1, immediate=False)
+        conf_list = check_single_agent_k_step_c_v(self.name, self.path, self.nei_paths_dict, check_r+1, immediate=immediate)
+        c_e_list = check_single_agent_k_step_c_e(self.name, self.path, self.nei_paths_dict, check_r+1, immediate=immediate)
         conf_list.extend(c_e_list)
         conf_agents_names = []
         for conf in conf_list:
@@ -245,13 +245,31 @@ class KSDSAgent:
         else:
             raise RuntimeError('no such p_h_type')
 
+    def update_full_path_no_k(self):
+        if len(self.full_path) == 0:
+            self.full_path.extend(self.path)
+        else:
+            self.full_path.extend(self.path[1:])
+        self.full_path_names = [node.xy_name for node in self.full_path]
+        self.curr_node = self.full_path[-1]
+        self.path = self.path[-1:]
+        self.path_names = [node.xy_name for node in self.path]
+        return self.curr_node.xy_name == self.goal_node.xy_name
+
     def update_full_path(self, **kwargs):
+        # stats
+        self.stats_n_step_m_list.append(self.stats_n_step_m)
+        self.stats_n_step_m = 0
+
         k = kwargs['k']
         h = kwargs['h']
+
+        if max(k, h) > 1e6:
+            return self.update_full_path_no_k()
+
         step = h + 1
         # step = k + 1
         # step = 1
-        goal_name = self.goal_node.xy_name
 
         while len(self.path) < step:
             self.path.append(self.path[-1])
@@ -264,9 +282,7 @@ class KSDSAgent:
         self.curr_node = self.full_path[-1]
         self.path = self.path[step - 1:]
         self.path_names = [node.xy_name for node in self.path]
-        self.stats_n_step_m_list.append(self.stats_n_step_m)
-        self.stats_n_step_m = 0
-        return self.curr_node.xy_name == goal_name
+        return self.curr_node.xy_name == self.goal_node.xy_name
 
     def cut_back_full_path(self):
         len_full_path = len(self.full_path)

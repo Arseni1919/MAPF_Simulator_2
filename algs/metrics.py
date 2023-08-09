@@ -200,7 +200,15 @@ def just_check_plans(plans):
     return there_is_col, c_v, c_e, cost
 
 
+def get_final_t(path_1, plans, k):
+    len_list = [len(path_1)]
+    len_list.extend([len(v) for v in plans.values()])
+    max_len = max(len_list)
+    return min(max_len, k)
+
+
 def check_single_agent_k_step_c_v(agent_1, path_1, plans, k, immediate=False):
+    final_t = get_final_t(path_1, plans, k)
     c_v_list = []
     if len(path_1) == 0:
         return c_v_list
@@ -208,7 +216,7 @@ def check_single_agent_k_step_c_v(agent_1, path_1, plans, k, immediate=False):
         if len(path_2) == 0:
             continue
         if agent_1 != agent_2:
-            for t in range(k):
+            for t in range(final_t):
                 node_1 = path_1[min(t, len(path_1) - 1)]
                 node_2 = path_2[min(t, len(path_2) - 1)]
                 if (node_1.x, node_1.y) == (node_2.x, node_2.y):
@@ -229,6 +237,7 @@ def check_k_step_c_v(plans, k, immediate=False):
 
 
 def check_single_agent_k_step_c_e(agent_1, path_1, plans, k, immediate=False):
+    # final_t = get_final_t(path_1, plans, k)
     c_e_list = []
     if len(path_1) <= 1:
         return c_e_list

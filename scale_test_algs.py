@@ -261,7 +261,7 @@ def big_test(
                 update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
                 if i_run % 1 == 0:
                     plotter.plot_big_test(stats_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir,
-                                          n_agents=n_agents, time_per_alg_limit=time_per_alg_limit)
+                                          n_agents=n_agents, time_per_alg_limit=time_per_alg_limit, i_run=i_run)
 
         if to_save_results:
             save_and_show_results(to_save_dict, file_dir, None, runs_per_n_agents, algs_to_test_dict, n_agents_list,
@@ -307,9 +307,9 @@ def main():
             'color': 'tab:blue',
         }),
         #
-        '10-Dist-PrP': (run_k_distr_pp, {
-            'k': 10,
-            'h': 10,
+        'Dist-PrP': (run_k_distr_pp, {
+            'k': 1e7,
+            'h': 1e7,
             # reset_type: 'reset_start',
             'reset_type': 'reset_step',
             'pref_paths_type': 'pref_index',
@@ -322,21 +322,20 @@ def main():
             'color': 'c',
         }),
 
-        # '10-PrP-index': (run_k_sds, {
-        #     'a_star_func': a_star,
-        #     'k': 10,
-        #     'h': 10,
-        #     'p_h_type': 'simple',
-        #     'alpha': 1,
-        #     'pref_paths_type': 'pref_index',
-        #     # 'pref_paths_type': 'pref_path_length',
-        #     'p_h': 1,
-        #     'p_l': 0.01,
-        #     'limit_type': 'norm_time',
-        #     # 'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'crimson',
-        # }),
+        '10-PrP-index': (run_k_distr_pp, {
+            'k': 10,
+            'h': 10,
+            # reset_type: 'reset_start',
+            'reset_type': 'reset_step',
+            'pref_paths_type': 'pref_index',
+            # 'pref_paths_type': 'pref_path_length',
+            'p_h': 1,
+            'p_l': 0,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            'dist': True,
+            'color': 'crimson',
+        }),
 
         'SDS': (run_sds, {
             'a_star_func': a_star,
@@ -460,12 +459,12 @@ def main():
 
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25
-    runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
+    # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10
     # runs_per_n_agents = 5
     # runs_per_n_agents = 4
     # runs_per_n_agents = 3
-    # runs_per_n_agents = 2
+    runs_per_n_agents = 2
     # runs_per_n_agents = 1
 
     random_seed = True

@@ -60,7 +60,7 @@ class KPrPAgent(KSDSAgent):
 
     def replan(self, **kwargs):
         check_r = self.k_transform(**kwargs)
-        self.update_conf_agents_names(check_r)
+        self.update_conf_agents_names(check_r, immediate=True)
         # self.update_conf_agents_names(h)
         if len(self.conf_agents_names) == 0:
             return True, {}

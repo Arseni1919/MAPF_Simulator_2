@@ -112,7 +112,7 @@ class Plotter:
 
         time_per_alg_limit = f'{kwargs["time_per_alg_limit"]}' if 'time_per_alg_limit' in kwargs else '-'
         # self.fig.tight_layout()
-        self.fig.suptitle(f'{img_png} Map, {runs_per_n_agents} RpP, time limit: {time_per_alg_limit}', fontsize=16)
+        self.fig.suptitle(f'{img_png} Map, {kwargs["i_run"]+1}/{runs_per_n_agents} RpP, time limit: {time_per_alg_limit}', fontsize=16)
         plt.pause(0.1)
         print('big plot ends')
         # plt.show()
