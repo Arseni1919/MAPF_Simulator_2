@@ -63,11 +63,11 @@ class KSDSAgent:
             e_constr_dict = {node.xy_name: [] for node in self.nodes}
         if not perm_constr_dict:
             perm_constr_dict = {node.xy_name: [] for node in self.nodes}
-        # if kwargs["small_iteration"] > 20:
-        #     print(f'\n ---------- ({kwargs["alg_name"]}) '
-        #           f'[number_of_finished: {kwargs["number_of_finished"]}]'
-        #           f'[k_step_iter: {kwargs["k_step_iteration"]}]'
-        #           f'[small_iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
+        if kwargs["small_iteration"] > 50:
+            print(f'\n ---------- ({kwargs["alg_name"]}) '
+                  f'[finished: {kwargs["number_of_finished"]}]'
+                  f'[step: {kwargs["k_step_iteration"]}]'
+                  f'[iter: {kwargs["small_iteration"]}] A* {self.name} ---------- \n')
         if k_time:
             new_path, a_s_info = a_star(start=self.curr_node, goal=self.goal_node, nodes=self.nodes,
                                         nodes_dict=self.nodes_dict, h_func=self.h_func,
@@ -417,7 +417,7 @@ def all_replan(agents: List[KSDSAgent], **kwargs):
     a_star_n_closed, a_star_n_closed_dist = 0, [0]
     succeeded_list = []
     failed_paths_dict = {}
-    print(f'\n({kwargs["alg_name"]})[finished: {kwargs["number_of_finished"]}]'
+    print(f'\n({kwargs["alg_name"]})[finished: {kwargs["number_of_finished"]}/{kwargs["n_agents"]}]'
           f'[step: {kwargs["k_step_iteration"]}][iter: {kwargs["small_iteration"]}]')
 
     for agent in agents:
@@ -485,6 +485,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # Creating agents
     agents, agents_dict = create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot,
                                         iter_limit, map_dim)
+    kwargs['n_agents'] = len(agents)
 
     # alg info dict
     alg_info = get_alg_info_dict()

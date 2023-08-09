@@ -197,7 +197,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     # Creating agents
     agents, agents_dict = create_agents(start_nodes, goal_nodes, nodes, nodes_dict, h_func, plotter, middle_plot,
                                         iter_limit, map_dim)
-
+    kwargs['n_agents'] = len(agents)
     # alg info dict
     alg_info = get_alg_info_dict()
 
