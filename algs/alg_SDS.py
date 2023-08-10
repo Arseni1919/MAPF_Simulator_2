@@ -286,12 +286,13 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 330
+    n_agents = 400
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    img_dir = 'empty-48-48.map'  # 48-48
+    # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    img_dir = 'random-32-32-10.map'  # 32-32               | LNS |
 
     random_seed = True
     # random_seed = False

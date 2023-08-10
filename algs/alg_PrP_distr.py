@@ -186,7 +186,7 @@ def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs)
                     print(f'#########################################################')
                     print(f"runtime: {alg_info['runtime']}\n{alg_info['dist_runtime']=}\n{cost=}")
                     print(f"a_star_n_closed: {sum(alg_info['a_star_n_closed'])}\n{alg_info['a_star_n_closed_dist']=}")
-                    # plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, **kwargs)
+                    plotter.plot_mapf_paths(paths_dict=cut_full_plans, nodes=nodes, **kwargs)
                 alg_info['success_rate'] = 1
                 alg_info['sol_quality'] = cost
                 alg_info['a_star_calls_per_agent'] = [agent.stats_n_calls for agent in agents]
@@ -206,18 +206,18 @@ def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs)
 
 
 def main():
-    n_agents = 330
+    n_agents = 230
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # --------------------------------------------------- #
     # --------------------------------------------------- #
     # for the PP algorithm
     k = 30
-    h = 20
+    h = 30
     pref_paths_type = 'pref_index'
     p_h = 1
     p_l = 0

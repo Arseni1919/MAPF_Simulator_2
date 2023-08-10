@@ -297,7 +297,7 @@ def main():
         #     'color': 'tab:blue',
         # }),
 
-        'Dist-PrP': (run_k_distr_pp, {
+        'D-PrP': (run_k_distr_pp, {
             'k': 1e7,
             'h': 1e7,
             # reset_type: 'reset_start',
@@ -313,8 +313,8 @@ def main():
             'color': 'c',
         }),
 
-        '30-PrP': (run_k_distr_pp, {
-            'k': 30,  # for warehouse 30
+        '30-D-PrP': (run_k_distr_pp, {
+            'k': 30,  # for warehouse 30, for random and empty - 10
             'h': 30,
             # reset_type: 'reset_start',
             'reset_type': 'reset_step',
@@ -468,10 +468,10 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    # img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 680 agents with h=w=5
+    # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 680/730 agents with h=w=10
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161    | Up to 330 agents with h=w=30
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30
 
     # ------------------------------ LIMITS ------------------------------ #
     time_per_alg_limit = 0.1667  # approximately 10 seconds

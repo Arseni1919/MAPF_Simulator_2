@@ -199,8 +199,8 @@ def plot_step_in_mapf_paths(ax, info):
     i = 0
     for agent_name, path in paths_dict.items():
         t_path = path[:t + 1]
-        for node in t_path:
-            field[node.x, node.y] = 3
+        # for node in t_path:
+        #     field[node.x, node.y] = 3
         if agent_name == 'agent_0':
             ax.scatter(t_path[-1].y, t_path[-1].x, s=200, c='white')
             ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
@@ -211,7 +211,7 @@ def plot_step_in_mapf_paths(ax, info):
         i += 1
 
     for agent_name, path in paths_dict.items():
-        field[path[0].x, path[0].y] = 4
+        # field[path[0].x, path[0].y] = 4
         field[path[-1].x, path[-1].y] = 5
 
     ax.imshow(field, origin='lower')
