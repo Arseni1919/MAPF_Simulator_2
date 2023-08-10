@@ -313,21 +313,21 @@ def main():
         #     'color': 'c',
         # }),
 
-        '10-PrP': (run_k_distr_pp, {
-            'k': 10,  # for warehouse 30
-            'h': 10,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'purple',
-        }),
+        # '10-PrP': (run_k_distr_pp, {
+        #     'k': 10,  # for warehouse 30
+        #     'h': 10,
+        #     # reset_type: 'reset_start',
+        #     'reset_type': 'reset_step',
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'purple',
+        # }),
 
         # 'SDS': (run_sds, {
         #     'a_star_func': a_star,
@@ -434,8 +434,10 @@ def main():
     # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [280, 330, 380, 430, 480, 530, 580]  # !!!!!!!!!!!!!!!!!
+    n_agents_list = [530, 580, 630, 680, 730, 780]
     # n_agents_list = [50, 150, 250, 350, 450, 550]  # !!!!!!!!!!!!!!!!!
-    n_agents_list = [250, 350, 450, 550]
+    # n_agents_list = [250, 350, 450, 550]
     # n_agents_list = [10, 450, 500, 550, 600, 650]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
@@ -461,9 +463,9 @@ def main():
     # runs_per_n_agents = 2
     runs_per_n_agents = 1
 
-    random_seed = True
-    # random_seed = False
-    seed = 338
+    # random_seed = True
+    random_seed = False
+    seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
     img_dir = 'empty-48-48.map'  # 48-48
@@ -472,8 +474,8 @@ def main():
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # ------------------------------ LIMITS ------------------------------ #
-    time_per_alg_limit = 0.1667  # approximately 10 seconds
-    # time_per_alg_limit = 1  # According to PBS paper!
+    # time_per_alg_limit = 0.1667  # approximately 10 seconds
+    time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
     # time_per_alg_limit = 2
     # time_per_alg_limit = 4

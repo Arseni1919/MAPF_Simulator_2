@@ -63,7 +63,7 @@ class KSDSAgent:
             e_constr_dict = {node.xy_name: [] for node in self.nodes}
         if not perm_constr_dict:
             perm_constr_dict = {node.xy_name: [] for node in self.nodes}
-        if kwargs["small_iteration"] > 500:
+        if kwargs["small_iteration"] > 100:
             print(f'\n ---------- ({kwargs["alg_name"]}) '
                   f'[finished: {kwargs["number_of_finished"]}]'
                   f'[step: {kwargs["k_step_iteration"]}]'
