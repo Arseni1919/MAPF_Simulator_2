@@ -157,6 +157,7 @@ def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs)
             if not there_are_collisions:
                 break
 
+            print(f'\n\n[runtime={alg_info["runtime"]:0.2f}][dist_runtime={alg_info["dist_runtime"]:0.2f}]')
             func_info = all_replan(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}

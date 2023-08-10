@@ -63,7 +63,7 @@ class KSDSAgent:
             e_constr_dict = {node.xy_name: [] for node in self.nodes}
         if not perm_constr_dict:
             perm_constr_dict = {node.xy_name: [] for node in self.nodes}
-        if kwargs["small_iteration"] > 50:
+        if kwargs["small_iteration"] > 500:
             print(f'\n ---------- ({kwargs["alg_name"]}) '
                   f'[finished: {kwargs["number_of_finished"]}]'
                   f'[step: {kwargs["k_step_iteration"]}]'
@@ -248,7 +248,7 @@ class KSDSAgent:
             full_path_lngths.append(my_full_path_len)
             full_path_lngths.sort()
             my_order = full_path_lngths.index(my_full_path_len)
-            my_alpha = 0.9 - 0.8 * (my_order / (len(full_path_lngths) - 1))
+            my_alpha = 0.95 - 0.9 * (my_order / (len(full_path_lngths) - 1))
             return my_alpha
 
         else:
@@ -511,6 +511,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             if not there_are_collisions:
                 break
 
+            print(f'\n\n[runtime={alg_info["runtime"]:0.2f}][dist_runtime={alg_info["dist_runtime"]:0.2f}]')
             func_info = all_replan(agents, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
