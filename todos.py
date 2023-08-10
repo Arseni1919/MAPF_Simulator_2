@@ -11,9 +11,10 @@ DONE:
 - check different time horizons (w) with different replanning periods (h)
 - update k-MGDS and MGDS
 - prepare saving functions for results
+- create Dist-PrP algorithm
 
 TODO:
-- create Dist-PrP algorithm
+- for SDS and k-SDS: if neighbours didn't change their path - do not calculate once again the path!
 - prepare the flow of the paper - what experiments exactly needed to be done
 - prepare the paper
 - do the big experiments with other algorithms

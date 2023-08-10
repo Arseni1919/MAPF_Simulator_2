@@ -34,6 +34,7 @@ class KSDSAgent:
         self.iter_limit = iter_limit
         self.path = []
         self.path_names = []
+        self.last_path_change_iter = 0
         self.h = 0
         self.full_path = []
         self.full_path_names = []
@@ -88,6 +89,7 @@ class KSDSAgent:
         else:
             self.path = [self.curr_node]
             succeeded = False
+        rename_nodes_in_path(self.path)
         self.path_names = [node.xy_name for node in self.path]
         return succeeded, {'a_s_time': time.time() - start_time, 'a_s_info': a_s_info}
 
@@ -96,6 +98,7 @@ class KSDSAgent:
         h = kwargs['h']
         # nei_r = k
         nei_r = h
+        self.last_path_change_iter = 0
         self.conf_agents_names = []
         self.nei_list, self.nei_dict, self.nei_paths_dict, self.nei_h_dict = [], {}, {}, {}
         nei_dist_const = 2 * nei_r + 1
@@ -167,6 +170,13 @@ class KSDSAgent:
                     paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
         return paths_to_consider_dict
 
+    def pref_path_rand(self, paths_to_consider_dict, **kwargs):
+        new_paths_to_consider_dict = {}
+        for agent_name, path in paths_to_consider_dict.items():
+            if agent_name not in self.conf_agents_names:
+                new_paths_to_consider_dict[agent_name] = path
+        return new_paths_to_consider_dict
+
     def get_paths_to_consider_dict(self, **kwargs):
         # p_h, p_l = 0.9, 0.1
         pref_paths_type = kwargs['pref_paths_type']
@@ -185,13 +195,17 @@ class KSDSAgent:
     def k_transform(**kwargs):
         k = kwargs['k']
         # use also kwargs['k_step_iteration'] and kwargs['k_step_iteration_limit']
-        # k = k + k * round(kwargs['small_iteration'] / 20)
+        # k = k + k * round(kwargs['small_iteration'] / 20)  kwargs['k_small_iter_limit']
         ratio = kwargs['k_step_iteration'] / kwargs['k_step_iteration_limit']
-        if ratio > 0.95:
+        # ratio = kwargs['small_iteration'] / kwargs['k_small_iter_limit']
+        if ratio > 0.87:
+            # print('!!!!!!!!!!!!')
             return k * 8
-        if ratio > 0.9:
+        if ratio > 0.75:
+            # print('!!!!!!!!!!!!')
             return k * 4
-        if ratio > 0.8:
+        if ratio > 0.5:
+            # print('!!!!!!!!!!!!')
             return k * 2
         return k
 
@@ -205,6 +219,28 @@ class KSDSAgent:
             return False, info
         return succeeded, info
 
+    def check_nei_last_change(self, paths_to_consider_dict, names_to_consider_list, **kwargs):
+        curr_iteration = kwargs["small_iteration"]
+        nei_changed_dict = {}
+        changed = False
+        for nei_name in names_to_consider_list:
+            nei_agent = self.nei_dict[nei_name]
+            nei_changed_dict[nei_name] = nei_agent.last_path_change_iter
+            if nei_agent.last_path_change_iter >= curr_iteration - 1:
+                changed = True
+                break
+        return changed
+        # old_names_to_consider_list = names_to_consider_list[:]
+        # if not changed:
+        #     paths_to_consider_dict = self.pref_path_rand(paths_to_consider_dict, **kwargs)
+        #     names_to_consider_list = list(paths_to_consider_dict.keys())
+        #     self.names_to_consider_list = names_to_consider_list
+        #     print(f'\n{self.name} >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> pref_path_rand\n')
+        #     print(f'{old_names_to_consider_list=}')
+        #     print(f'new {names_to_consider_list=}')
+        #     print(f'conf_agents_names={self.conf_agents_names}')
+        # return paths_to_consider_dict, names_to_consider_list
+
     def replan(self, **kwargs):
         check_r = self.k_transform(**kwargs)
         self.update_conf_agents_names(check_r)
@@ -215,10 +251,18 @@ class KSDSAgent:
         p_ch = self.set_p_ch(**kwargs)
         if random.random() < p_ch:
             paths_to_consider_dict, names_to_consider_list = self.get_paths_to_consider_dict(**kwargs)
+            # v change paths to consider v
+            # paths_to_consider_dict, names_to_consider_list = self.check_nei_last_change(paths_to_consider_dict, names_to_consider_list, **kwargs)
+            # changed = self.check_nei_last_change(paths_to_consider_dict, names_to_consider_list, **kwargs)
+            # if not changed and random.random() < 0.5:
+            #     return True, {}
             v_constr_dict, e_constr_dict, _ = build_constraints(self.nodes, paths_to_consider_dict)
             # full_paths_dict = {agent_name: self.nei_paths_dict[agent_name] for agent_name in names_to_consider_list}
             perm_constr_dict = build_k_step_perm_constr_dict(self.nodes, paths_to_consider_dict, check_r)
+            # succeeded: if True - changed, if False - did not
             succeeded, info = self.calc_a_star_plan(v_constr_dict, e_constr_dict, perm_constr_dict, k_time=check_r, **kwargs)
+            if succeeded:
+                self.last_path_change_iter = kwargs["small_iteration"]
             succeeded, info = self.check_if_all_around_finished(succeeded, info, paths_to_consider_dict, check_r,
                                                                 **kwargs)
             return succeeded, info
@@ -229,6 +273,9 @@ class KSDSAgent:
 
         if len(self.path) == 0:
             return 1
+
+        if len(self.conf_agents_names) == 1:
+            return 0.5
 
         if p_ch_type == 'simple':
             alpha = kwargs['alpha']
@@ -248,7 +295,7 @@ class KSDSAgent:
             full_path_lngths.append(my_full_path_len)
             full_path_lngths.sort()
             my_order = full_path_lngths.index(my_full_path_len)
-            my_alpha = 0.95 - 0.9 * (my_order / (len(full_path_lngths) - 1))
+            my_alpha = 0.9 - 0.8 * (my_order / (len(full_path_lngths) - 1))
             return my_alpha
 
         else:
@@ -289,7 +336,9 @@ class KSDSAgent:
             self.full_path.extend(self.path[1:step])
         self.full_path_names = [node.xy_name for node in self.full_path]
         self.curr_node = self.full_path[-1]
+        self.curr_node.t = 0
         self.path = self.path[step - 1:]
+        rename_nodes_in_path(self.path)
         self.path_names = [node.xy_name for node in self.path]
         return self.curr_node.xy_name == self.goal_node.xy_name
 
@@ -411,14 +460,17 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
     return there_are_collisions, c_v, c_e, func_info
 
 
-def all_replan(agents: List[KSDSAgent], **kwargs):
+def all_replan(agents: List[KSDSAgent], alg_info, **kwargs):
+    # inner print
+    print(f'\n\n[runtime={alg_info["runtime"]:0.2f} sec.][dist_runtime={alg_info["dist_runtime"]:0.2f} sec.]'
+          f'\n({kwargs["alg_name"]})[finished: {kwargs["number_of_finished"]}/{kwargs["n_agents"]}]'
+          f'[step: {kwargs["k_step_iteration"]}][iter: {kwargs["small_iteration"]}]\n')
+
     runtime, runtime_dist = 0, [0]
     a_star_calls_counter, a_star_calls_counter_dist = 0, []
     a_star_n_closed, a_star_n_closed_dist = 0, [0]
     succeeded_list = []
     failed_paths_dict = {}
-    print(f'\n({kwargs["alg_name"]})[finished: {kwargs["number_of_finished"]}/{kwargs["n_agents"]}]'
-          f'[step: {kwargs["k_step_iteration"]}][iter: {kwargs["small_iteration"]}]')
 
     for agent in agents:
         start_time = time.time()
@@ -473,6 +525,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
     else:
         k_step_iteration_limit = 200
         kwargs['k_step_iteration_limit'] = k_step_iteration_limit
+        kwargs['k_small_iter_limit'] = 40
     alg_name = kwargs['alg_name'] if 'alg_name' in kwargs else f'k-SDS'
     iter_limit = kwargs['a_star_iter_limit'] if 'a_star_iter_limit' in kwargs else 1e100
     plotter = kwargs['plotter'] if 'plotter' in kwargs else None
@@ -511,8 +564,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             if not there_are_collisions:
                 break
 
-            print(f'\n\n[runtime={alg_info["runtime"]:0.2f}][dist_runtime={alg_info["dist_runtime"]:0.2f}]')
-            func_info = all_replan(agents, **kwargs)  # agents
+            func_info = all_replan(agents, alg_info, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
@@ -557,26 +609,26 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 50
+    n_agents = 330
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
-    img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # random_seed = True
     random_seed = False
-    seed = 839
+    seed = 888
     PLOT_PER = 1
     PLOT_RATE = 0.5
 
     # --------------------------------------------------- #
     # --------------------------------------------------- #
     # for the algorithms
-    k = 10
-    h = 10
-    p_h_type = 'max_prev'
-    # p_h_type = 'simple'
+    k = 30
+    h = 20
+    p_ch_type = 'max_prev'
+    # p_ch_type = 'simple'
     alpha = 1.0
     # pref_paths_type = 'pref_index'
     pref_paths_type = 'pref_path_length'
@@ -611,7 +663,7 @@ def main():
             alg_name=alg_name,
             k=k,
             h=h,
-            p_h_type=p_h_type,
+            p_ch_type=p_ch_type,
             alpha=alpha,
             p_h=p_h,
             p_l=p_l,

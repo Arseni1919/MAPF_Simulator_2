@@ -201,8 +201,12 @@ def plot_step_in_mapf_paths(ax, info):
         t_path = path[:t + 1]
         for node in t_path:
             field[node.x, node.y] = 3
-        ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
-        ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
+        if agent_name == 'agent_0':
+            ax.scatter(t_path[-1].y, t_path[-1].x, s=200, c='white')
+            ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
+        else:
+            ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
+            ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
         ax.text(t_path[-1].y - 0.4, t_path[-1].x - 0.4, agent_name[6:])
         i += 1
 

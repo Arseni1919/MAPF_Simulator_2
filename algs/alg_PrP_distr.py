@@ -43,21 +43,6 @@ class KPrPAgent(KSDSAgent):
         self.full_path = []
         self.full_path_names = []
 
-    # def update_conf_agents_names(self, check_r):
-    #     self.conf_agents_names = []
-    #     # self.nei_paths_dict
-    #     h_nei_paths_dict = {}
-    #     for nei_name, nei_path in self.nei_paths_dict.items():
-    #         if self.nei_dict[nei_name].index < self.index:
-    #             h_nei_paths_dict[nei_name] = nei_path
-    #     conf_list = check_single_agent_k_step_c_v(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
-    #     c_e_list = check_single_agent_k_step_c_e(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
-    #     conf_list.extend(c_e_list)
-    #     conf_agents_names = []
-    #     for conf in conf_list:
-    #         conf_agents_names.append(conf[1])
-    #     self.conf_agents_names = list(set(conf_agents_names))
-
     def replan(self, **kwargs):
         check_r = self.k_transform(**kwargs)
         self.update_conf_agents_names(check_r, immediate=False)
@@ -157,8 +142,7 @@ def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs)
             if not there_are_collisions:
                 break
 
-            print(f'\n\n[runtime={alg_info["runtime"]:0.2f}][dist_runtime={alg_info["dist_runtime"]:0.2f}]')
-            func_info = all_replan(agents, **kwargs)  # agents
+            func_info = all_replan(agents, alg_info, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
@@ -222,24 +206,24 @@ def run_k_distr_pp(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs)
 
 
 def main():
-    n_agents = 50
+    n_agents = 330
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
-    img_dir = 'random-64-64-10.map'  # 64-64
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
 
     # --------------------------------------------------- #
     # --------------------------------------------------- #
     # for the PP algorithm
-    alg_name = 'k-PrP'
-    k = 10000
-    h = 10000
+    k = 30
+    h = 20
     pref_paths_type = 'pref_index'
     p_h = 1
     p_l = 0
     # reset_type = 'reset_start'
     reset_type = 'reset_step'
+    alg_name = f'{k}-{h}-PrP'
     # --------------------------------------------------- #
     # --------------------------------------------------- #
 
@@ -295,3 +279,19 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+
+    # def update_conf_agents_names(self, check_r):
+    #     self.conf_agents_names = []
+    #     # self.nei_paths_dict
+    #     h_nei_paths_dict = {}
+    #     for nei_name, nei_path in self.nei_paths_dict.items():
+    #         if self.nei_dict[nei_name].index < self.index:
+    #             h_nei_paths_dict[nei_name] = nei_path
+    #     conf_list = check_single_agent_k_step_c_v(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
+    #     c_e_list = check_single_agent_k_step_c_e(self.name, self.path, h_nei_paths_dict, check_r+1, immediate=True)
+    #     conf_list.extend(c_e_list)
+    #     conf_agents_names = []
+    #     for conf in conf_list:
+    #         conf_agents_names.append(conf[1])
+    #     self.conf_agents_names = list(set(conf_agents_names))

@@ -181,7 +181,9 @@ def iteration_print(agents, plan, alg_name, alg_info, runtime, iteration):
         raise RuntimeError('0 in plan_lngths')
     cost = sum([len(path) for path in plan.values()])
     print(f'\r---\n'
-          f'[{alg_name}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {runtime:0.2f}s][iter {iteration}][A* dist calls: ]\n'
+          f'ITERATION PRINT: '
+          f'[{alg_name}][{len(agents)} agents][A* calls: {alg_info["a_star_calls_counter"]}][time: {runtime:0.2f}s]'
+          f'[step {iteration}]\n'
           f'cost: {cost}\n'
           f'---\n')
     return cost

@@ -51,22 +51,24 @@ class SDSAgent:
         if len(agents_in_confs) == 0:
             raise RuntimeError('len(agents_in_confs) == 0')
 
-        if decision_type == 'simple':
-            if random.random() < alpha:
-                return True
+        if len(agents_in_confs) == 1:
+            return random.random() < 0.5
 
-        elif decision_type == 'min_prev_1':
-            path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
-            max_n = max(path_lngths)
-            min_n = min(path_lngths)
-            # priority on smaller paths
-            if len(self.path) > max_n and random.random() < 0.9:
-                return True
-            elif len(self.path) < min_n and random.random() < 0.1:
-                return True
-            elif random.random() < alpha:
-                return True
-            return
+        if decision_type == 'simple':
+            return random.random() < alpha
+
+        # elif decision_type == 'min_prev_1':
+        #     path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
+        #     max_n = max(path_lngths)
+        #     min_n = min(path_lngths)
+        #     # priority on smaller paths
+        #     if len(self.path) > max_n and random.random() < 0.9:
+        #         return True
+        #     elif len(self.path) < min_n and random.random() < 0.1:
+        #         return True
+        #     elif random.random() < alpha:
+        #         return True
+        #     return
 
         elif decision_type == 'min_prev_2':
             # A MORE SMART VERSION
@@ -86,46 +88,46 @@ class SDSAgent:
                 if random.random() < my_alpha:
                     return True
 
-        elif decision_type == 'max_prev_1':
-            path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
-            max_n = max(path_lngths)
-            min_n = min(path_lngths)
-            # priority on bigger paths
-            if len(self.path) > max_n and random.random() < 0.1:
-                return True
-            elif len(self.path) < min_n and random.random() < 0.9:
-                return True
-            elif random.random() < alpha:
-                return True
+        # elif decision_type == 'max_prev_1':
+        #     path_lngths = [len(self.other_paths[agent_name]) for agent_name in agents_in_confs]
+        #     max_n = max(path_lngths)
+        #     min_n = min(path_lngths)
+        #     # priority on bigger paths
+        #     if len(self.path) > max_n and random.random() < 0.1:
+        #         return True
+        #     elif len(self.path) < min_n and random.random() < 0.9:
+        #         return True
+        #     elif random.random() < alpha:
+        #         return True
 
-        elif decision_type == 'index_1':
-            agents_indecies = [agents_dict[agent_name].index for agent_name in agents_in_confs]
-            max_i = max(agents_indecies)
-            min_i = min(agents_indecies)
-            # priority on bigger paths
-            if self.index > max_i and random.random() < 0.1:
-                return True
-            elif self.index < min_i and random.random() < 0.9:
-                return True
-            elif random.random() < alpha:
-                return True
+        # elif decision_type == 'index_1':
+        #     agents_indecies = [agents_dict[agent_name].index for agent_name in agents_in_confs]
+        #     max_i = max(agents_indecies)
+        #     min_i = min(agents_indecies)
+        #     # priority on bigger paths
+        #     if self.index > max_i and random.random() < 0.1:
+        #         return True
+        #     elif self.index < min_i and random.random() < 0.9:
+        #         return True
+        #     elif random.random() < alpha:
+        #         return True
 
-        elif decision_type == 'index_2':
-            agents_indecies = [agents_dict[agent_name].index for agent_name in agents_in_confs]
-            max_i = max(agents_indecies)
-            min_i = min(agents_indecies)
-            # priority on bigger paths
-            if self.index > max_i and random.random() < 0.9:
-                return True
-            elif self.index < min_i and random.random() < 0.1:
-                return True
-            else:
-                agents_indecies.append(self.index)
-                agents_indecies.sort()
-                my_order = agents_indecies.index(self.index)
-                my_alpha = 0.1 + 0.8 * (my_order / len(agents_indecies))
-                if random.random() < my_alpha:
-                    return True
+        # elif decision_type == 'index_2':
+        #     agents_indecies = [agents_dict[agent_name].index for agent_name in agents_in_confs]
+        #     max_i = max(agents_indecies)
+        #     min_i = min(agents_indecies)
+        #     # priority on bigger paths
+        #     if self.index > max_i and random.random() < 0.9:
+        #         return True
+        #     elif self.index < min_i and random.random() < 0.1:
+        #         return True
+        #     else:
+        #         agents_indecies.append(self.index)
+        #         agents_indecies.sort()
+        #         my_order = agents_indecies.index(self.index)
+        #         my_alpha = 0.1 + 0.8 * (my_order / len(agents_indecies))
+        #         if random.random() < my_alpha:
+        #             return True
 
         else:
             raise RuntimeError('no such decision_type')
@@ -284,9 +286,9 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 50
-    img_dir = 'my_map_10_10_room.map'  # 10-10
-    # img_dir = 'empty-48-48.map'  # 48-48
+    n_agents = 330
+    # img_dir = 'my_map_10_10_room.map'  # 10-10
+    img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251

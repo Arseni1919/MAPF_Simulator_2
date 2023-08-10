@@ -226,7 +226,7 @@ def run_k_mgds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
-            func_info = all_replan(agents, **kwargs)  # agents
+            func_info = all_replan(agents, alg_info, **kwargs)  # agents
             if check_if_limit_is_crossed(func_info, alg_info, **kwargs):
                 return None, {'agents': agents, 'success_rate': 0}
 
