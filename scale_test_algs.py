@@ -289,33 +289,33 @@ def main():
         #     'color': 'tab:purple',
         # }),
 
-        'PrP': (run_pp, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'norm_a_star_closed',
-            'dist': False,
-            'color': 'tab:blue',
-        }),
+        # 'PrP': (run_pp, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'norm_a_star_closed',
+        #     'dist': False,
+        #     'color': 'tab:blue',
+        # }),
 
-        'D-PrP': (run_k_distr_pp, {
-            'k': 1e7,
-            'h': 1e7,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'c',
-        }),
+        # 'D-PrP': (run_k_distr_pp, {
+        #     'k': 1e7,
+        #     'h': 1e7,
+        #     # reset_type: 'reset_start',
+        #     'reset_type': 'reset_step',
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'c',
+        # }),
 
         'k-D-PrP': (run_k_distr_pp, {
-            'k': 5,  # for warehouse 30, for random and empty - 10
-            'h': 5,
+            'k': 10,  # for warehouse 30, for random and empty - 10
+            'h': 10,
             # reset_type: 'reset_start',
             'reset_type': 'reset_step',
             'pref_paths_type': 'pref_index',
@@ -329,19 +329,19 @@ def main():
             'color': 'purple',
         }),
 
-        'SDS': (run_sds, {
-            'a_star_func': a_star,
-            'decision_type': 'min_prev_2',
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
+        # 'SDS': (run_sds, {
+        #     'a_star_func': a_star,
+        #     'decision_type': 'min_prev_2',
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'tab:orange',
+        # }),
 
-        'k-SDS': (run_k_sds, {   # for LNS: k=5, h=2
-            'k': 5,
-            'h': 5,
+        'k-SDS': (run_k_sds, {   # for LNS: k=15, h=2
+            'k': 10,
+            'h': 10,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -433,11 +433,12 @@ def main():
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
-    # n_agents_list = [100, 200, 300, 400]  # !!!!!!!!!! LNS
+    # n_agents_list = [ 400]  # !!!!!!!!!! LNS
     # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! room
     # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse
-    # n_agents_list = [380, 430, 480, 530, 580, 630, 680]  # !!!!!!!!!! empty and random
-    n_agents_list = [80, 180, 280, 380, 480, 580, 680]  # !!!!!!!!!! empty and random
+    n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
+    # n_agents_list = [480, 580]
+    # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
     # n_agents_list = [530, 580, 630, 680, 730, 780]
     # n_agents_list = [50, 150, 250, 350, 450, 550]
@@ -472,15 +473,15 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    img_dir = 'empty-48-48.map'  # 48-48              | Up to 680 agents with h=w=5
-    # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 680/730 agents with h=w=10
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30
-    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30
-    # img_dir = 'random-32-32-10.map'  # 32-32          | LNS | Up to 400 agents with w=5, h=2
+    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
+    img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
+    # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30, lim=10sec.
+    # img_dir = 'random-32-32-10.map'  # 32-32          | LNS | Up to 400 agents with w=5, h=2, lim=1min.
 
     # ------------------------------ LIMITS ------------------------------ #
-    # time_per_alg_limit = 0.1667  # approximately 10 seconds
-    time_per_alg_limit = 1  # According to PBS paper!
+    time_per_alg_limit = 0.1667  # approximately 10 seconds
+    # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
     # time_per_alg_limit = 2
     # time_per_alg_limit = 4

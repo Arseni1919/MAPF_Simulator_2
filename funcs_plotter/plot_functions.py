@@ -43,26 +43,28 @@ def set_legend(ax, framealpha=None):
 
 
 def sub_plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
-    line = get_line_or_marker(index, 'l')
+    line_style = get_line_or_marker(index, 'l')
     linewidth = 2
     alpha = 0.75
     if 'color' in alg_info:
-        ax.plot(l_x, l_y, line, label=f'{alg_name}', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+        ax.plot(l_x, l_y, line_style, label=f'{alg_name}', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
     else:
-        ax.plot(l_x, l_y, line, label=f'{alg_name}', alpha=alpha, linewidth=linewidth)
+        raise RuntimeError('no color! ufff')
+        # ax.plot(l_x, l_y, line_style, label=f'{alg_name}', alpha=alpha, linewidth=linewidth)
     plot_text_in_cactus(ax, l_x, l_y)
 
 
 def sub_plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
-    marker = f"-{get_line_or_marker(index, 'm')}"
+    # line_style = f"-{get_line_or_marker(index, 'm')}"
+    line_style = get_line_or_marker(index, 'l')
     linewidth = 1
     alpha = 0.43
     if 'color' in alg_info:
-        # ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
-        ax.plot(l_x, l_y, marker, alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+        ax.plot(l_x, l_y, line_style, label=f'{alg_name}', alpha=alpha, color=alg_info['color'], linewidth=linewidth)
+        # ax.plot(l_x, l_y, line_style, alpha=alpha, color=alg_info['color'], linewidth=linewidth)
     else:
         raise RuntimeError('no color! ufff')
-        # ax.plot(l_x, l_y, marker, label=f'{alg_name} (dist)', alpha=alpha, linewidth=linewidth)
+        # ax.plot(l_x, l_y, line_style, label=f'{alg_name} (dist)', alpha=alpha, linewidth=linewidth)
     plot_text_in_cactus(ax, l_x, l_y)
 
 
@@ -305,7 +307,6 @@ def plot_runtime_cactus(ax, info):
         rt_y.sort()
         rt_x = list(range(len(rt_y)))
         max_instances = max(max_instances, len(rt_x))
-        sub_plot_cactus_big_lines(ax, index, rt_x, rt_y, alg_name, alg_info)
 
         # dist_runtime
         if alg_info['dist']:
@@ -315,12 +316,15 @@ def plot_runtime_cactus(ax, info):
             it_x = list(range(len(it_y)))
             max_instances = max(max_instances, len(it_x))
             sub_plot_cactus_dist_lines(ax, index, it_x, it_y, alg_name, alg_info)
+        else:
+            sub_plot_cactus_big_lines(ax, index, rt_x, rt_y, alg_name, alg_info)
+
 
     ax.set_xlim([0, max_instances + 2])
     # ax.set_xticks(rt_x)
     ax.set_xlabel('Solved Instances', labelpad=-1)
     ax.set_ylabel('seconds', labelpad=-1)
-    is_log = set_log(ax)
+    # is_log = set_log(ax)
     set_plot_title(ax, f'runtime (cactus{" - log scale" if is_log else ""})')
     # ax.set_ylim([1, 3000])
     ax.set_ylim([0, 3000])
@@ -345,7 +349,6 @@ def plot_a_star_calls_counters(ax, info):
         ac_y.sort()
         ac_x = list(range(len(ac_y)))
         max_instances = max(max_instances, len(ac_x))
-        sub_plot_cactus_big_lines(ax, index, ac_x, ac_y, alg_name, alg_info)
 
         if alg_info['dist']:
             # get_list_a_star(statistics_dict, alg_name, n_agents_list, list_type, is_json=False)
@@ -354,10 +357,13 @@ def plot_a_star_calls_counters(ax, info):
             acd_x = list(range(len(acd_y)))
             max_instances = max(max_instances, len(acd_x))
             sub_plot_cactus_dist_lines(ax, index, acd_x, acd_y, alg_name, alg_info)
+        else:
+            sub_plot_cactus_big_lines(ax, index, ac_x, ac_y, alg_name, alg_info)
+
 
     ax.set_xlim([0, max_instances + 2])
     ax.set_xlabel('Solved Instances')
-    is_log = set_log(ax)
+    # is_log = set_log(ax)
     ax.set_ylim([0, 3e7])
     set_plot_title(ax, f'A* Calls (cactus{" - log scale" if is_log else ""})')
     set_legend(ax, framealpha=0)
@@ -451,7 +457,6 @@ def plot_n_expanded_cactus(ax, info):
         rt_y.sort()
         rt_x = list(range(len(rt_y)))
         max_instances = max(max_instances, len(rt_x))
-        sub_plot_cactus_big_lines(ax, index, rt_x, rt_y, alg_name, alg_info)
 
         if alg_info['dist']:
             l_y = get_list_a_star(statistics_dict, alg_name, n_agents_list, 'a_star_n_closed_dist', is_json)
@@ -459,13 +464,15 @@ def plot_n_expanded_cactus(ax, info):
             l_x = list(range(len(l_y)))
             max_instances = max(max_instances, len(l_x))
             sub_plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info)
+        else:
+            sub_plot_cactus_big_lines(ax, index, rt_x, rt_y, alg_name, alg_info)
 
     ax.set_xlim([0, max_instances + 2])
     # ax.set_xticks(rt_x)
     # ax.set_ylabel('n_closed')
     ax.set_xlabel('Solved Instances')
     # ax.set_xlabel('y: N expanded nodes (cactus - log scale)')
-    is_log = set_log(ax)
+    # is_log = set_log(ax)
     ax.set_ylim([0, 3e7])
     set_plot_title(ax, f'N expanded nodes (cactus{" - log scale" if is_log else ""})')
     set_legend(ax)

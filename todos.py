@@ -15,9 +15,6 @@ DONE:
 - for SDS and k-SDS: if neighbours didn't change their path - do not calculate once again the path!
 
 TODO:
-- prepare the flow of the paper - what experiments exactly needed to be done
-- prepare the paper
-- do the big experiments with other algorithms
 - implement more algorithms from literature
 - make big experiments with the algorithms from literature
 - export graphs

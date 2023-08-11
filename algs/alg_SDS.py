@@ -162,7 +162,7 @@ class SDSAgent:
         if to_change:
             v_constr_dict, e_constr_dict, perm_constr_dict = build_constraints(self.nodes, self.other_paths)
             iter_limit = self.get_a_star_iter_limit(agents_in_confs)
-            print(f'\n ---------- ({kwargs["alg_name"]})[iteration: {kwargs["iteration"]}] A* {self.name} ---------- \n')
+            # print(f'\n ---------- ({kwargs["alg_name"]})[iteration: {kwargs["iteration"]}] A* {self.name} ---------- \n')
             a_star_func = kwargs['a_star_func']
             new_path, a_s_info = a_star_func(start=self.start_node, goal=self.goal_node,
                                              nodes=self.nodes, nodes_dict=self.nodes_dict, h_func=self.h_func,
@@ -210,6 +210,9 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
     # Distributed Part
     for iteration in range(1000000):
+        print(f'\n\n[runtime={alg_info["runtime"]:0.2f} sec.][dist_runtime={alg_info["dist_runtime"]:0.2f} sec.]'
+              f'\n({kwargs["alg_name"]})[n agents: {len(agents)}][iter: {iteration}]\n')
+
         # start_time = time.time()
         kwargs['iteration'] = iteration
         max_time_list = []
@@ -258,7 +261,7 @@ def run_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
         # CHECK PLAN
         plan = {agent.name: agent.path for agent in agents}
-        iteration_print(agents, plan, alg_name, alg_info, runtime, iteration)
+        # iteration_print(agents, plan, alg_name, alg_info, runtime, iteration)
         if all(no_confs_list):
             there_is_col, c_v, c_e, cost = check_plan(agents, plan, alg_name, alg_info, runtime, iteration)
             if not there_is_col:
