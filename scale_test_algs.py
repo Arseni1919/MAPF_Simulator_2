@@ -315,7 +315,7 @@ def main():
 
         'k-D-PrP': (run_k_distr_pp, {
             'k': 5,  # for warehouse 30, for random and empty - 10
-            'h': 2,
+            'h': 5,
             # reset_type: 'reset_start',
             'reset_type': 'reset_step',
             'pref_paths_type': 'pref_index',
@@ -329,19 +329,19 @@ def main():
             'color': 'purple',
         }),
 
-        # 'SDS': (run_sds, {
-        #     'a_star_func': a_star,
-        #     'decision_type': 'min_prev_2',
-        #     # 'limit_type': 'norm_time',
-        #     'limit_type': 'dist_time',
-        #     # 'limit_type': 'dist_a_star_closed',
-        #     'dist': True,
-        #     'color': 'tab:orange',
-        # }),
+        'SDS': (run_sds, {
+            'a_star_func': a_star,
+            'decision_type': 'min_prev_2',
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'tab:orange',
+        }),
 
         'k-SDS': (run_k_sds, {   # for LNS: k=5, h=2
             'k': 5,
-            'h': 2,
+            'h': 5,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -427,17 +427,19 @@ def main():
     }
 
     # n_agents_list = [5, 10]
-    n_agents_list = [100, 200, 300, 400]
     # n_agents_list = [10, 15, 20, 25, 30]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
     # n_agents_list = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
-    # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!!!!!!!!!
-    # n_agents_list = [280, 330, 380, 430, 480, 530, 580]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [100, 200, 300, 400]  # !!!!!!!!!! LNS
+    # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! room
+    # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse
+    n_agents_list = [380, 430, 480, 530, 580, 630, 680]  # !!!!!!!!!! empty and random
+    # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
     # n_agents_list = [530, 580, 630, 680, 730, 780]
-    # n_agents_list = [50, 150, 250, 350, 450, 550]  # !!!!!!!!!!!!!!!!!
+    # n_agents_list = [50, 150, 250, 350, 450, 550]
     # n_agents_list = [250, 350, 450, 550]
     # n_agents_list = [10, 450, 500, 550, 600, 650]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
@@ -455,9 +457,9 @@ def main():
     # n_agents_list = [250, 300, 350, 400, 450, 500, 550]
 
     # runs_per_n_agents = 50
-    runs_per_n_agents = 25
+    # runs_per_n_agents = 25  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 10  # !!!!!!!!!!!!!!!!!
+    runs_per_n_agents = 10  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 5
     # runs_per_n_agents = 4
     # runs_per_n_agents = 3
@@ -469,11 +471,11 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 680 agents with h=w=5
+    img_dir = 'empty-48-48.map'  # 48-48              | Up to 680 agents with h=w=5
     # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 680/730 agents with h=w=10
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30
-    img_dir = 'random-32-32-10.map'  # 32-32          | LNS |
+    # img_dir = 'random-32-32-10.map'  # 32-32          | LNS | Up to 400 agents with w=5, h=2
 
     # ------------------------------ LIMITS ------------------------------ #
     # time_per_alg_limit = 0.1667  # approximately 10 seconds
