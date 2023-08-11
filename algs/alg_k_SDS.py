@@ -610,7 +610,7 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 450
+    n_agents = 400
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
