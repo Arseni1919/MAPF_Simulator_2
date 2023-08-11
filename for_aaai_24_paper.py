@@ -1,16 +1,22 @@
 """
 # Experiments:
+
 Empty:
+    empty_1.json
 
 Random:
     Part 1:
-    random - k-D-PrP, k-SDS - 80 to 280
-    2023-08-11--13-25_ALGS-2_RUNS-10_MAP-random-64-64-10.json
+    k-D-PrP, k-SDS - 80 to 280
+    rand_1.json
     Part 2:
-
+    k-D-PrP, k-SDS - 380 to 580
+    rand_2.json
     Part 3:
+    PrP, D-PrP, SDS
+    rand_3.json
 
 Warehouse:
+
 
 Game:
 

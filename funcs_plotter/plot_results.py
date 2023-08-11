@@ -46,7 +46,7 @@ def main():
     # file_dir = '../logs_for_graphs/2023-01-17--13-51_ALGS-3_RUNS-5_MAP-random-64-64-10.json'  # mgm
     # file_dir = '../logs_for_graphs/2023-01-17--16-19_ALGS-3_RUNS-5_MAP-empty-48-48.json'  # dsa
 
-    file_dir = f'../logs_for_graphs/2023-08-10--18-20_ALGS-4_RUNS-10_MAP-warehouse-10-20-10-2-1.json'
+    file_dir = f'../logs_for_graphs/2023-08-11--11-57_ALGS-4_RUNS-10_MAP-empty-48-48.json'
 
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
