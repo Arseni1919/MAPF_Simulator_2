@@ -436,7 +436,8 @@ def main():
     # n_agents_list = [100, 200, 300, 400]  # !!!!!!!!!! LNS
     # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! room
     # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse
-    n_agents_list = [380, 430, 480, 530, 580, 630, 680]  # !!!!!!!!!! empty and random
+    # n_agents_list = [380, 430, 480, 530, 580, 630, 680]  # !!!!!!!!!! empty and random
+    n_agents_list = [80, 180, 280, 380, 480, 580, 680]  # !!!!!!!!!! empty and random
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
     # n_agents_list = [530, 580, 630, 680, 730, 780]
     # n_agents_list = [50, 150, 250, 350, 450, 550]
