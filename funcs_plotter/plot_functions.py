@@ -19,8 +19,8 @@ def set_plot_title(ax, title):
 
 
 def set_log(ax):
-    log = True
-    # log = False
+    # log = True
+    log = False
     if log:
         ax.set_yscale('log')
     return log
@@ -55,8 +55,8 @@ def sub_plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
 
 
 def sub_plot_cactus_dist_lines(ax, index, l_x, l_y, alg_name, alg_info):
-    # line_style = f"-{get_line_or_marker(index, 'm')}"
-    line_style = get_line_or_marker(index, 'l')
+    line_style = f"-{get_line_or_marker(index, 'm')}"
+    # line_style = get_line_or_marker(index, 'l')
     linewidth = 1
     alpha = 0.43
     if 'color' in alg_info:
@@ -324,10 +324,10 @@ def plot_runtime_cactus(ax, info):
     # ax.set_xticks(rt_x)
     ax.set_xlabel('Solved Instances', labelpad=-1)
     ax.set_ylabel('seconds', labelpad=-1)
-    # is_log = set_log(ax)
+    is_log = set_log(ax)
     set_plot_title(ax, f'runtime (cactus{" - log scale" if is_log else ""})')
     # ax.set_ylim([1, 3000])
-    ax.set_ylim([0, 3000])
+    # ax.set_ylim([0, 3000])
     set_legend(ax)
 
 
@@ -363,8 +363,8 @@ def plot_a_star_calls_counters(ax, info):
 
     ax.set_xlim([0, max_instances + 2])
     ax.set_xlabel('Solved Instances')
-    # is_log = set_log(ax)
-    ax.set_ylim([0, 3e7])
+    is_log = set_log(ax)
+    # ax.set_ylim([0, 3e7])
     set_plot_title(ax, f'A* Calls (cactus{" - log scale" if is_log else ""})')
     set_legend(ax, framealpha=0)
 
@@ -472,8 +472,8 @@ def plot_n_expanded_cactus(ax, info):
     # ax.set_ylabel('n_closed')
     ax.set_xlabel('Solved Instances')
     # ax.set_xlabel('y: N expanded nodes (cactus - log scale)')
-    # is_log = set_log(ax)
-    ax.set_ylim([0, 3e7])
+    is_log = set_log(ax)
+    # ax.set_ylim([0, 3e7])
     set_plot_title(ax, f'N expanded nodes (cactus{" - log scale" if is_log else ""})')
     set_legend(ax)
 

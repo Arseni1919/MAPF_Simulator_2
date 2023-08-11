@@ -88,7 +88,7 @@ class KSDSAgent:
             succeeded = True
         else:
             # self.h += len(self.path) - 1
-            self.path = [self.curr_node]
+            # self.path = [self.curr_node]
             succeeded = False
         rename_nodes_in_path(self.path)
         self.path_names = [node.xy_name for node in self.path]
@@ -610,13 +610,13 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 400
+    n_agents = 480
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
-    img_dir = 'random-32-32-10.map'  # 32-32               | LNS |
+    # img_dir = 'random-32-32-10.map'  # 32-32               | LNS |
 
     # random_seed = True
     random_seed = False
@@ -627,8 +627,8 @@ def main():
     # --------------------------------------------------- #
     # --------------------------------------------------- #
     # for the algorithms
-    k = 5
-    h = 2
+    k = 10
+    h = 10
     p_ch_type = 'max_prev'
     # p_ch_type = 'simple'
     alpha = 1.0
