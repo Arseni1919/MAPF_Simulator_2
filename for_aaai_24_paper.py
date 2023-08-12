@@ -16,8 +16,12 @@ Random:
     rand_3.json
 
 Warehouse:
+    ware_1.json
 
 
-Game:
+Game (lt_gallowstemplar_n):
+    Part 1:
+     k-D-PrP, k-SDS - up to 230
+    2023-08-12--09-25_ALGS-2_RUNS-10_MAP-lt_gallowstemplar_n.json
 
 """

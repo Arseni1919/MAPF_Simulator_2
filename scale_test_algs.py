@@ -289,13 +289,13 @@ def main():
         #     'color': 'tab:purple',
         # }),
 
-        'PrP': (run_pp, {
-            'a_star_func': a_star,
-            'limit_type': 'norm_time',
-            # 'limit_type': 'norm_a_star_closed',
-            'dist': False,
-            'color': 'tab:blue',
-        }),
+        # 'PrP': (run_pp, {
+        #     'a_star_func': a_star,
+        #     'limit_type': 'norm_time',
+        #     # 'limit_type': 'norm_a_star_closed',
+        #     'dist': False,
+        #     'color': 'tab:blue',
+        # }),
 
         'D-PrP': (run_k_distr_pp, {
             'k': 1e7,
@@ -313,21 +313,21 @@ def main():
             'color': 'c',
         }),
 
-        'k-D-PrP': (run_k_distr_pp, {
-            'k': 30,  # for warehouse 30, for random and empty - 10
-            'h': 30,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'purple',
-        }),
+        # 'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        #     'k': 15,
+        #     'h': 15,
+        #     # reset_type: 'reset_start',
+        #     'reset_type': 'reset_step',
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'purple',
+        # }),
 
         'SDS': (run_sds, {
             'a_star_func': a_star,
@@ -339,34 +339,19 @@ def main():
             'color': 'tab:orange',
         }),
 
-        'k-SDS': (run_k_sds, {   # for LNS: k=15, h=2
-            'k': 30,
-            'h': 30,
-            'p_ch_type': 'max_prev',
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.9,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'red',
-        }),
-
-        # 'k-SDS-0.95': (run_k_sds, {
-        #     'k': 10,
-        #     'h': 10,
+        # 'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        #     'k': 15,
+        #     'h': 15,
         #     'p_ch_type': 'max_prev',
-        #     'alpha': 0.5,
         #     # 'pref_paths_type': 'pref_index',
         #     'pref_paths_type': 'pref_path_length',
-        #     'p_h': 0.95,
-        #     'p_l': 0.95,
-        #     'limit_type': 'norm_time',
-        #     # 'limit_type': 'dist_time',
+        #     'p_h': 0.9,
+        #     'p_l': 0.9,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
         #     'dist': True,
-        #     'color': 'purple',
+        #     'color': 'red',
         # }),
 
         # 'k-SDS-1': (run_k_sds, {
@@ -434,8 +419,9 @@ def main():
     # n_agents_list = [10, 30, 50, 70, 90, 110]
     # n_agents_list = [50, 70, 90, 110, 130, 150]
     # n_agents_list = [ 400]  # !!!!!!!!!! LNS
-    # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! room
-    n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse
+    # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! game 1
+    # n_agents_list = [330]
+    n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
     # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
     # n_agents_list = [380, 480, 580]
     # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
@@ -475,9 +461,11 @@ def main():
     # ------------------------------ MAPS ------------------------------ #
     # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
     # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30, lim=10sec.
     # img_dir = 'random-32-32-10.map'  # 32-32          | LNS | Up to 400 agents with w=5, h=2, lim=1min.
+
+    img_dir = 'ht_chantry.map'  # 162-141   | Up to 330 agents with h=w=30, lim=10sec.
 
     # ------------------------------ LIMITS ------------------------------ #
     time_per_alg_limit = 0.1667  # approximately 10 seconds

@@ -617,6 +617,7 @@ def main():
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'random-32-32-10.map'  # 32-32               | LNS |
+    img_dir = 'ht_chantry.map'  # 162-141   | Up to 230 agents with h=w=30, lim=10sec.
 
     # random_seed = True
     random_seed = False
