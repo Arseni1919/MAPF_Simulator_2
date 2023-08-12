@@ -463,8 +463,10 @@ def all_exchange_k_step_paths(agents: List[KSDSAgent], **kwargs):
 
 def all_replan(agents: List[KSDSAgent], alg_info, **kwargs):
     # inner print
+    i_run_str = f'[i_run: {kwargs["i_run"]}]' if 'i_run' in kwargs else ''
+    img_str = f'[{kwargs["img_dir"]}]' if 'img_dir' in kwargs else ''
     print(f'\n\n[runtime={alg_info["runtime"]:0.2f} sec.][dist_runtime={alg_info["dist_runtime"]:0.2f} sec.]'
-          f'\n({kwargs["alg_name"]})[finished: {kwargs["number_of_finished"]}/{kwargs["n_agents"]}]'
+          f'\n{img_str}({kwargs["alg_name"]}){i_run_str}[finished: {kwargs["number_of_finished"]}/{kwargs["n_agents"]}]'
           f'[step: {kwargs["k_step_iteration"]}][iter: {kwargs["small_iteration"]}]\n')
 
     runtime, runtime_dist = 0, [0]

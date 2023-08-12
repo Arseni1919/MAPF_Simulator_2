@@ -231,6 +231,8 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
                     a_star_closed_nodes_limit=a_star_closed_nodes_limit,
                     # initial_ordering=[]  # for PBS
                     alg_name=alg_name,
+                    i_run=i_run,
+                    img_dir=img_dir,
                     **params,
                 )
 
@@ -248,7 +250,7 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
                 if alg_info["success_rate"] == 1:
                     print(f'[{alg_name}][runtime: {alg_info["runtime"]:0.2f}]\n')
                 update_statistics_dict(stats_dict, alg_name, n_agents, i_run, result, alg_info)
-                if i_run % 1 == 0:
+                if plotter and i_run % 1 == 0:
                     plotter.plot_big_test(stats_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_dir,
                                           n_agents=n_agents, time_per_alg_limit=time_per_alg_limit, i_run=i_run)
 
@@ -263,16 +265,17 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
-        # 'DSA': (run_sds, {
-        #     'a_star_func': a_star,
-        #     'limit_type': 'norm_time',
-        #     # 'limit_type': 'dist_a_star_closed',
-        #     'decision_type': 'simple',
-        #     'alpha': 0.5,
-        #     'dist': True,
-        #     'color': 'tab:brown',
-        # }),
-        #
+        'DSA': (run_sds, {
+            'a_star_func': a_star,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'decision_type': 'simple',
+            'alpha': 0.5,
+            'dist': True,
+            'color': 'tab:brown',
+        }),
+
         # 'MGM': (run_mgm_classic, {
         #     'a_star_func': a_star,
         #     'limit_type': 'norm_time',
@@ -314,8 +317,8 @@ def main():
         }),
 
         # 'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-        #     'k': 15,
-        #     'h': 15,
+        #     'k': 30,
+        #     'h': 30,
         #     # reset_type: 'reset_start',
         #     'reset_type': 'reset_step',
         #     'pref_paths_type': 'pref_index',
@@ -339,20 +342,20 @@ def main():
             'color': 'tab:orange',
         }),
 
-        # 'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-        #     'k': 15,
-        #     'h': 15,
-        #     'p_ch_type': 'max_prev',
-        #     # 'pref_paths_type': 'pref_index',
-        #     'pref_paths_type': 'pref_path_length',
-        #     'p_h': 0.9,
-        #     'p_l': 0.9,
-        #     # 'limit_type': 'norm_time',
-        #     'limit_type': 'dist_time',
-        #     # 'limit_type': 'dist_a_star_closed',
-        #     'dist': True,
-        #     'color': 'red',
-        # }),
+        'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.9,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'red',
+        }),
 
         # 'k-SDS-1': (run_k_sds, {
         #     'k': 1000,
@@ -421,8 +424,9 @@ def main():
     # n_agents_list = [ 400]  # !!!!!!!!!! LNS
     # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! game 1
     # n_agents_list = [330]
-    n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
-    # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
+    # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
+    # n_agents_list = [230, 280, 330]
+    n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
     # n_agents_list = [380, 480, 580]
     # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
@@ -460,9 +464,9 @@ def main():
 
     # ------------------------------ MAPS ------------------------------ #
     # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
-    # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
+    img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
-    img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
+    # img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
 
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30, lim=10sec.
     # img_dir = 'random-32-32-10.map'  # 32-32          | LNS | Up to 400 agents with w=5, h=2, lim=1min.
@@ -490,6 +494,7 @@ def main():
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
 
+    # plotter = None
     plotter = Plotter()
 
     to_save_results = True

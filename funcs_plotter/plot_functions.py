@@ -28,7 +28,7 @@ def set_log(ax):
 
 def plot_text_in_cactus(ax, l_x, l_y):
     if len(l_x) > 0:
-        ax.text(l_x[-1] - 5, l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
+        ax.text(l_x[-1] - 2, l_y[-1], f'{l_x[-1] + 1}', bbox=dict(facecolor='yellow', alpha=0.75))
 
 
 def set_legend(ax, framealpha=None):
@@ -246,13 +246,13 @@ def plot_success_rate(ax, info):
         else:
             ax.plot(sr_x, sr_y, marker, label=f'{alg_name}', alpha=0.9)
 
-    set_plot_title(ax, 'Success Rate')
-    ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+    set_plot_title(ax, 'success rate')
+    ax.set_xlim([min(n_agents_list) - 20, max(n_agents_list) + 20])
     # ax.yaxis.set_major_locator(MaxNLocator(integer=True))
     # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
     ax.set_ylim([0, 1.5])
     ax.set_xticks(n_agents_list)
-    ax.set_xlabel('N agents')
+    ax.set_xlabel('N agents', labelpad=-1)
     set_legend(ax)
 
 
@@ -283,10 +283,10 @@ def plot_sol_quality(ax, info):
         else:
             ax.plot(sq_x, sq_y, marker, label=f'{alg_name}', alpha=0.8)
 
-    set_plot_title(ax, 'Solution Quality')
-    ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+    set_plot_title(ax, 'solution quality')
+    ax.set_xlim([min(n_agents_list) - 20, max(n_agents_list) + 20])
     ax.set_xticks(n_agents_list)
-    ax.set_xlabel('N agents')
+    ax.set_xlabel('N agents', labelpad=-1)
     # ax.set_ylabel('sol_quality')
     set_legend(ax)
 
@@ -322,7 +322,7 @@ def plot_runtime_cactus(ax, info):
 
     ax.set_xlim([0, max_instances + 2])
     # ax.set_xticks(rt_x)
-    ax.set_xlabel('Solved Instances', labelpad=-1)
+    ax.set_xlabel('solved instances', labelpad=-1)
     ax.set_ylabel('seconds', labelpad=-1)
     is_log = set_log(ax)
     set_plot_title(ax, f'runtime (cactus{" - log scale" if is_log else ""})')
@@ -362,10 +362,10 @@ def plot_a_star_calls_counters(ax, info):
 
 
     ax.set_xlim([0, max_instances + 2])
-    ax.set_xlabel('Solved Instances')
+    ax.set_xlabel('solved instances', labelpad=-1)
     is_log = set_log(ax)
     # ax.set_ylim([0, 3e7])
-    set_plot_title(ax, f'A* Calls (cactus{" - log scale" if is_log else ""})')
+    set_plot_title(ax, f'# of A* calls (cactus{" - log scale" if is_log else ""})')
     set_legend(ax, framealpha=0)
 
 
@@ -381,7 +381,10 @@ def plot_n_messages(ax, info):
     showfliers = False
     # showfliers = True
     big_table = []
+    counter = 0
     for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
+        line_style = f"-{get_line_or_marker(counter, 'm')}"
+        counter += 1
         if alg_info['dist']:
             x_list = []
             y_list = []
@@ -395,15 +398,16 @@ def plot_n_messages(ax, info):
 
             if len(y_list) > 0:
                 if 'color' in alg_info:
-                    ax.plot(x_list, y_list, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
-                    ax.plot(x_list, y2_list, '--', label=f'{alg_name} (step)', alpha=0.55, color=alg_info['color'])
+                    # ax.plot(x_list, y_list, '-o', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                    ax.plot(x_list, y2_list, line_style, label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
                 else:
                     ax.plot(x_list, y_list, '-o', label=f'{alg_name}', alpha=0.75)
 
-    ax.set_ylabel('n_messages_per_agent')
-    ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+    # ax.set_ylabel('n_messages_per_agent')
+    ax.set_xlim([min(n_agents_list) - 20, max(n_agents_list) + 20])
     ax.set_xticks(n_agents_list)
-    ax.set_xlabel('N agents')
+    ax.set_xlabel('N agents', labelpad=-1)
+    set_plot_title(ax, f'# of messages per step')
     set_legend(ax)
 
 
@@ -416,7 +420,10 @@ def plot_n_steps_iters(ax, info):
     n_agents_list = info['n_agents_list']
     is_json = info['is_json']
 
+    counter = 0
     for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
+        line_style = f"-{get_line_or_marker(counter, 'm')}"
+        counter += 1
         if alg_info['dist']:
             x_list = []
             steps_list = []
@@ -430,13 +437,13 @@ def plot_n_steps_iters(ax, info):
 
             if len(steps_list) > 0:
                 if 'color' in alg_info:
-                    ax.plot(x_list, steps_list, '-s', label=f'{alg_name}(step)', alpha=0.75, color=alg_info['color'])
-                    ax.plot(x_list, iters_list, '--', label=f'{alg_name}(iter)', alpha=0.55, color=alg_info['color'])
-
-    ax.set_ylabel('steps & iters')
-    ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+                    ax.plot(x_list, steps_list, line_style, label=f'{alg_name}', alpha=0.75, color=alg_info['color'])  # steps
+                    # ax.plot(x_list, iters_list, line_style, label=f'{alg_name}', alpha=0.55, color=alg_info['color'])  # iters
+    set_plot_title(ax, f'# of steps')
+    # set_plot_title(ax, f'# of iterations')
+    ax.set_xlim([min(n_agents_list) - 20, max(n_agents_list) + 20])
     ax.set_xticks(n_agents_list)
-    ax.set_xlabel('N agents')
+    ax.set_xlabel('N agents', labelpad=-1)
     set_legend(ax)
 
 
@@ -470,11 +477,11 @@ def plot_n_expanded_cactus(ax, info):
     ax.set_xlim([0, max_instances + 2])
     # ax.set_xticks(rt_x)
     # ax.set_ylabel('n_closed')
-    ax.set_xlabel('Solved Instances')
+    ax.set_xlabel('solved instances', labelpad=-1)
     # ax.set_xlabel('y: N expanded nodes (cactus - log scale)')
     is_log = set_log(ax)
     # ax.set_ylim([0, 3e7])
-    set_plot_title(ax, f'N expanded nodes (cactus{" - log scale" if is_log else ""})')
+    set_plot_title(ax, f'# of expanded nodes (cactus{" - log scale" if is_log else ""})')
     set_legend(ax)
 
 
@@ -588,22 +595,27 @@ def plot_n_nei(ax, info):
     n_agents_list = info['n_agents_list']
     is_json = info['is_json']
 
+    counter = 0
     for alg_name, (alg_func, alg_info) in algs_to_test_dict.items():
+        line_style = f"-{get_line_or_marker(counter, 'm')}"
+        counter += 1
         if alg_info['dist']:
             x_list = []
             nei_list = []
             for n_agents in n_agents_list:
                 x_list.append(n_agents)
+                n_agents_number = n_agents
                 if is_json:
                     n_agents = str(n_agents)
-                nei_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_nei']))
+                nei_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_nei'])/n_agents_number)
 
             if len(nei_list) > 0:
                 if 'color' in alg_info:
-                    ax.plot(x_list, nei_list, '-v', label=f'{alg_name}', alpha=0.75, color=alg_info['color'])
+                    ax.plot(x_list, nei_list, line_style, label=f'{alg_name}', alpha=0.55, color=alg_info['color'])
 
-    ax.set_ylabel('sum of neighbours')
-    ax.set_xlim([min(n_agents_list) - 1, max(n_agents_list) + 1])
+    # ax.set_ylabel('sum of neighbours', labelpad=-1)
+    set_plot_title(ax, f'# of neighbours per agent')
+    ax.set_xlim([min(n_agents_list) - 20, max(n_agents_list) + 20])
     ax.set_xticks(n_agents_list)
-    ax.set_xlabel('N agents')
+    ax.set_xlabel('N agents', labelpad=-1)
     set_legend(ax)
