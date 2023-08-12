@@ -462,10 +462,10 @@ def main():
     # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
     # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
+    img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
+
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30, lim=10sec.
     # img_dir = 'random-32-32-10.map'  # 32-32          | LNS | Up to 400 agents with w=5, h=2, lim=1min.
-
-    img_dir = 'ht_chantry.map'  # 162-141   | Up to 330 agents with h=w=30, lim=10sec.
 
     # ------------------------------ LIMITS ------------------------------ #
     time_per_alg_limit = 0.1667  # approximately 10 seconds

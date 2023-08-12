@@ -18,6 +18,11 @@ Random:
 Warehouse:
     ware_1.json
 
+Game (ht_mansion_n.map):
+    Part 1:
+    game_1.json
+    Part 2:
+    game_2.json
 
 Game (lt_gallowstemplar_n):
     Part 1:
