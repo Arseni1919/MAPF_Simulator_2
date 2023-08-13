@@ -265,6 +265,11 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
+
+        ################################################################################################################
+        ################################################################################################################
+        ################################################################################################################
+
         # 'DSA': (run_sds, {
         #     'a_star_func': a_star,
         #     # 'limit_type': 'norm_time',
@@ -316,21 +321,21 @@ def main():
         #     'color': 'c',
         # }),
 
-        'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 10,
-            'h': 10,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'purple',
-        }),
+        # 'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        #     'k': 10,
+        #     'h': 10,
+        #     # reset_type: 'reset_start',
+        #     'reset_type': 'reset_step',
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'purple',
+        # }),
 
         # 'SDS': (run_sds, {
         #     'a_star_func': a_star,
@@ -357,36 +362,6 @@ def main():
         #     'color': 'red',
         # }),
 
-        # 'k-SDS-1': (run_k_sds, {
-        #     'k': 1000,
-        #     'h': 1000,
-        #     'p_ch_type': 'max_prev',
-        #     'alpha': 0.5,
-        #     # 'pref_paths_type': 'pref_index',
-        #     'pref_paths_type': 'pref_path_length',
-        #     'p_h': 1,
-        #     'p_l': 1,
-        #     'limit_type': 'norm_time',
-        #     # 'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'green',
-        # }),
-
-        # '10-10-SDS-0.1': (run_k_sds, {
-        #     'k': 10,
-        #     'h': 10,
-        #     'p_ch_type': 'max_prev',
-        #     'alpha': 0.5,
-        #     # 'pref_paths_type': 'pref_index',
-        #     'pref_paths_type': 'pref_path_length',
-        #     'p_h': 0.9,
-        #     'p_l': 0.1,
-        #     'limit_type': 'norm_time',
-        #     # 'limit_type': 'dist_time',
-        #     'dist': True,
-        #     'color': 'm',
-        # }),
-
         # 'MGDS': (run_mgds, {
         #     'a_star_func': a_star,
         #     'gain_type': 'rank',
@@ -397,7 +372,6 @@ def main():
         #     'color': 'tab:green'
         # }),
 
-        #
         # '10-MGDS': (run_k_mgds, {
         #     'k': 10,
         #     'h': 10,
@@ -411,6 +385,100 @@ def main():
         #     'dist': True,
         #     'color': 'yellowgreen',
         # }),
+
+        ################################################################################################################
+        ################################################################################################################
+        ################################################################################################################
+
+        'k-SDS-1-1': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 1,
+            'p_l': 1,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'red',
+        }),
+
+        'k-SDS-0.9-0.9': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.9,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'orange',
+        }),
+
+        'k-SDS-0.1-0.9': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.9,
+            'p_l': 0.1,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'green',
+        }),
+
+        'k-SDS-0.9-0.1': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.1,
+            'p_l': 0.9,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'c',
+        }),
+
+        'k-SDS-0.5-0.5': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.5,
+            'p_l': 0.5,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'blue',
+        }),
+
+        'k-SDS-0.1-0.1': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
+            'p_ch_type': 'max_prev',
+            # 'pref_paths_type': 'pref_index',
+            'pref_paths_type': 'pref_path_length',
+            'p_h': 0.1,
+            'p_l': 0.1,
+            # 'limit_type': 'norm_time',
+            'limit_type': 'dist_time',
+            # 'limit_type': 'dist_a_star_closed',
+            'dist': True,
+            'color': 'purple',
+        }),
 
     }
 
@@ -426,8 +494,8 @@ def main():
     # n_agents_list = [330]
     # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
     # n_agents_list = [280, 330]
-    # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
-    n_agents_list = [480, 580]
+    n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
+    # n_agents_list = [480, 580]
     # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
     # n_agents_list = [530, 580, 630, 680, 730, 780]
@@ -451,10 +519,10 @@ def main():
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
-    runs_per_n_agents = 10  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 5
+    # runs_per_n_agents = 10  # !!!!!!!!!!!!!!!!!
+    # runs_per_n_agents = 5  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 4
-    # runs_per_n_agents = 3
+    runs_per_n_agents = 3
     # runs_per_n_agents = 2
     # runs_per_n_agents = 1
 
@@ -494,8 +562,8 @@ def main():
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
 
-    plotter = None
-    # plotter = Plotter()
+    # plotter = None
+    plotter = Plotter()
 
     to_save_results = True
     # to_save_results = False
@@ -533,188 +601,102 @@ def main():
 if __name__ == '__main__':
     main()
 
-# '30-2-SDS': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 30,
-#     'h': 2,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.9,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'lime',
-# }),
-#
-# '30-5-SDS': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 30,
-#     'h': 5,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.9,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'orange',
-# }),
-
-# '30-10-SDS': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 30,
-#     'h': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.9,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'tab:purple',
-# }),
-#
-# '30-15-SDS': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 30,
-#     'h': 15,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.9,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'tab:blue',
-# }),
-
-#
-# '5-SDS-0.1-0.9': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 5,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.1,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'gray',
-# }),
 
 
-# 'k-SDS-1-0.9': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 1.0,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'red',
-# }),
-#
-# 'k-SDS-0.9-0.9': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.9,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'tab:orange',
-# }),
-#
-# 'k-SDS-0.6-0.9': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.6,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'goldenrod',
-# }),
-#
-# 'k-SDS-0.3-0.9': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.3,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'green',
-# }),
-#
-# 'k-SDS-0-0.9': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.9,
-#     'p_l': 0.0,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'tab:blue',
-# }),
-#
-# 'k-SDS-0.95-0.95': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 0.95,
-#     'p_l': 0.95,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'tab:purple',
-# }),
-#
-# 'k-SDS-1-1': (run_k_sds, {
-#     'a_star_func': a_star,
-#     'k': 10,
-#     'p_ch_type': 'max_prev',
-#     'alpha': 0.5,
-#     # 'pref_paths_type': 'pref_index',
-#     'pref_paths_type': 'pref_path_length',
-#     'p_h': 1,
-#     'p_l': 1,
-#     # 'limit_type': 'dist_time',
-#     'limit_type': 'norm_time',
-#     'dist': True,
-#     'color': 'navy',
-# }),
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

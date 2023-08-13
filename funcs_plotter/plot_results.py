@@ -48,13 +48,14 @@ def main():
 
     # file_dir = f'../logs_for_graphs/2023-08-13--12-05_ALGS-1_RUNS-10_MAP-empty-48-48.json'
     #
-    file_dir = f'../logs_for_graphs/empty_1.json'
+    # file_dir = f'../logs_for_graphs/empty_1.json'
     # file_dir = f'../logs_for_graphs/rand_1.json'
     # file_dir = f'../logs_for_graphs/ware_1.json'
     # file_dir = f'../logs_for_graphs/game_1.json'
     # file_dir = f'../logs_for_graphs/dsa_and_others_in_random_map.json'
     # file_dir = f'../logs_for_graphs/pbs_pp_empty.json'
     # file_dir = f'../logs_for_graphs/pbs_pp_ware.json'
+    file_dir = f'../logs_for_graphs/e_prp_dprp_kdprp.json'
 
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
