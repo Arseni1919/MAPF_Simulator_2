@@ -265,16 +265,16 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
 def main():
     logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d/%m/%Y %H:%M:%S', level=logging.INFO)
     algs_to_test_dict = {
-        'DSA': (run_sds, {
-            'a_star_func': a_star,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'decision_type': 'simple',
-            'alpha': 0.5,
-            'dist': True,
-            'color': 'tab:brown',
-        }),
+        # 'DSA': (run_sds, {
+        #     'a_star_func': a_star,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'decision_type': 'simple',
+        #     'alpha': 0.5,
+        #     'dist': True,
+        #     'color': 'tab:brown',
+        # }),
 
         # 'MGM': (run_mgm_classic, {
         #     'a_star_func': a_star,
@@ -300,25 +300,9 @@ def main():
         #     'color': 'tab:blue',
         # }),
 
-        'D-PrP': (run_k_distr_pp, {
-            'k': 1e7,
-            'h': 1e7,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'c',
-        }),
-
-        # 'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-        #     'k': 30,
-        #     'h': 30,
+        # 'D-PrP': (run_k_distr_pp, {
+        #     'k': 1e7,
+        #     'h': 1e7,
         #     # reset_type: 'reset_start',
         #     'reset_type': 'reset_step',
         #     'pref_paths_type': 'pref_index',
@@ -329,33 +313,49 @@ def main():
         #     'limit_type': 'dist_time',
         #     # 'limit_type': 'dist_a_star_closed',
         #     'dist': True,
-        #     'color': 'purple',
+        #     'color': 'c',
         # }),
 
-        'SDS': (run_sds, {
-            'a_star_func': a_star,
-            'decision_type': 'min_prev_2',
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
-
-        'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
             'k': 10,
             'h': 10,
-            'p_ch_type': 'max_prev',
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.9,
+            # reset_type: 'reset_start',
+            'reset_type': 'reset_step',
+            'pref_paths_type': 'pref_index',
+            # 'pref_paths_type': 'pref_path_length',
+            'p_h': 1,
+            'p_l': 0,
             # 'limit_type': 'norm_time',
             'limit_type': 'dist_time',
             # 'limit_type': 'dist_a_star_closed',
             'dist': True,
-            'color': 'red',
+            'color': 'purple',
         }),
+
+        # 'SDS': (run_sds, {
+        #     'a_star_func': a_star,
+        #     'decision_type': 'min_prev_2',
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'tab:orange',
+        # }),
+
+        # 'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        #     'k': 30,
+        #     'h': 30,
+        #     'p_ch_type': 'max_prev',
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.9,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'red',
+        # }),
 
         # 'k-SDS-1': (run_k_sds, {
         #     'k': 1000,
@@ -425,9 +425,9 @@ def main():
     # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! game 1
     # n_agents_list = [330]
     # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
-    # n_agents_list = [230, 280, 330]
-    n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
-    # n_agents_list = [380, 480, 580]
+    # n_agents_list = [280, 330]
+    # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
+    n_agents_list = [480, 580]
     # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
     # n_agents_list = [530, 580, 630, 680, 730, 780]
@@ -463,8 +463,8 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
-    img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
+    img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
+    # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
     # img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
 
@@ -494,8 +494,8 @@ def main():
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
 
-    # plotter = None
-    plotter = Plotter()
+    plotter = None
+    # plotter = Plotter()
 
     to_save_results = True
     # to_save_results = False

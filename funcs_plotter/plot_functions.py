@@ -181,6 +181,7 @@ def get_list_a_star(statistics_dict, alg_name, n_agents_list, list_type, is_json
 # --------------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------------- #
 # --------------------------------------------------------------------------------- #
+
 def plot_step_in_mapf_paths(ax, info):
     ax.cla()
     paths_dict = info['paths_dict']
@@ -209,12 +210,12 @@ def plot_step_in_mapf_paths(ax, info):
         else:
             ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
             ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
-        ax.text(t_path[-1].y - 0.4, t_path[-1].x - 0.4, agent_name[6:])
+        # ax.text(t_path[-1].y - 0.4, t_path[-1].x - 0.4, agent_name[6:])
         i += 1
 
-    for agent_name, path in paths_dict.items():
-        # field[path[0].x, path[0].y] = 4
-        field[path[-1].x, path[-1].y] = 5
+    # for agent_name, path in paths_dict.items():
+    #     # field[path[0].x, path[0].y] = 4
+    #     field[path[-1].x, path[-1].y] = 5
 
     ax.imshow(field, origin='lower')
     ax.set_title(f'Paths in <{img_dir}> (time: {t})')
@@ -391,10 +392,11 @@ def plot_n_messages(ax, info):
             y2_list = []
             for n_agents in n_agents_list:
                 x_list.append(n_agents)
+                n_agents_number = n_agents
                 if is_json:
                     n_agents = str(n_agents)
                 y_list.append(np.mean(statistics_dict[alg_name][n_agents]['n_messages']))
-                y2_list.append(np.mean(statistics_dict[alg_name][n_agents]['m_per_step']))
+                y2_list.append(np.mean(statistics_dict[alg_name][n_agents]['m_per_step'])/n_agents_number)
 
             if len(y_list) > 0:
                 if 'color' in alg_info:
