@@ -390,9 +390,9 @@ def main():
         ################################################################################################################
         ################################################################################################################
 
-        '5-5-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 5,
-            'h': 5,
+        '10-10-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 10,
+            'h': 10,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -405,9 +405,9 @@ def main():
             'color': 'red',
         }),
 
-        '15-5-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 15,
-            'h': 5,
+        '20-10-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 20,
+            'h': 10,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -420,9 +420,9 @@ def main():
             'color': 'orange',
         }),
 
-        '30-5-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        '30-10-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
             'k': 30,
-            'h': 5,
+            'h': 10,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -435,9 +435,9 @@ def main():
             'color': 'green',
         }),
 
-        '15-15-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 15,
-            'h': 15,
+        '30-30-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 30,
+            'h': 30,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -450,9 +450,9 @@ def main():
             'color': 'c',
         }),
 
-        '30-15-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 30,
-            'h': 15,
+        '50-30-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 50,
+            'h': 30,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -465,9 +465,9 @@ def main():
             'color': 'blue',
         }),
 
-        '30-30-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 30,
-            'h': 30,
+        '50-50-SDS': (run_k_sds, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+            'k': 50,
+            'h': 50,
             'p_ch_type': 'max_prev',
             # 'pref_paths_type': 'pref_index',
             'pref_paths_type': 'pref_path_length',
@@ -493,8 +493,9 @@ def main():
     # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! game 1
     # n_agents_list = [330]
     # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
+    n_agents_list = [130, 180, 230, 280, 330]
     # n_agents_list = [280, 330]
-    n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
+    # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
     # n_agents_list = [480, 580]
     # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
@@ -531,9 +532,9 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
+    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
     # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
-    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
+    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
     # img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
 
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30, lim=10sec.
@@ -562,8 +563,8 @@ def main():
     a_star_iter_limit = 1e100
     # ---------------------------- END LIMITS --------------------------- #
 
-    # plotter = None
-    plotter = Plotter()
+    plotter = None
+    # plotter = Plotter()
 
     to_save_results = True
     # to_save_results = False

@@ -44,18 +44,24 @@ def main():
     # file_dir = f'../logs_for_graphs/2023-01-17--21-44_ALGS-4_RUNS-10_MAP-random-64-64-10.json'  # pbs
 
     # file_dir = '../logs_for_graphs/2023-01-17--13-51_ALGS-3_RUNS-5_MAP-random-64-64-10.json'  # mgm
-    # file_dir = '../logs_for_graphs/pp_dsa_sds.json'  # dsa
+    # file_dir = '../logs_for_graphs/appendix_pp_dsa_sds.json'  # dsa
 
-    # file_dir = f'../logs_for_graphs/2023-08-13--12-05_ALGS-1_RUNS-10_MAP-empty-48-48.json'
-    #
+    # file_dir = f'../logs_for_graphs/2023-08-14--08-24_ALGS-6_RUNS-3_MAP-warehouse-10-20-10-2-1.json'
+
+    # main paper
     # file_dir = f'../logs_for_graphs/empty_1.json'
     # file_dir = f'../logs_for_graphs/rand_1.json'
     # file_dir = f'../logs_for_graphs/ware_1.json'
     # file_dir = f'../logs_for_graphs/game_1.json'
     # file_dir = f'../logs_for_graphs/dsa_and_others_in_random_map.json'
-    # file_dir = f'../logs_for_graphs/pbs_pp_empty.json'
-    # file_dir = f'../logs_for_graphs/pbs_pp_ware.json'
-    file_dir = f'../logs_for_graphs/e_prp_dprp_kdprp.json'
+    # appendix
+    # file_dir = f'../logs_for_graphs/appendix_pbs_pp_empty.json'
+    # file_dir = f'../logs_for_graphs/appendix_pbs_pp_ware.json'
+    # file_dir = f'../logs_for_graphs/appendix_e_prp_dprp_kdprp.json'
+    # file_dir = f'../logs_for_graphs/appendix_w_h_empty.json'
+    # file_dir = f'../logs_for_graphs/appendix_w_h_ware_part_1.json'
+    # file_dir = f'../logs_for_graphs/appendix_p_h_p_l_empty.json'
+    file_dir = f'../logs_for_graphs/appendix_p_h_p_l_ware.json'
 
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)

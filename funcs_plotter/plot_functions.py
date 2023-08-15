@@ -3,7 +3,7 @@ from globals import *
 
 def get_line_or_marker(index, kind):
     if kind == 'l':
-        lines = ['-', '--', '-.', ':']
+        lines = ['--', '-', '-.', ':']
         index = index % len(lines)
         return lines[index]
     elif kind == 'm':
@@ -32,14 +32,17 @@ def plot_text_in_cactus(ax, l_x, l_y):
 
 
 def set_legend(ax, framealpha=None):
-    if not framealpha:
-        framealpha = 0
-    legend_properties = {'weight': 'bold', 'size': 9}
-    # legend_properties = {}
-    if framealpha is not None:
-        ax.legend(prop=legend_properties, framealpha=framealpha)
-    else:
-        ax.legend(prop=legend_properties)
+    # to_put_legend = True
+    to_put_legend = False
+    if to_put_legend:
+        if not framealpha:
+            framealpha = 0
+        legend_properties = {'weight': 'bold', 'size': 9}
+        # legend_properties = {}
+        if framealpha is not None:
+            ax.legend(prop=legend_properties, framealpha=framealpha)
+        else:
+            ax.legend(prop=legend_properties)
 
 
 def sub_plot_cactus_big_lines(ax, index, l_x, l_y, alg_name, alg_info):
