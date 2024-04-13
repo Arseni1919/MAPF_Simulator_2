@@ -3,6 +3,42 @@ import cProfile
 import pstats
 from typing import *
 from algs.test_mapf_alg import test_mapf_alg_from_pic
+from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constraints, \
+    limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
+from algs.metrics import just_check_k_step_plans, just_check_plans
+
+
+class BnBAgent:
+    def __init__(self, index, start_node, goal_node, nodes, nodes_dict, h_func):
+        self.index = index
+        self.start_node = start_node
+        self.curr_node = start_node
+        self.goal_node = goal_node
+        self.nodes = nodes
+        self.nodes_dict = nodes_dict
+        self.h_func = h_func
+        self.path = []
+
+        # stats
+        self.stats_n_closed = 0
+        self.stats_n_calls = 0
+        self.stats_runtime = 0
+        self.stats_n_messages = 0
+        self.stats_n_step_m = 0
+        self.stats_n_step_m_list = []
+        self.stats_nei_list = []
+        # nei
+        self.nei_list = []
+        self.nei_dict = {}
+        self.nei_paths_dict = {}
+
+    @property
+    def name(self):
+        return f'agent_{self.index}'
+
+    @property
+    def path_names(self):
+        return [n.xy_name for n in self.path]
 
 
 def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tuple[Dict[str, list] | None, dict]:
@@ -28,11 +64,20 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
     """
     max_time = kwargs['max_time']  # seconds
 
+    # preps
+    alg_info = get_alg_info_dict()
+    start_time = time.time()
+
     # create agents
     agents = []
+    for a_index, (s_node, g_node) in enumerate(zip(start_nodes, goal_nodes)):
+        agent = BnBAgent(a_index, s_node, g_node, nodes, nodes_dict, h_func)
+        agents.append(agent)
 
     # step iterations
-    for step in range(100000):
+    step = 0
+    while True:
+        step += 1
 
         # Build a pseudo-tree
         pass
@@ -40,10 +85,21 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
         # find the best future move
         pass
 
-        # execute the move
+        # execute the move + check (+ plot)
         pass
 
-    return None, {'agents': agents, 'success_rate': 0}
+        # check if everybody arrived -> return
+        pass
+
+        # time check -> return
+        runtime = time.time() - start_time
+        if runtime > max_time:
+            return None, {'agents': agents, 'success_rate': 0}
+
+        # print + plot
+        print(f'\r{step=}, {runtime=:.2f}', end='')
+
+    # return None, {'agents': agents, 'success_rate': 0}
 
 
 def main():
