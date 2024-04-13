@@ -2,11 +2,13 @@ import copy
 import random
 import numpy as np
 import matplotlib.pyplot as plt
-
+import os
+import json
 import concurrent.futures
 import threading
 import asyncio
 import logging
+from typing import *
 
 from simulator_objects import ListNodes
 from funcs_graph.map_dimensions import map_dimensions_dict
@@ -57,6 +59,58 @@ def parallel_build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, 
 
     print(f'\nFinished to build heuristic for all nodes.')
     return h_dict
+
+
+def load_h_dict(possible_dir: str) -> Dict[str, np.ndarray] | None:
+    if os.path.exists(possible_dir):
+        # Opening JSON file
+        with open(possible_dir, 'r') as openfile:
+            # Reading from json file
+            h_dict = json.load(openfile)
+            for k, v in h_dict.items():
+                h_dict[k] = np.array(v)
+            return h_dict
+    return None
+
+
+def save_h_dict(h_dict, possible_dir):
+    for k, v in h_dict.items():
+        h_dict[k] = v.tolist()
+    json_object = json.dumps(h_dict, indent=2)
+    with open(possible_dir, "w") as outfile:
+        outfile.write(json_object)
+
+
+def parallel_build_heuristic_for_entire_map(nodes: List, nodes_dict: Dict[str, Any], map_dim: Tuple[int, int], **kwargs) -> Dict[str, np.ndarray]:
+    # print(f'Started to build heuristic for {kwargs['img_dir'][:-4]}...')
+    path = kwargs['path']
+    possible_dir = f"{path}/h_dict_of_{kwargs['img_dir'][:-4]}.json"
+
+    # if there is one
+    h_dict = load_h_dict(possible_dir)
+    if h_dict is not None:
+        # print(f'\nFinished to build heuristic for all nodes.')
+        return h_dict
+
+    # else, create one
+    h_dict = {}
+    reset_nodes(nodes, nodes)
+    # for node_index, node in enumerate(nodes):
+    #     h_table = build_heuristic_for_one_target(node, nodes, map_dim, False, None, False)
+    #     h_dict[node.xy_name] = h_table
+    with concurrent.futures.ThreadPoolExecutor(max_workers=len(nodes)) as executor:
+        for node_index, node in enumerate(nodes):
+            # parallel_update_h_table(node, nodes, map_dim, to_save, plotter, middle_plot, h_dict, node_index)
+            executor.submit(parallel_update_h_table, node, nodes, map_dim, False, None, False, h_dict, node_index)
+    save_h_dict(h_dict, possible_dir)
+    # print(f'\nFinished to build heuristic for all nodes.')
+
+    h_dict = load_h_dict(possible_dir)
+    if h_dict is not None:
+        print(f'\nFinished to build heuristic for all nodes.')
+        return h_dict
+
+    raise RuntimeError('nu nu')
 
 
 def build_heuristic_for_multiple_targets(target_nodes, nodes, map_dim, to_save=True, plotter=None, middle_plot=False):

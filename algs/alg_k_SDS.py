@@ -171,12 +171,12 @@ class KSDSAgent:
                     paths_to_consider_dict[agent_name] = self.nei_paths_dict[agent_name]
         return paths_to_consider_dict
 
-    def pref_path_rand(self, paths_to_consider_dict, **kwargs):
-        new_paths_to_consider_dict = {}
-        for agent_name, path in paths_to_consider_dict.items():
-            if agent_name not in self.conf_agents_names:
-                new_paths_to_consider_dict[agent_name] = path
-        return new_paths_to_consider_dict
+    # def pref_path_rand(self, paths_to_consider_dict, **kwargs):
+    #     new_paths_to_consider_dict = {}
+    #     for agent_name, path in paths_to_consider_dict.items():
+    #         if agent_name not in self.conf_agents_names:
+    #             new_paths_to_consider_dict[agent_name] = path
+    #     return new_paths_to_consider_dict
 
     def get_paths_to_consider_dict(self, **kwargs):
         # p_h, p_l = 0.9, 0.1
@@ -612,10 +612,10 @@ def run_k_sds(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs):
 
 
 def main():
-    n_agents = 400
+    n_agents = 200
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    img_dir = 'empty-48-48.map'  # 48-48
-    # img_dir = 'random-64-64-10.map'  # 64-64
+    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
     # img_dir = 'random-32-32-10.map'  # 32-32               | LNS |

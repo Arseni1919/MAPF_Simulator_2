@@ -6,7 +6,7 @@ from funcs_plotter.plotter import Plotter
 from funcs_graph.map_dimensions import map_dimensions_dict
 from funcs_graph.nodes_from_pic import build_graph_nodes, get_dims_from_pic
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
-from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets
+from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets, parallel_build_heuristic_for_entire_map
 
 
 def test_mapf_alg_from_pic(algorithm, **kwargs):
@@ -78,15 +78,25 @@ def test_mapf_alg_from_pic(algorithm, **kwargs):
     # ------------------------- #
     # ------------------------- #
     # h_dict = build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=plotter, middle_plot=False)
-    h_dict = parallel_build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=plotter, middle_plot=False)
+    # h_dict = parallel_build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=plotter, middle_plot=False)
+    h_dict = parallel_build_heuristic_for_entire_map(nodes, nodes_dict, map_dim, path='../heuristic_tables', img_dir=img_dir)
     h_func = h_func_creator(h_dict)
 
     # h_func = dist_heuristic
 
     # ------------------------- #
     # ------------------------- #
-    plan, info = algorithm(start_nodes=start_nodes, goal_nodes=goal_nodes, nodes=nodes, nodes_dict=nodes_dict, h_func=h_func,
-                           plotter=plotter, middle_plot=False, map_dim=map_dim, **kwargs)
+    plan, info = algorithm(
+        start_nodes=start_nodes,
+        goal_nodes=goal_nodes,
+        nodes=nodes,
+        nodes_dict=nodes_dict,
+        h_func=h_func,
+        plotter=plotter,
+        middle_plot=False,
+        map_dim=map_dim,
+        **kwargs
+    )
 
     res_to_print = plan
     if plan:

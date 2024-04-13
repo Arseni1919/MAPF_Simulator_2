@@ -49,7 +49,7 @@ def main():
     # file_dir = f'../logs_for_graphs/2023-08-14--08-24_ALGS-6_RUNS-3_MAP-warehouse-10-20-10-2-1.json'
 
     # main paper
-    # file_dir = f'../logs_for_graphs/empty_1.json'
+    file_dir = f'../logs_for_graphs/empty_1.json'
     # file_dir = f'../logs_for_graphs/rand_1.json'
     # file_dir = f'../logs_for_graphs/ware_1.json'
     # file_dir = f'../logs_for_graphs/game_1.json'
@@ -61,7 +61,7 @@ def main():
     # file_dir = f'../logs_for_graphs/appendix_w_h_empty.json'
     # file_dir = f'../logs_for_graphs/appendix_w_h_ware_part_1.json'
     # file_dir = f'../logs_for_graphs/appendix_p_h_p_l_empty.json'
-    file_dir = f'../logs_for_graphs/appendix_p_h_p_l_ware.json'
+    # file_dir = f'../logs_for_graphs/appendix_p_h_p_l_ware.json'
 
     plotter = Plotter()
     show_results(file_dir, plotter=plotter)
