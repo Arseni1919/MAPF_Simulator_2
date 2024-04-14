@@ -1,10 +1,13 @@
 # MAPF Simulator (version 2)
 
 ## Algorithms
-- PBS
-- PP
-- SDS
-- MGDS
+
+- Distributed PrP
+
+Our contribution:
+
+- Stochastic Distributed Search (SDS) for MAPF 
+- Branch and Bound (B&B) for MAPF
 
 ## Experiments
 
@@ -25,6 +28,8 @@
 - [geeksforgeeks | json.load](https://www.geeksforgeeks.org/json-load-in-python/?ref=lbp)
 - [scipy | scipy.sparse.csgraph.floyd_warshall (from all to all dist)](https://docs.scipy.org/doc/scipy/reference/generated/scipy.sparse.csgraph.floyd_warshall.html)
 - [sof | q](https://stackoverflow.com/questions/55109716/c-argument-looks-like-a-single-numeric-rgb-or-rgba-sequence)
+- [blog | DFS Pseudocode](https://www.programiz.com/dsa/graph-dfs)
+- [wiki | DFS Pseudocode](https://en.wikipedia.org/wiki/Depth-first_search)
 
 ### Matplotlib
 
@@ -33,7 +38,3 @@
 - [matplotlib | matplotlib.pyplot.imshow](https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.imshow.html)
 - [matplotlib | markers](https://matplotlib.org/stable/api/markers_api.html)
 - [matplotlib | lines](https://matplotlib.org/stable/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D.set_linestyle)
-
-Papers:
-
-- Hang Ma, Daniel Harabor, Peter J. Stuckey, Jiaoyang Li, and Sven Koenig. 2019. Searching with Consistent Prioritization for Multi-Agent Path Finding. In Proceedings of the AAAI Conference on Artificial Intelligence (AAAI)

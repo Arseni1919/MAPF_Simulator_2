@@ -1,3 +1,5 @@
+import random
+
 from functions import *
 import cProfile
 import pstats
@@ -31,14 +33,65 @@ class BnBAgent:
         self.nei_list = []
         self.nei_dict = {}
         self.nei_paths_dict = {}
+        self.parent = None
+        self.children = []
+        self.visited = False
+
+    def clear_nei(self):
+        self.nei_list = []
+        self.nei_dict = {}
+        self.nei_paths_dict = {}
+        self.parent = None
+        self.children = []
+        self.visited = False
+
+    def add_nei(self, agent: Self):
+        self.nei_list.append(agent)
+        self.nei_dict[agent.name] = agent
 
     @property
     def name(self):
         return f'agent_{self.index}'
 
     @property
+    def curr_node_name(self):
+        return self.curr_node.xy_name
+
+    @property
+    def goal_node_name(self):
+        return self.goal_node.xy_name
+
+    @property
     def path_names(self):
         return [n.xy_name for n in self.path]
+
+
+def get_pseudo_trees(agents: List[BnBAgent]) -> list:
+    pseudo_tree_list = []
+    # shuffle
+    randomly_ordered_agents: List[BnBAgent] = agents[:]
+    random.shuffle(randomly_ordered_agents)
+
+    # clear
+    for agent in randomly_ordered_agents:
+        agent.clear_nei()
+
+    # create edges
+    for agent1, agent2 in combinations(randomly_ordered_agents, 2):
+        if agent1.curr_node.xy_name in agent2.curr_node.neighbours:
+            agent1.add_nei(agent2)
+            agent2.add_nei(agent1)
+
+    caught: List[int] = []
+    while len(randomly_ordered_agents) > 0:
+        next_root = randomly_ordered_agents.pop()
+        if next_root.index in caught:
+            continue
+
+        # DFS
+        pass
+
+    return pseudo_tree_list
 
 
 def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tuple[Dict[str, list] | None, dict]:
@@ -66,7 +119,6 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
     # preps
     alg_info = get_alg_info_dict()
-    start_time = time.time()
 
     # create agents
     agents = []
@@ -75,17 +127,18 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
         agents.append(agent)
 
     # step iterations
+    start_time = time.time()
     step = 0
     while True:
         step += 1
 
         # Build a pseudo-tree
-        pass
+        pseudo_tree_list = get_pseudo_trees(agents)
 
         # find the best future move
         pass
 
-        # execute the move + check (+ plot)
+        # execute the move + check
         pass
 
         # check if everybody arrived -> return
