@@ -11,10 +11,7 @@ Our contribution:
 
 ## Experiments
 
-### [warehouse-20-40-10-2-1.map](maps%2Fwarehouse-20-40-10-2-1.map)
-
-
-![Figure_2.png](pics%2FFigure_2.png)
+TODO
 
 ## Credits
 
