@@ -154,7 +154,7 @@ def get_pseudo_trees(agents: List[BnBAgent]) -> list:
         for nei in agent.nei_list:
             if nei not in agent.children and agent.level < nei.level:
                 agent.pseudo_children.append(nei)
-            if nei != agent.parent and agent.level > nei.level:
+            if agent.parent and nei != agent.parent and agent.level > nei.level:
                 agent.pseudo_parents.append(nei)
 
     # plot
@@ -175,12 +175,19 @@ def get_graph_list(root: BnBAgent) -> List[BnBAgent]:
     return graph_list
 
 
-def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: int) -> Tuple[bool, BnBAgent, Any, float, dict]:
+def buid_cpa_constraints(CPA: dict, agents_dict: Dict[str, BnBAgent]) -> Tuple[List[str], List[Tuple[str, str]]]:
+    c_v_list = []
+    c_e_list = []
+    for cpa_a_name, cpa_next_n in CPA.items():
+        c_v_list.append(cpa_next_n)
+        cpa_a = agents_dict[cpa_a_name]
+        c_e_list.append((cpa_next_n, cpa_a.curr_node_name))
+    return c_v_list, c_e_list
 
-    # all
-    pass
 
-    # root
+def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: int, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent]) -> Tuple[bool, BnBAgent, Any, float, dict]:
+
+    # ------------------------- root -------------------------
     if to_agent.parent is None:
 
         if len(to_agent.bnb_next_n_deque) == 0:
@@ -213,20 +220,44 @@ def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: 
         next_agent = to_agent.bnb_next_a_deque.pop()
         return False, next_agent, UB, LB, CPA
 
-    # leaf and middle agent
-    pass
-
-    # leaf
+    # ------------------------- leaf -------------------------
     if len(to_agent.children) == 0:
-        return False, None
+        for nei in to_agent.nei_list:
+            assert nei.name in CPA
+        c_v_list, c_e_list = buid_cpa_constraints(CPA, agents_dict)
+        curr_node_name = to_agent.curr_node_name
+        n_to_v_list = []
+        for next_n in to_agent.curr_node.neighbours:
+            if next_n in c_v_list:
+                n_to_v_list.append((next_n, 1e7))
+                continue
+            if (curr_node_name, next_n) in c_e_list:
+                n_to_v_list.append((next_n, 1e7))
+                continue
+            n_to_v_list.append((next_n, to_agent.unary_c[next_n]))
+        min_n, min_v = min(n_to_v_list, key=lambda x: x[1])
+        if min_v >= UB:
+            return False, to_agent.parent, UB, LB + min_v, CPA
+        CPA[to_agent.name] = min_n
+        LB += min_v
+        return False, to_agent.parent, UB, LB, CPA
 
-    # middle agent
-    pass
+    # ------------------------- middle agent -------------------------
+    assert to_agent.parent.name in CPA
+    for pp in to_agent.pseudo_parents:
+        assert pp.name in CPA
 
-    return False, None
+    if from_agent == to_agent.parent:
+        # to_agent.bnb_next_n_deque = deque(to_agent.curr_node.neighbours)
+        pass
+
+    if from_agent in to_agent.children:
+        pass
+
+    raise RuntimeError('noooo')
 
 
-def execute_branch_and_bound(root: BnBAgent) -> None:
+def execute_branch_and_bound(root: BnBAgent, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent]) -> None:
     LB, UB = 0, math.inf
     graph_list = get_graph_list(root)
     n_g_agents = len(graph_list)
@@ -235,7 +266,7 @@ def execute_branch_and_bound(root: BnBAgent) -> None:
     from_agent = None
     to_agent = root
     while not finished:
-        finished, next_agent, UB, LB, CPA = bnb_step(from_agent, to_agent, UB, LB, CPA, n_g_agents)
+        finished, next_agent, UB, LB, CPA = bnb_step(from_agent, to_agent, UB, LB, CPA, n_g_agents, agents, agents_dict)
         from_agent = to_agent
         to_agent = next_agent
 
@@ -269,10 +300,11 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
     alg_info = get_alg_info_dict()
 
     # create agents
-    agents = []
+    agents, agents_dict = [], {}
     for a_index, (s_node, g_node) in enumerate(zip(start_nodes, goal_nodes)):
         agent = BnBAgent(a_index, s_node, g_node, nodes, nodes_dict, h_func)
         agents.append(agent)
+        agents_dict[agent.name] = agent
 
     # step iterations
     start_time = time.time()
@@ -285,7 +317,7 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
         # find the best future move
         for root in pseudo_tree_list:
-            execute_branch_and_bound(root)
+            execute_branch_and_bound(root, agents, agents_dict)
 
         # execute the move + check
         pass
