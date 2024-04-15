@@ -8,7 +8,6 @@ class Node:
             self.ID = new_ID
         else:
             self.ID = f'{x}_{y}_{t}'
-        self.xy_name = f'{x}_{y}'
         self.x = x
         self.y = y
         self.t = t
@@ -23,6 +22,15 @@ class Node:
         self.parent = None
         self.g_dict = {}
 
+    @property
+    def xy_name(self):
+        return f'{self.x}_{self.y}'
+
+    # @property
+    # def ID(self):
+    #     return f'{self.x}_{self.y}_{self.t}'
+
+    @property
     def f(self):
         return self.t + self.h
         # return self.g + self.h
@@ -62,7 +70,7 @@ class ListNodes:
         else:
             if node.ID not in self.dict:
                 raise RuntimeError('node.ID not in self.dict')
-            self.heap_list.remove(((node.f(), node.h), node.ID))
+            self.heap_list.remove(((node.f, node.h), node.ID))
             del self.dict[node.ID]
         # self.nodes_list.remove(node)
 
@@ -71,7 +79,7 @@ class ListNodes:
             heapq.heappush(self.heap_list, (node.g_dict[self.target_name], node.xy_name))
             self.dict[node.xy_name] = node
         else:
-            heapq.heappush(self.heap_list, ((node.f(), node.h), node.ID))
+            heapq.heappush(self.heap_list, ((node.f, node.h), node.ID))
             self.dict[node.ID] = node
         # self.nodes_list.append(node)
 

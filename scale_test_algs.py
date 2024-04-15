@@ -4,7 +4,7 @@ import pstats
 import matplotlib.pyplot as plt
 
 from funcs_graph.heuristic_funcs import dist_heuristic, h_func_creator, build_heuristic_for_multiple_targets
-from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets
+from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_targets, parallel_build_heuristic_for_entire_map
 from funcs_graph.nodes_from_pic import build_graph_nodes, get_dims_from_pic
 from funcs_graph.map_dimensions import map_dimensions_dict
 # from algs.test_mapf_alg import test_mapf_alg_from_pic
@@ -209,8 +209,10 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
             start_nodes = sample_nodes[:n_agents]
             goal_nodes = sample_nodes[n_agents:]
             # h_dict = build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=inner_plotter, middle_plot=False)
-            h_dict = parallel_build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=inner_plotter,
-                                                                   middle_plot=False)
+            # h_dict = parallel_build_heuristic_for_multiple_targets(goal_nodes, nodes, map_dim, plotter=inner_plotter,
+            #                                                        middle_plot=False)
+            h_dict = parallel_build_heuristic_for_entire_map(nodes, nodes_dict, map_dim, path='heuristic_tables',
+                                                             img_dir=img_dir)
             h_func = h_func_creator(h_dict)
             # h_func = dist_heuristic
 
@@ -532,9 +534,9 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
+    img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
     # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
-    img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
+    # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
     # img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
 
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251    | Up to 230 agents with h=w=30, lim=10sec.
