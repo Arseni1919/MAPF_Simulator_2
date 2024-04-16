@@ -80,6 +80,7 @@ class BnBAgent:
             nei_node = self.nodes_dict[nei_node_name]
             next_v = self.h_func(nei_node, self.goal_node)
             self.unary_c[nei_node_name] = next_v
+            # self.unary_c[nei_node_name] = next_v - curr_v + self.index
 
     def add_nei(self, agent: Self):
         self.nei_list.append(agent)
@@ -489,7 +490,7 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
 
 def main():
-    n_agents = 150
+    n_agents = 200
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     img_dir = 'random-32-32-10.map'  # 32-32
