@@ -10,6 +10,7 @@ from algs.metrics import c_v_check_for_agent, c_e_check_for_agent, build_constra
     limit_is_crossed, get_agents_in_conf, check_plan, get_alg_info_dict, iteration_print
 from algs.metrics import just_check_k_step_plans, just_check_plans
 from simulator_objects import Node
+from funcs_plotter.plot_functions import plot_step_in_mapf_paths
 
 
 class BnBAgent:
@@ -21,7 +22,7 @@ class BnBAgent:
         self.nodes: List[Node] = nodes
         self.nodes_dict: Dict[str, Node] = nodes_dict
         self.h_func = h_func
-        self.path = []
+        self.path = [start_node]
 
         # stats
         self.stats_n_closed = 0
@@ -40,15 +41,18 @@ class BnBAgent:
         self.pseudo_parents: List[Self] = []
         self.children: List[Self] = []
         self.pseudo_children: List[Self] = []
+        self.descendants: List[Self] = []
+        self.ancestors: List[Self] = []
         self.visited: bool = False
         self.level: int = -1
         self.bnb_next_n_deque = deque(self.curr_node.neighbours)
         self.bnb_next_a_deque = deque()
-        self.next_n_cost_cpa_dict = {}
+        self.next_cost_to_cpa_list: List[Tuple[float, dict]] = []
+        self.next_assignment: Dict[str, str] = {}
         self.curr_next_n = None
         self.unary_c = {}
 
-    def clear_nei(self):
+    def step_reset(self):
         self.nei_list = []
         self.nei_dict = {}
         self.nei_paths_dict = {}
@@ -57,11 +61,15 @@ class BnBAgent:
         self.pseudo_parents: List[Self] = []
         self.children = []
         self.pseudo_children: List[Self] = []
+        self.descendants: List[Self] = []
+        self.ancestors: List[Self] = []
         self.visited = False
         self.level = -1
+        random.shuffle(self.curr_node.neighbours)
         self.bnb_next_n_deque = deque(self.curr_node.neighbours)
         self.bnb_next_a_deque = deque()
-        self.next_n_cost_cpa_dict = {}
+        self.next_cost_to_cpa_list = []
+        self.next_assignment: Dict[str, str] = {}
         self.curr_next_n = None
         # update unary table
         self.unary_c = {}
@@ -100,9 +108,9 @@ def plot_edges(agents: List[BnBAgent]) -> None:
     g = graphviz.Graph('agents', format='png')
     for agent in agents:
         # single
-        if len(agent.children) == 0:
-            g.node(agent.name)
-            continue
+        # if len(agent.children) == 0:
+        #     g.node(agent.name)
+        #     continue
         # child
         for child in agent.children:
             g.edge(agent.name, child.name)
@@ -124,15 +132,31 @@ def run_dfs(agent: BnBAgent, parent=None) -> None:
             agent.children.append(nei)
 
 
+def find_descendants(agent: BnBAgent) -> List[BnBAgent]:
+    s = deque([agent])
+    descendants: List[BnBAgent] = []
+    while len(s) > 0:
+        next_a = s.pop()
+        for child in next_a.children:
+            s.append(child)
+            descendants.append(child)
+    return descendants
+
+
+def find_ancestors(agent: BnBAgent) -> List[BnBAgent]:
+    ancestors: List[BnBAgent] = []
+    next_a = agent.parent
+    while next_a is not None:
+        ancestors.append(next_a)
+        next_a = next_a.parent
+    return ancestors
+
+
 def get_pseudo_trees(agents: List[BnBAgent]) -> list:
     pseudo_tree_list = []
     # shuffle
     randomly_ordered_agents: List[BnBAgent] = agents[:]
     random.shuffle(randomly_ordered_agents)
-
-    # clear
-    for agent in randomly_ordered_agents:
-        agent.clear_nei()
 
     # create edges
     for agent1, agent2 in combinations(randomly_ordered_agents, 2):
@@ -148,14 +172,15 @@ def get_pseudo_trees(agents: List[BnBAgent]) -> list:
         run_dfs(agent)
         pseudo_tree_list.append(agent)
 
-
-    # pseudo-children and pseudo-parents
+    # pseudo-children and pseudo-parents + ancestors and descendants
     for agent in agents:
         for nei in agent.nei_list:
             if nei not in agent.children and agent.level < nei.level:
                 agent.pseudo_children.append(nei)
             if agent.parent and nei != agent.parent and agent.level > nei.level:
                 agent.pseudo_parents.append(nei)
+        agent.ancestors = find_ancestors(agent)
+        agent.descendants = find_descendants(agent)
 
     # plot
     # plot_edges(randomly_ordered_agents)
@@ -175,7 +200,7 @@ def get_graph_list(root: BnBAgent) -> List[BnBAgent]:
     return graph_list
 
 
-def buid_cpa_constraints(CPA: dict, agents_dict: Dict[str, BnBAgent]) -> Tuple[List[str], List[Tuple[str, str]]]:
+def build_cpa_constraints(CPA: dict, agents_dict: Dict[str, BnBAgent]) -> Tuple[List[str], List[Tuple[str, str]]]:
     c_v_list = []
     c_e_list = []
     for cpa_a_name, cpa_next_n in CPA.items():
@@ -185,7 +210,39 @@ def buid_cpa_constraints(CPA: dict, agents_dict: Dict[str, BnBAgent]) -> Tuple[L
     return c_v_list, c_e_list
 
 
+def get_min_n_and_v(curr_node_name, nei_n_list, c_v_list, c_e_list, unary_c) -> Tuple[str, float]:
+    n_to_v_list = []
+    for next_n in nei_n_list:
+        if next_n in c_v_list:
+            n_to_v_list.append((next_n, 1e7))
+            continue
+        if (curr_node_name, next_n) in c_e_list:
+            n_to_v_list.append((next_n, 1e7))
+            continue
+        n_to_v_list.append((next_n, unary_c[next_n]))
+    min_n, min_v = min(n_to_v_list, key=lambda x: x[1])
+    return min_n, min_v
+
+
+def get_cpa_cost(CPA: Dict[str, str], agents_dict: Dict[str, BnBAgent]) -> float:
+    cost = 0
+    for k, v in CPA.items():
+        cost += agents_dict[k].unary_c[v]
+    return cost
+
+
+def del_descendants_and_myself_from_cpa(agent: BnBAgent, CPA: Dict[str, str]):
+    if agent.name in CPA:
+        del CPA[agent.name]
+        for d in agent.descendants:
+            if d.name in CPA:
+                del CPA[d.name]
+
+
 def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: int, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent]) -> Tuple[bool, BnBAgent, Any, float, dict]:
+    if from_agent:
+        from_agent_name = from_agent.name
+    to_agent_name = to_agent.name
 
     # ------------------------- root -------------------------
     if to_agent.parent is None:
@@ -195,23 +252,26 @@ def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: 
 
         if from_agent is None or len(CPA) == n_g_agents:
             if len(CPA) == n_g_agents:
-                to_agent.next_n_cost_cpa_dict[CPA[to_agent.name]] = (LB, CPA)
+                # assert LB == get_cpa_cost(CPA, agents_dict)
+                to_agent.next_cost_to_cpa_list.append((LB, CPA))
 
             possible_next_n_name = to_agent.bnb_next_n_deque.pop()
             CPA = {to_agent.name: possible_next_n_name}
-            LB = to_agent.unary_c[possible_next_n_name]
-            UB = 1e7 if len(to_agent.next_n_cost_cpa_dict) == 0 else min([i[0] for i in to_agent.next_n_cost_cpa_dict.values()])
+            LB = get_cpa_cost(CPA, agents_dict)
+            UB = 1e7 if len(to_agent.next_cost_to_cpa_list) == 0 else min([i[0] for i in to_agent.next_cost_to_cpa_list])
+            if len(to_agent.children) == 0:
+                return False, to_agent, UB, LB, CPA
             to_agent.bnb_next_a_deque = deque(to_agent.children)
             next_agent = to_agent.bnb_next_a_deque.pop()
             return False, next_agent, UB, LB, CPA
 
         # if you here that means the from_agent is some middle child
         if LB >= UB:
-            to_agent.next_n_cost_cpa_dict[CPA[to_agent.name]] = (LB, {})
+            to_agent.next_cost_to_cpa_list.append((1e7, {}))
             possible_next_n_name = to_agent.bnb_next_n_deque.pop()
             CPA = {to_agent.name: possible_next_n_name}
-            LB = to_agent.unary_c[possible_next_n_name]
-            UB = min([i[0] for i in to_agent.next_n_cost_cpa_dict.values()])
+            LB = get_cpa_cost(CPA, agents_dict)
+            UB = min([i[0] for i in to_agent.next_cost_to_cpa_list])
             to_agent.bnb_next_a_deque = deque(to_agent.children)
             next_agent = to_agent.bnb_next_a_deque.pop()
             return False, next_agent, UB, LB, CPA
@@ -222,37 +282,66 @@ def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: 
 
     # ------------------------- leaf -------------------------
     if len(to_agent.children) == 0:
+        assert to_agent.name not in CPA
         for nei in to_agent.nei_list:
             assert nei.name in CPA
-        c_v_list, c_e_list = buid_cpa_constraints(CPA, agents_dict)
-        curr_node_name = to_agent.curr_node_name
-        n_to_v_list = []
-        for next_n in to_agent.curr_node.neighbours:
-            if next_n in c_v_list:
-                n_to_v_list.append((next_n, 1e7))
-                continue
-            if (curr_node_name, next_n) in c_e_list:
-                n_to_v_list.append((next_n, 1e7))
-                continue
-            n_to_v_list.append((next_n, to_agent.unary_c[next_n]))
-        min_n, min_v = min(n_to_v_list, key=lambda x: x[1])
-        if min_v >= UB:
+        c_v_list, c_e_list = build_cpa_constraints(CPA, agents_dict)
+        min_n, min_v = get_min_n_and_v(to_agent.curr_node_name, to_agent.curr_node.neighbours, c_v_list, c_e_list,
+                                       to_agent.unary_c)
+        if LB + min_v >= UB:
+            if to_agent.name in CPA:
+                del CPA[to_agent.name]
             return False, to_agent.parent, UB, LB + min_v, CPA
         CPA[to_agent.name] = min_n
-        LB += min_v
+        LB = get_cpa_cost(CPA, agents_dict)
         return False, to_agent.parent, UB, LB, CPA
 
     # ------------------------- middle agent -------------------------
     assert to_agent.parent.name in CPA
-    for pp in to_agent.pseudo_parents:
-        assert pp.name in CPA
+    for an in to_agent.ancestors:
+        assert an.name in CPA
 
+    # from parent
     if from_agent == to_agent.parent:
-        # to_agent.bnb_next_n_deque = deque(to_agent.curr_node.neighbours)
-        pass
+        assert to_agent.name not in CPA
+        c_v_list, c_e_list = build_cpa_constraints(CPA, agents_dict)
+        to_agent.bnb_next_n_deque = deque(to_agent.curr_node.neighbours)
+        min_n, min_v = get_min_n_and_v(to_agent.curr_node_name, to_agent.bnb_next_n_deque, c_v_list, c_e_list,
+                                       to_agent.unary_c)
+        if LB + min_v >= UB:
+            del_descendants_and_myself_from_cpa(to_agent, CPA)
+            return False, to_agent.parent, UB, LB + min_v, CPA
+        CPA[to_agent.name] = min_n
+        to_agent.bnb_next_n_deque.remove(min_n)
+        LB = get_cpa_cost(CPA, agents_dict)
+        to_agent.bnb_next_a_deque = deque(to_agent.children)
+        next_agent = to_agent.bnb_next_a_deque.pop()
+        return False, next_agent, UB, LB, CPA
 
+    # from child
     if from_agent in to_agent.children:
-        pass
+        assert to_agent.name in CPA
+        if LB >= UB:
+            del_descendants_and_myself_from_cpa(to_agent, CPA)
+            if len(to_agent.bnb_next_n_deque) == 0:
+                return False, to_agent.parent, UB, LB, CPA
+            c_v_list, c_e_list = build_cpa_constraints(CPA, agents_dict)
+            min_n, min_v = get_min_n_and_v(to_agent.curr_node_name, to_agent.bnb_next_n_deque, c_v_list, c_e_list,
+                                           to_agent.unary_c)
+            if LB + min_v >= UB:
+                return False, to_agent.parent, UB, LB + min_v, CPA
+            CPA[to_agent.name] = min_n
+            to_agent.bnb_next_n_deque.remove(min_n)
+            LB = get_cpa_cost(CPA, agents_dict)
+            to_agent.bnb_next_a_deque = deque(to_agent.children)
+            next_agent = to_agent.bnb_next_a_deque.pop()
+            return False, next_agent, UB, LB, CPA
+
+        # if LB < UB
+        if len(to_agent.bnb_next_a_deque) == 0:
+            return False, to_agent.parent, UB, LB, CPA
+        next_agent = to_agent.bnb_next_a_deque.pop()
+        return False, next_agent, UB, LB, CPA
 
     raise RuntimeError('noooo')
 
@@ -265,11 +354,15 @@ def execute_branch_and_bound(root: BnBAgent, agents: List[BnBAgent], agents_dict
     finished = False
     from_agent = None
     to_agent = root
+    visited_list = []
     while not finished:
         finished, next_agent, UB, LB, CPA = bnb_step(from_agent, to_agent, UB, LB, CPA, n_g_agents, agents, agents_dict)
+        visited_list.append((to_agent.name, LB, UB))
         from_agent = to_agent
         to_agent = next_agent
-
+    next_cost_to_cpa_list = root.next_cost_to_cpa_list
+    min_v, min_cpa = min(next_cost_to_cpa_list, key=lambda x: x[0])
+    root.next_assignment = min_cpa
     return
 
 
@@ -294,6 +387,13 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
     - img_dir
     :return:
     """
+    to_render = kwargs['to_render']
+    plot_rate = kwargs['plot_rate']
+    map_dim = kwargs['map_dim']
+    img_dir = kwargs['img_dir']
+    if to_render:
+        fig, ax = plt.subplots(1, 2, figsize=(14, 7))
+
     max_time = kwargs['max_time']  # seconds
 
     # preps
@@ -312,18 +412,36 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
     while True:
         step += 1
 
+        # reset
+        for agent in agents:
+            agent.step_reset()
+
         # Build a pseudo-tree
-        pseudo_tree_list = get_pseudo_trees(agents)
+        pseudo_tree_list: List[BnBAgent] = get_pseudo_trees(agents)
 
         # find the best future move
         for root in pseudo_tree_list:
             execute_branch_and_bound(root, agents, agents_dict)
 
         # execute the move + check
-        pass
+        for root in pseudo_tree_list:
+            i_next_assignment = root.next_assignment
+            for a_name, n_name in i_next_assignment.items():
+                i_agent = agents_dict[a_name]
+                new_curr_node = nodes_dict[n_name]
+                i_agent.path.append(new_curr_node)
+                i_agent.curr_node = new_curr_node
 
         # check if everybody arrived -> return
-        pass
+        finished = True
+        for agent in agents:
+            if agent.path[-1] != agent.goal_node:
+                finished = False
+                break
+        if finished:
+            result = {agent.name: agent.path for agent in agents}
+            # TODO
+            return result, alg_info
 
         # time check -> return
         runtime = time.time() - start_time
@@ -332,12 +450,26 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
         # print + plot
         print(f'\r{step=}, {runtime=:.2f}', end='')
+        if to_render:
+            plot_info = {'i': step,
+                         'iterations': max_time,
+                         'paths_dict': {agent.name: agent.path for agent in agents},
+                         'nodes': nodes,
+                         'side_x': map_dim[0],
+                         'side_y': map_dim[1],
+                         't': step,
+                         'img_dir': img_dir,
+                         'i_agent': agents[0],
+                         }
+            plot_step_in_mapf_paths(ax[0], plot_info)
+            plt.pause(plot_rate)
+
 
     # return None, {'agents': agents, 'success_rate': 0}
 
 
 def main():
-    n_agents = 400
+    n_agents = 20
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = 'empty-48-48.map'  # 48-48
     img_dir = 'random-32-32-10.map'  # 32-32
@@ -351,7 +483,9 @@ def main():
     random_seed = False
     seed = 878
     PLOT_PER = 1
-    PLOT_RATE = 0.5
+    plot_rate = 0.5
+    to_render = True
+    # to_render = False
 
     # --------------------------------------------------- #
     # --------------------------------------------------- #
@@ -381,7 +515,8 @@ def main():
             max_time=50,
             a_star_closed_nodes_limit=1e6,
             plot_per=PLOT_PER,
-            plot_rate=PLOT_RATE,
+            plot_rate=plot_rate,
+            to_render=to_render,
         )
 
         if not random_seed:

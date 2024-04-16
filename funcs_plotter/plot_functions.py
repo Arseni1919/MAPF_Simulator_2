@@ -193,6 +193,7 @@ def plot_step_in_mapf_paths(ax, info):
     side_y = info['side_y']
     t = info['t']
     img_dir = info['img_dir']
+    i_agent = info['i_agent']
 
     field = np.zeros((side_x, side_y))
 
@@ -203,18 +204,28 @@ def plot_step_in_mapf_paths(ax, info):
     n = len(list(paths_dict.keys()))
     color_map = plt.cm.get_cmap('hsv', n)
     i = 0
-    for agent_name, path in paths_dict.items():
-        t_path = path[:t + 1]
+    scatter_x_list = []
+    scatter_y_list = []
+    scatter_c_list = []
+    for agent_name, t_path in paths_dict.items():
         # for node in t_path:
         #     field[node.x, node.y] = 3
-        if agent_name == 'agent_0':
+        if agent_name == i_agent.name:
             ax.scatter(t_path[-1].y, t_path[-1].x, s=200, c='white')
             ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
+
+            ax.scatter(i_agent.goal_node.y, i_agent.goal_node.x, s=200, c='white', marker='X')
+            ax.scatter(i_agent.goal_node.y, i_agent.goal_node.x, s=100, c='red', marker='X')
         else:
-            ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
-            ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
+            scatter_x_list.append(t_path[-1].x)
+            scatter_y_list.append(t_path[-1].y)
+            scatter_c_list.append(np.array([color_map(i)]))
+            # ax.scatter(t_path[-1].y, t_path[-1].x, s=100, c='k')
+            # ax.scatter(t_path[-1].y, t_path[-1].x, s=50, c=np.array([color_map(i)]))
         # ax.text(t_path[-1].y - 0.4, t_path[-1].x - 0.4, agent_name[6:])
         i += 1
+    ax.scatter(scatter_y_list, scatter_x_list, s=100, c='k')
+    ax.scatter(scatter_y_list, scatter_x_list, s=50, c=scatter_c_list)
 
     # for agent_name, path in paths_dict.items():
     #     # field[path[0].x, path[0].y] = 4

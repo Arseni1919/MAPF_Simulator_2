@@ -1,5 +1,6 @@
-l = [1,2,3]
+from globals import *
 
-l.pop()
+l = deque(['a', 'c', 'b'])
 
-print(1e7)
+l.remove('c')
+print(l)
