@@ -10,14 +10,14 @@ from funcs_graph.heuristic_funcs import parallel_build_heuristic_for_multiple_ta
 
 
 def test_mapf_alg_from_pic(algorithm, **kwargs):
-    random_seed = kwargs['random_seed']
-    seed = kwargs['seed']
-    if random_seed:
-        seed = random.choice(range(1000))
-    print(f'SEED: {seed}')
+    # random_seed = kwargs['random_seed']
+    # seed = kwargs['seed']
+    # if random_seed:
+    #     seed = random.choice(range(1000))
+    # print(f'SEED: {seed}')
 
-    random.seed(seed)
-    np.random.seed(seed)
+    # random.seed(seed)
+    # np.random.seed(seed)
 
     if 'img_dir' in kwargs:
         img_dir = kwargs['img_dir']

@@ -10,3 +10,15 @@ def rename_nodes_in_path(path):
         node.t = t
         node.ID = f'{node.x}_{node.y}_{t}'
 
+
+def get_color(i):
+    index_to_pick = i % len(color_names)
+    return color_names[index_to_pick]
+
+
+def set_seed(random_seed_bool, seed=1):
+    if random_seed_bool:
+        seed = random.randint(0, 10000)
+    random.seed(seed)
+    np.random.seed(seed)
+    print(f'[SEED]: --- {seed} ---')
