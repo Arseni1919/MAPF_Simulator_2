@@ -282,11 +282,12 @@ def update_next_cost_to_fpa_list(LB: int, UB: int, CPA: Dict[str, str], agent: B
 
 
 def update_cost_to_local_cpa_list(LB: int, UB: int, CPA: Dict[str, str], agent: BnBAgent) -> None:
+    # agent.cost_to_cpa_list.append((LB, CPA))
     if LB < UB:
         agent.cost_to_cpa_list.append((LB, CPA))
     if LB >= 1e7:
         agent.cost_to_cpa_list.append((LB, {}))
-    if UB < LB < 1e7:
+    if UB <= LB < 1e7:
         agent.cost_to_cpa_list.append((LB, {}))
 
 
@@ -406,7 +407,7 @@ def process_step_middle_agent(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, 
             to_agent.bnb_next_n_deque.remove(min_n)
             no_move_cost_check(min_n, LB + min_v, new_CPA, to_agent)
             if LB + min_v >= UB:
-                # update_cost_to_local_cpa_list(LB, UB, new_CPA, to_agent)
+                update_cost_to_local_cpa_list(LB, UB, new_CPA, to_agent)
                 if len(to_agent.bnb_next_n_deque) == 0:
                     min_V, min_CPA = min(to_agent.cost_to_cpa_list, key=lambda x: x[0])
                     return False, to_agent.parent, UB, min_V, min_CPA
@@ -580,10 +581,10 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
 
 def main():
-    n_agents = 17
+    n_agents = 50
     # img_dir = 'my_map_10_10_room.map'  # 10-10
-    img_dir = '10_10_my_rand.map'  # 10-10
-    # img_dir = 'random-32-32-10.map'  # 32-32
+    # img_dir = '10_10_my_rand.map'  # 10-10
+    img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'empty-32-32.map'  # 32-32
     # img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
