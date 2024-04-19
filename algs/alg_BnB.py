@@ -359,18 +359,12 @@ def ub_from_goal_locations(root: BnBAgent):
 def process_step_root(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: int, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent], step: int, to_assert: bool = False) -> Tuple[bool, BnBAgent, Any, float, dict]:
     # the start
     if from_agent is None:
-        # possible_next_n_name = to_agent.bnb_next_n_deque.pop()
-        # CPA = {to_agent.name: possible_next_n_name}
-        # LB = to_agent.unary_c[possible_next_n_name]
-        # TODO: PIBT for UB
         init_UB = ub_from_goal_locations(to_agent) + 1
-        # init_UB = ub_from_pibt(to_agent, agents_dict) + 1
         to_agent.init_ub = init_UB
 
         while len(to_agent.bnb_next_n_deque) > 0:
             next_possible_n = to_agent.bnb_next_n_deque.pop()
             new_LB = to_agent.unary_c[next_possible_n]
-            # look_ahead()
             look_ahead_v = look_ahead(to_agent, next_possible_n, new_LB, init_UB)
             if new_LB + look_ahead_v >= init_UB:
                 assert next_possible_n not in to_agent.cost_to_cpa_per_node_dict
@@ -430,6 +424,16 @@ def process_step_root(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g
 
         min_v, min_cpa = min(to_agent.cost_to_cpa_per_node_dict.values(), key=lambda x: x[0])
         to_agent.next_assignment = min_cpa
+        freeze = False
+        if to_agent.name not in min_cpa:
+            freeze = True
+        for d in to_agent.descendants:
+            if d.name not in min_cpa:
+                freeze = True
+        if freeze:
+            min_cpa[to_agent.name] = to_agent.curr_node_name
+            for d in to_agent.descendants:
+                min_cpa[d.name] = d.curr_node_name
         if to_assert:
             assert min_v < 1e7
             assert to_agent.name in min_cpa
@@ -713,7 +717,7 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
 
 def main():
-    n_agents = 65
+    n_agents = 40
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = '10_10_my_rand.map'  # 10-10
     img_dir = 'random-32-32-10.map'  # 32-32
