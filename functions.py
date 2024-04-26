@@ -22,3 +22,16 @@ def set_seed(random_seed_bool, seed=1):
     random.seed(seed)
     np.random.seed(seed)
     print(f'[SEED]: --- {seed} ---')
+
+
+def cut_back_path(path, goal_node):
+    len_path = len(path)
+    if len_path > 1:
+        if path[-1].xy_name == goal_node.xy_name:
+            for backwards_node in path[:-1][::-1]:
+                if backwards_node.xy_name == goal_node.xy_name:
+                    len_path -= 1
+                else:
+                    break
+    cut_path = path[:len_path]
+    return cut_path

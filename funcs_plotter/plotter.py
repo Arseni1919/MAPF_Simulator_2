@@ -92,7 +92,12 @@ class Plotter:
             'runs_per_n_agents': runs_per_n_agents,
             'algs_to_test_dict': algs_to_test_dict,
             'n_agents_list': n_agents_list,
-            'is_json': is_json
+            'is_json': is_json,
+            'linewidth': kwargs['linewidth'],
+            'markersize': kwargs['markersize'],
+            'to_put_legend': kwargs['to_put_legend'],
+            'legend_size': kwargs['legend_size'],
+            'to_set_log': kwargs['to_set_log']
         }
         plot_success_rate(self.ax[0, 0], info)
 
@@ -100,22 +105,25 @@ class Plotter:
 
         plot_runtime_cactus(self.ax[0, 2], info)
 
-        plot_a_star_calls_counters(self.ax[0, 3], info)
+        # plot_n_messages(self.ax[0, 3], info)
 
-        plot_n_nei(self.ax[1, 0], info)
+        plot_n__total_messages(self.ax[0, 3], info)
 
+        plot_a_star_calls_counters(self.ax[1, 0], info)
+
+        # plot_n_nei(self.ax[1, 0], info)
+        #
         plot_n_steps_iters(self.ax[1, 1], info)
-
-        plot_n_messages(self.ax[1, 2], info)
-
+        #
         plot_n_expanded_cactus(self.ax[1, 3], info)
 
         time_per_alg_limit = f'{kwargs["time_per_alg_limit"]}' if 'time_per_alg_limit' in kwargs else '-'
-        # self.fig.tight_layout()
+        self.fig.tight_layout()
         if 'i_run' in kwargs:
             title = f'{img_png}, {kwargs["i_run"]+1}/{runs_per_n_agents}, time limit: {float(time_per_alg_limit) * 60:0.0f} sec.'
         else:
-            title = f'{img_png}'
+            # title = f'{img_png}'
+            title = f''
         self.fig.suptitle(title, fontsize=16)
         plt.pause(0.1)
         print('big plot ends')

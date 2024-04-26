@@ -12,6 +12,7 @@ from funcs_plotter.plotter import Plotter
 from algs.alg_SDS import run_sds
 from algs.alg_k_SDS import run_k_sds
 from algs.alg_PrP_distr import run_k_distr_pp
+from algs.alg_BnB import run_bnb
 from algs.alg_k_MGDS import run_k_mgds
 from algs.alg_PBS import run_pbs
 from algs.alg_MGDS import run_mgds
@@ -133,43 +134,7 @@ def set_seed(random_seed, seed):
     print(f'SEED: {seed}')
 
 
-def get_map_nodes(img_dir=None):
-    if not img_dir:
-        # img_dir = 'empty-48-48.map'  # 48-48
-        img_dir = 'random-64-64-10.map'  # 64-64
-        # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
-        # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
-
-        # img_dir = 'random-32-32-10.map'  # 32-32
-        # img_dir = 'orz900d.map'  # 656-1491
-
-        # img_dir = 'room-64-64-8.map'  # 64-64
-        # img_dir = 'random-64-64-20.map'  # 64-64
-        # img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
-        # img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
-        # img_dir = 'maze-128-128-2.map'  # 128-128
-        # img_dir = 'ht_chantry.map'  # 141-162
-        # img_dir = 'ost003d.map'  # 194-194
-        # img_dir = 'lak303d.map'  # 194-194
-        # img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
-        # img_dir = 'Berlin_1_256.map'  # 256-256
-        # img_dir = 'den520d.map'  # 257-256
-        # img_dir = 'ht_mansion_n.map'  # 270-133
-        # img_dir = 'brc202d.map'  # 481-530
-
-        # img_dir = 'lak108d.png'
-        # img_dir = 'lak109d.png'
-        # img_dir = '19_20_warehouse.png'
-        # img_dir = '22_22_blank_grid.png'
-        # img_dir = '22_22_blank_grid_rate_0.1.png'
-        # img_dir = 'warehouse-10-20-10-2-1.png'
-        # img_dir = 'den101d.png'
-        # img_dir = 'rmtst.png'
-        # img_dir = 'lak505d.png'
-        # img_dir = 'lak503d.png'
-        # img_dir = 'ost003d.png'
-        # img_dir = 'brc202d.png'
-        # img_dir = 'den520d.png'
+def get_map_nodes(img_dir):
     map_dim = get_dims_from_pic(img_dir=img_dir, path='maps')
     nodes, nodes_dict = build_graph_nodes(img_dir=img_dir, path='maps', show_map=False)
     return nodes, nodes_dict, map_dim, img_dir
@@ -235,6 +200,9 @@ def big_test(img_dir: str, algs_to_test_dict: dict, n_agents_list: list, runs_pe
                     alg_name=alg_name,
                     i_run=i_run,
                     img_dir=img_dir,
+                    to_render=False,
+                    plot_rate=1,
+                    map_dim=None,
                     **params,
                 )
 
@@ -307,62 +275,109 @@ def main():
         #     'color': 'tab:blue',
         # }),
 
-        'D-PrP': (run_k_distr_pp, {
-            'k': 1e7,
-            'h': 1e7,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'c',
-        }),
+        ################################################################################################################
+        ################################################################################################################
+        ################################################################################################################
 
-        'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 10,
-            'h': 10,
-            # reset_type: 'reset_start',
-            'reset_type': 'reset_step',
-            'pref_paths_type': 'pref_index',
-            # 'pref_paths_type': 'pref_path_length',
-            'p_h': 1,
-            'p_l': 0,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'purple',
-        }),
-
-        'SDS': (run_sds, {
-            'a_star_func': a_star,
-            'decision_type': 'min_prev_2',
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
-            'dist': True,
-            'color': 'tab:orange',
-        }),
-
-        'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
-            'k': 30,
-            'h': 30,
-            'p_ch_type': 'max_prev',
-            # 'pref_paths_type': 'pref_index',
-            'pref_paths_type': 'pref_path_length',
-            'p_h': 0.9,
-            'p_l': 0.9,
-            # 'limit_type': 'norm_time',
-            'limit_type': 'dist_time',
-            # 'limit_type': 'dist_a_star_closed',
+        'B&B (10)': (run_bnb, {
             'dist': True,
             'color': 'red',
+            'to_plot_edges': False,
+            'to_assert': False,
+            'my_max_time': 0.1667,  # ~10 sec
         }),
+
+        'B&B (30)': (run_bnb, {
+            'dist': True,
+            'color': 'orange',
+            'to_plot_edges': False,
+            'to_assert': False,
+            'my_max_time': 0.5,  #
+        }),
+
+        'B&B (50)': (run_bnb, {
+            'dist': True,
+            'color': 'tab:green',
+            'to_plot_edges': False,
+            'to_assert': False,
+            'my_max_time': 0.8333,  #
+        }),
+
+        'B&B (70)': (run_bnb, {
+            'dist': True,
+            'color': 'blue',
+            'to_plot_edges': False,
+            'to_assert': False,
+            'my_max_time': 1.1667,  #
+        }),
+
+        ################################################################################################################
+        ################################################################################################################
+        ################################################################################################################
+
+        # 'PT-FB-PF': (run_bnb, {
+        #     'dist': True,
+        #     'color': 'tab:green',
+        #     'to_plot_edges': False,
+        #     'to_assert': False,
+        # }),
+
+        # 'D-PrP': (run_k_distr_pp, {
+        #     'k': 1e7,
+        #     'h': 1e7,
+        #     # reset_type: 'reset_start',
+        #     'reset_type': 'reset_step',
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'c',
+        # }),
+        #
+        # 'k-D-PrP': (run_k_distr_pp, {  # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        #     'k': 10,
+        #     'h': 10,
+        #     # reset_type: 'reset_start',
+        #     'reset_type': 'reset_step',
+        #     'pref_paths_type': 'pref_index',
+        #     # 'pref_paths_type': 'pref_path_length',
+        #     'p_h': 1,
+        #     'p_l': 0,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'purple',
+        # }),
+        #
+        # 'SDS': (run_sds, {
+        #     'a_star_func': a_star,
+        #     'decision_type': 'min_prev_2',
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'tab:orange',
+        # }),
+        #
+        # 'k-SDS': (run_k_sds, {   # for random and empty - 10, for warehouse 30, for game 2: k=h=15
+        #     'k': 30,
+        #     'h': 30,
+        #     'p_ch_type': 'max_prev',
+        #     # 'pref_paths_type': 'pref_index',
+        #     'pref_paths_type': 'pref_path_length',
+        #     'p_h': 0.9,
+        #     'p_l': 0.9,
+        #     # 'limit_type': 'norm_time',
+        #     'limit_type': 'dist_time',
+        #     # 'limit_type': 'dist_a_star_closed',
+        #     'dist': True,
+        #     'color': 'red',
+        # }),
 
         # 'MGDS': (run_mgds, {
         #     'a_star_func': a_star,
@@ -484,7 +499,11 @@ def main():
 
     }
 
-    # n_agents_list = [5, 10]
+    # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
+    # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
+    n_agents_list = [20, 40, 60, 80, 100]
+    # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
+    # n_agents_list = [100, 120]
     # n_agents_list = [10, 15, 20, 25, 30]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20]
     # n_agents_list = [2, 3, 4, 5, 6, 7, 8, 9, 10]
@@ -494,10 +513,8 @@ def main():
     # n_agents_list = [ 400]  # !!!!!!!!!! LNS
     # n_agents_list = [30, 80, 130, 180, 230]  # !!!!!!!!!! game 1
     # n_agents_list = [330]
-    # n_agents_list = [30, 80, 130, 180, 230, 280, 330]  # !!!!!!!!!! warehouse, game 2
-    n_agents_list = [130, 180, 230, 280, 330]
+    # n_agents_list = [130, 180, 230, 280, 330]
     # n_agents_list = [280, 330]
-    # n_agents_list = [80, 180, 280, 380, 480, 580]  # !!!!!!!!!! empty and random
     # n_agents_list = [480, 580]
     # n_agents_list = [380, 430, 480, 530, 580, 630, 680]
     # n_agents_list = [280, 330, 380, 430, 480, 530, 580]
@@ -507,7 +524,6 @@ def main():
     # n_agents_list = [10, 450, 500, 550, 600, 650]
     # n_agents_list = [100, 200, 300, 400, 500, 600, 700]
     # n_agents_list = [400, 500, 600, 700, 800, 900]
-    # n_agents_list = [10, 20, 30, 40, 50, 60, 70, 80, 90, 100]
     # n_agents_list = [20, 40, 60, 80, 100, 120, 140, 160, 180, 200]
     # n_agents_list = [20, 60, 100, 140, 180, 220, 260, 300, 340]
     # n_agents_list = [20, 30, 40, 50, 60, 70, 80, 90, 100]
@@ -522,10 +538,11 @@ def main():
     # runs_per_n_agents = 50
     # runs_per_n_agents = 25  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 20  # !!!!!!!!!!!!!!!!!
+    # runs_per_n_agents = 15  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 10  # !!!!!!!!!!!!!!!!!
-    # runs_per_n_agents = 5  # !!!!!!!!!!!!!!!!!
+    runs_per_n_agents = 5  # !!!!!!!!!!!!!!!!!
     # runs_per_n_agents = 4
-    runs_per_n_agents = 3
+    # runs_per_n_agents = 3
     # runs_per_n_agents = 2
     # runs_per_n_agents = 1
 
@@ -534,7 +551,12 @@ def main():
     seed = 941
 
     # ------------------------------ MAPS ------------------------------ #
-    img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
+    img_dir = 'empty-32-32.map'
+    # img_dir = 'random-32-32-20.map'
+    # img_dir = 'maze-32-32-4.map'
+    # img_dir = 'room-32-32-4.map'
+    # ------------------------------
+    # img_dir = 'empty-48-48.map'  # 48-48              | Up to 580 agents with h=w=5, lim=10sec.
     # img_dir = 'random-64-64-10.map'  # 64-64          | Up to 580 agents with h=w=10, lim=10sec.
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161  | Up to 330 agents with h=w=30, lim=10sec.
     # img_dir = 'ht_chantry.map'  # 162-141             | Up to 330 agents with h=w=30, lim=10sec.
@@ -544,6 +566,7 @@ def main():
 
     # ------------------------------ LIMITS ------------------------------ #
     time_per_alg_limit = 0.1667  # approximately 10 seconds
+    # time_per_alg_limit = 0.1667  # approximately 10 seconds
     # time_per_alg_limit = 1  # According to PBS paper!
     # time_per_alg_limit = 0.1
     # time_per_alg_limit = 2
@@ -568,8 +591,8 @@ def main():
     # plotter = None
     plotter = Plotter()
 
-    # to_save_results = True
-    to_save_results = False
+    to_save_results = True
+    # to_save_results = False
     file_dir = f'logs_for_graphs/{datetime.now().strftime("%Y-%m-%d--%H-%M")}_ALGS-{len(algs_to_test_dict)}_RUNS-{runs_per_n_agents}_MAP-{img_dir[:-4]}.json'
 
     # profiler = None
@@ -606,100 +629,40 @@ if __name__ == '__main__':
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+# img_dir = 'empty-48-48.map'  # 48-48
+# img_dir = 'random-64-64-10.map'  # 64-64
+# img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
+# img_dir = 'lt_gallowstemplar_n.map'  # 180-251
+
+# img_dir = 'random-32-32-10.map'  # 32-32
+# img_dir = 'orz900d.map'  # 656-1491
+
+# img_dir = 'room-64-64-8.map'  # 64-64
+# img_dir = 'random-64-64-20.map'  # 64-64
+# img_dir = 'warehouse-10-20-10-2-2.map'  # 84-170
+# img_dir = 'warehouse-20-40-10-2-1.map'  # 123-321
+# img_dir = 'maze-128-128-2.map'  # 128-128
+# img_dir = 'ht_chantry.map'  # 141-162
+# img_dir = 'ost003d.map'  # 194-194
+# img_dir = 'lak303d.map'  # 194-194
+# img_dir = 'warehouse-20-40-10-2-2.map'  # 164-340
+# img_dir = 'Berlin_1_256.map'  # 256-256
+# img_dir = 'den520d.map'  # 257-256
+# img_dir = 'ht_mansion_n.map'  # 270-133
+# img_dir = 'brc202d.map'  # 481-530
+
+# img_dir = 'lak108d.png'
+# img_dir = 'lak109d.png'
+# img_dir = '19_20_warehouse.png'
+# img_dir = '22_22_blank_grid.png'
+# img_dir = '22_22_blank_grid_rate_0.1.png'
+# img_dir = 'warehouse-10-20-10-2-1.png'
+# img_dir = 'den101d.png'
+# img_dir = 'rmtst.png'
+# img_dir = 'lak505d.png'
+# img_dir = 'lak503d.png'
+# img_dir = 'ost003d.png'
+# img_dir = 'brc202d.png'
+# img_dir = 'den520d.png'
 
 

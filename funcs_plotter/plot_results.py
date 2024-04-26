@@ -28,7 +28,8 @@ def show_results(file_dir, plotter):
     img_png = json_object['img_dir']
     # algs_to_test_names = json_object['algs_to_test_names']
     algs_to_test_dict = json_object['algs_to_test_dict']
-    plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, is_json=True)
+    plotter.plot_big_test(statistics_dict, runs_per_n_agents, algs_to_test_dict, n_agents_list, img_png, is_json=True,
+                          linewidth=2, markersize=10, to_put_legend=True, legend_size=17, to_set_log=True)
     plt.show()
 
 
@@ -46,14 +47,20 @@ def main():
     # file_dir = '../logs_for_graphs/2023-01-17--13-51_ALGS-3_RUNS-5_MAP-random-64-64-10.json'  # mgm
     # file_dir = '../logs_for_graphs/appendix_pp_dsa_sds.json'  # dsa
 
-    # file_dir = f'../logs_for_graphs/2023-08-14--08-24_ALGS-6_RUNS-3_MAP-warehouse-10-20-10-2-1.json'
+    # file_dir = f'../logs_for_graphs/2024-04-20--19-53_ALGS-5_RUNS-2_MAP-room-32-32-4.json'
 
     # main paper
-    file_dir = f'../logs_for_graphs/empty_1.json'
+    # file_dir = f'../logs_for_graphs/empty_1.json'
     # file_dir = f'../logs_for_graphs/rand_1.json'
     # file_dir = f'../logs_for_graphs/ware_1.json'
     # file_dir = f'../logs_for_graphs/game_1.json'
     # file_dir = f'../logs_for_graphs/dsa_and_others_in_random_map.json'
+
+    # file_dir = f'../logs_for_graphs/bnb_empty_2024-04-20--21-22_ALGS-5_RUNS-15_MAP-empty-32-32.json'
+    # file_dir = f'../logs_for_graphs/bnb_rand_2024-04-20--21-54_ALGS-5_RUNS-15_MAP-random-32-32-20.json'
+    file_dir = f'../logs_for_graphs/bnb_room_2024-04-21--07-55_ALGS-5_RUNS-15_MAP-room-32-32-4.json'
+    # file_dir = f'../logs_for_graphs/bnb_maze_2024-04-20--23-00_ALGS-5_RUNS-15_MAP-maze-32-32-4.json'
+
     # appendix
     # file_dir = f'../logs_for_graphs/appendix_pbs_pp_empty.json'
     # file_dir = f'../logs_for_graphs/appendix_pbs_pp_ware.json'

@@ -29,13 +29,10 @@ class BnBAgent:
         self.path = [start_node]
 
         # stats
-        self.stats_n_closed = 0
-        self.stats_n_calls = 0
         self.stats_runtime = 0
         self.stats_n_messages = 0
         self.stats_n_step_m = 0
-        self.stats_n_step_m_list = []
-        self.stats_nei_list = []
+        self.stats_n_step_m_list = []  # !!!
         # nei
         self.nei_list: List[Self] = []
         self.nei_dict: Dict[str, Self] = {}
@@ -62,6 +59,8 @@ class BnBAgent:
         self.nei_list = []
         self.nei_dict = {}
         self.nei_paths_dict = {}
+        # stats
+        self.stats_n_step_m = 0
         # bnb
         self.parent = None
         self.pseudo_parents: List[Self] = []
@@ -81,28 +80,18 @@ class BnBAgent:
         self.curr_next_n = None
         # update unary table
         self.unary_c = {}
-        # random.shuffle(self.curr_node.neighbours)
-        # curr_v = self.h_func(self.curr_node, self.goal_node)
         min_h = min([self.h_func(self.nodes_dict[n_name], self.goal_node) for n_name in self.curr_node.neighbours])
-        # min_h = max(1, min_h)
         for nei_node_name in self.curr_node.neighbours:
             nei_node = self.nodes_dict[nei_node_name]
             next_h = self.h_func(nei_node, self.goal_node)
-            # if nei_node == self.curr_node and nei_node != self.goal_node:
-            #     self.unary_c[nei_node_name] = next_h * 1000
-            #     continue
             self.unary_c[nei_node_name] = next_h - min_h
-            # if min_h > 0:
-            #     self.unary_c[nei_node_name] = (next_h - min_h) * min_h
-            # else:
-            #     self.unary_c[nei_node_name] = next_h
-            # self.unary_c[nei_node_name] = next_h - curr_v + self.index
-        # if self.goal_node_name in self.curr_node.neighbours:
-        #     print()
 
     def add_nei(self, agent: Self):
         self.nei_list.append(agent)
         self.nei_dict[agent.name] = agent
+
+    def get_cut_path(self):
+        return cut_back_path(self.path, self.goal_node)
 
     def __eq__(self, other: Self) -> bool:
         return self.index == other.index
@@ -356,6 +345,21 @@ def ub_from_goal_locations(root: BnBAgent):
     return init_ub
 
 
+def freeze_func(agent, cpa):
+    freeze = False
+    if agent.name not in cpa:
+        freeze = True
+    for d in agent.descendants:
+        if d.name not in cpa:
+            freeze = True
+            break
+    if freeze:
+        cpa[agent.name] = agent.curr_node_name
+        for d in agent.descendants:
+            cpa[d.name] = d.curr_node_name
+    return cpa
+
+
 def process_step_root(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: int, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent], step: int, to_assert: bool = False) -> Tuple[bool, BnBAgent, Any, float, dict]:
     # the start
     if from_agent is None:
@@ -423,17 +427,8 @@ def process_step_root(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g
             return False, next_agent, UB, new_LB, new_CPA
 
         min_v, min_cpa = min(to_agent.cost_to_cpa_per_node_dict.values(), key=lambda x: x[0])
+        min_cpa = freeze_func(to_agent, min_cpa)
         to_agent.next_assignment = min_cpa
-        freeze = False
-        if to_agent.name not in min_cpa:
-            freeze = True
-        for d in to_agent.descendants:
-            if d.name not in min_cpa:
-                freeze = True
-        if freeze:
-            min_cpa[to_agent.name] = to_agent.curr_node_name
-            for d in to_agent.descendants:
-                min_cpa[d.name] = d.curr_node_name
         if to_assert:
             assert min_v < 1e7
             assert to_agent.name in min_cpa
@@ -560,6 +555,7 @@ def process_step_middle_agent(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, 
 
 def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: int, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent], step: int, to_assert: bool = False) -> Tuple[bool, BnBAgent, Any, float, dict]:
 
+    to_agent.stats_n_step_m += 1
     # ------------------------- root -------------------------
     if to_agent.parent is None:
         return process_step_root(from_agent, to_agent, UB, LB, CPA, n_g_agents, agents, agents_dict, step, to_assert)
@@ -575,7 +571,11 @@ def bnb_step(from_agent: BnBAgent, to_agent: BnBAgent, UB, LB, CPA, n_g_agents: 
     raise RuntimeError('noooo')
 
 
-def execute_branch_and_bound(root: BnBAgent, agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent], step: int, to_assert: bool = False) -> None:
+def execute_branch_and_bound(
+        root: BnBAgent,
+        agents: List[BnBAgent], agents_dict: Dict[str, BnBAgent], step: int, to_assert: bool = False,
+        runtime: float = 0, start_step_time: float = 0, max_time: float = 1e7
+) -> None:
     LB, UB = 0, math.inf
     graph_list = get_graph_list(root)
     n_g_agents = len(graph_list)
@@ -591,6 +591,9 @@ def execute_branch_and_bound(root: BnBAgent, agents: List[BnBAgent], agents_dict
         from_agent = to_agent
         to_agent = next_agent
         print(f'\r[{n_g_agents}][{5**n_g_agents}][{root.name}][{UB=}][LB={int(LB)}][{len(CPA)}/{n_g_agents}][level={to_agent.level}]{len(visited_list)=}', end='')
+        if runtime + (time.time() - start_step_time) > max_time:
+            root.next_assignment = freeze_func(root, root.next_assignment)
+            return
     return
 
 
@@ -624,7 +627,8 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
     if to_render:
         fig, ax = plt.subplots(1, 2, figsize=(14, 7))
 
-    max_time = kwargs['max_time']  # seconds
+    max_time = kwargs['my_max_time'] if 'my_max_time' in kwargs else kwargs['max_time']  # minutes
+    max_time = max_time * 60  # seconds
 
     # preps
     alg_info = get_alg_info_dict()
@@ -637,7 +641,7 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
         agents_dict[agent.name] = agent
 
     # step iterations
-    start_time = time.time()
+    runtime = 0
     step = 0
     while True:
         step += 1
@@ -651,25 +655,34 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
         # find the best future move
         # -------------------------------------------------------------------------------------- #
+        step_time_list = []
         for root in pseudo_tree_list:
-            execute_branch_and_bound(root, agents, agents_dict, step, to_assert=to_assert)
+            start_step_time = time.time()
+            execute_branch_and_bound(root, agents, agents_dict, step, to_assert=to_assert, runtime=runtime, start_step_time=start_step_time, max_time=max_time)
+            end_step_time = time.time()
+            step_time_list.append(end_step_time - start_step_time)
+        runtime += max(step_time_list)
         # -------------------------------------------------------------------------------------- #
         # with concurrent.futures.ThreadPoolExecutor(max_workers=len(pseudo_tree_list)) as executor:
         #     for i, root in enumerate(pseudo_tree_list):
         #         executor.submit(execute_branch_and_bound, root, agents, agents_dict, step)
         # -------------------------------------------------------------------------------------- #
 
+        # stats
+        for agent in agents:
+            agent.stats_n_step_m_list.append(agent.stats_n_step_m)
+
         # execute the move + check
         l = set([len(a.path) for a in agents])
         assert len(set([len(a.path) for a in agents])) == 1
         for root in pseudo_tree_list:
-            r_name = root.name
-            r_cost_to_cpa_per_node_dict = root.cost_to_cpa_per_node_dict
-            r_domain = root.domain
-            r_curr_node_name = root.curr_node_name
+            # r_name = root.name
+            # r_cost_to_cpa_per_node_dict = root.cost_to_cpa_per_node_dict
+            # r_domain = root.domain
+            # r_curr_node_name = root.curr_node_name
+            # r_next_node_name = r_next_assignment[root.name]
+            # print('', end='')
             r_next_assignment = root.next_assignment
-            r_next_node_name = r_next_assignment[root.name]
-            print('', end='')
             for a_name, n_name in r_next_assignment.items():
                 i_agent = agents_dict[a_name]
                 new_curr_node = nodes_dict[n_name]
@@ -683,8 +696,17 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
                 finished = False
                 break
         if finished:
-            result = {agent.name: agent.path for agent in agents}
-            # TODO
+            print(f'#########################################################')
+            print(f'#########################################################')
+            print(f'#########################################################')
+            result = {agent.name: agent.get_cut_path() for agent in agents}
+            alg_info['success_rate'] = 1
+            cost = sum([len(p) for p in result.values()])
+            alg_info['sol_quality'] = cost
+            alg_info['runtime'] = runtime
+            alg_info['dist_runtime'] = runtime
+            # alg_info['n_messages'] =
+            alg_info['m_per_step'] = np.sum([np.mean(agent.stats_n_step_m_list) for agent in agents])
 
             # animate
             # img_np, _ = get_np_from_dot_map(img_dir, path='../maps', )
@@ -692,7 +714,6 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
             return result, alg_info
 
         # time check -> return
-        runtime = time.time() - start_time
         if runtime > max_time:
             return None, {'agents': agents, 'success_rate': 0}
 
@@ -717,12 +738,12 @@ def run_bnb(start_nodes, goal_nodes, nodes, nodes_dict, h_func, **kwargs) -> Tup
 
 
 def main():
-    n_agents = 40
+    n_agents = 100
     # img_dir = 'my_map_10_10_room.map'  # 10-10
     # img_dir = '10_10_my_rand.map'  # 10-10
-    img_dir = 'random-32-32-10.map'  # 32-32
+    # img_dir = 'random-32-32-10.map'  # 32-32
     # img_dir = 'empty-32-32.map'  # 32-32
-    # img_dir = 'empty-48-48.map'  # 48-48
+    img_dir = 'empty-48-48.map'  # 48-48
     # img_dir = 'random-64-64-10.map'  # 64-64
     # img_dir = 'warehouse-10-20-10-2-1.map'  # 63-161
     # img_dir = 'lt_gallowstemplar_n.map'  # 180-251
@@ -741,11 +762,11 @@ def main():
     # --------------------------------------------------- #
     # --------------------------------------------------- #
     # for the algorithms
-    alg_name = f'B&B'
+    alg_name = f'PT-FB-PF'
     # to_plot_edges = True
     to_plot_edges = False
-    to_assert = True
-    # to_assert = False
+    # to_assert = True
+    to_assert = False
     # --------------------------------------------------- #
     # --------------------------------------------------- #
 
@@ -767,7 +788,7 @@ def main():
             a_star_iter_limit=5e7,
             # limit_type='norm_time',
             limit_type='dist_time',
-            max_time=50000,
+            max_time=1,
             a_star_closed_nodes_limit=1e6,
             plot_per=PLOT_PER,
             plot_rate=plot_rate,
